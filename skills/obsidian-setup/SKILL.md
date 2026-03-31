@@ -4,7 +4,7 @@ description: >-
   Set up a new Obsidian knowledge base matching the NSLS builder pattern. This
   skill should be used when the user says "set up Obsidian", "create a vault",
   "obsidian setup", "start my knowledge base", "I want to use Obsidian", or
-  mentions wanting a project tracking system like Kevin's. Walks through
+  mentions wanting a project tracking system like the original builder's. Walks through
   vault creation, folder structure, templates, plugins, and configuration.
 ---
 
@@ -226,7 +226,7 @@ Based on the data sources the builder selected in Step 0, walk through connectin
 
 **Granola (alternative to Fathom)**
 
-> Granola stores meeting notes locally. If you use Granola instead of Fathom, the close-day skill will need to be configured to read from Granola's export format instead of the Fathom API. Let Kevin know — this is a customization we can add.
+> Granola stores meeting notes locally. If you use Granola instead of Fathom, the close-day skill will need to be configured to read from Granola's export format instead of the Fathom API. Open a GitHub issue — this is a customization we can add.
 
 **Slack**
 

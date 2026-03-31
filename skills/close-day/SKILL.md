@@ -10,7 +10,7 @@ description: >-
 
 # Daily Close
 
-Synthesize Kevin's full day from seven data sources into a daily note and project session updates. Write carry-over tasks to Asana.
+Synthesize your full day from seven data sources into a daily note and project session updates. Write carry-over tasks to Asana.
 
 ## Data Sources
 
@@ -20,14 +20,15 @@ Synthesize Kevin's full day from seven data sources into a daily note and projec
 | **Familiar** | Screen activity — apps used, window titles, URLs, time distribution | Bash: scan `$HOME/familiar/stills-markdown/session-YYYY-MM-DDT*/*.md` frontmatter |
 | **Fathom** | Meeting summaries, topics, action items, decisions | Bash: Python script calling Fathom API (see below) |
 | **Sent Email** | Approvals, decisions, outbound communications | `gmail_search_messages` MCP tool (`from:me after:YYYY/M/DD before:YYYY/M/DD+1`) |
-| **Sent Slack** | Conversations, decisions, coordination, context | `slack_search_public_and_private` MCP tool (`from:<@U07TS8X7T7X> on:YYYY-MM-DD`) |
+| **Sent Slack** | Conversations, decisions, coordination, context | `slack_search_public_and_private` MCP tool (`from:<@$SLACK_USER_ID> on:YYYY-MM-DD`) |
 | **Asana** | Pending tasks, overdue items, what was due today | `mcp__claude_ai_Asana__get_my_tasks` and `mcp__claude_ai_asana__asana_search_tasks` MCP tools |
 | **Claude session context** | What was built, decided, and discussed in this conversation | Conversation history in current session |
 
 ## Asana Reference
 
-- **Workspace GID:** `657431271309846`
-- **Kevin's user GID:** `1212312899409797`
+Read these from `~/.claude/local-plugins/nsls-personal-toolkit/.env`:
+- **Workspace GID:** `$ASANA_WORKSPACE_GID`
+- **User GID:** `$ASANA_USER_GID`
 
 ---
 
@@ -35,7 +36,7 @@ Synthesize Kevin's full day from seven data sources into a daily note and projec
 
 ### Step 0: Determine the date
 
-Default to today (`date +%Y-%m-%d`). Kevin can override: `/close-day 2026-03-21`.
+Default to today (`date +%Y-%m-%d`). User can override: `/close-day 2026-03-21`.
 
 ### Step 1: Collect data (run in parallel where possible)
 
@@ -60,7 +61,7 @@ This step produces three outputs: (1) app/tool time distribution, (2) total acti
 - `time_tracking_mode` — what summary line to produce (doing-vs-orchestrating, deep-vs-meetings, etc.)
 - `data_sources` — which integrations are available (familiar, fathom, slack, etc.)
 
-If no builder profile exists, fall back to the **Executive / SLT preset** categories (Coding/Building, Management/People, Product Management, Marketing/Sales, Admin/Ops, Learning/Research) — this is the default for backwards compatibility with Kevin's setup.
+If no builder profile exists, fall back to the **Executive / SLT preset** categories (Coding/Building, Management/People, Product Management, Marketing/Sales, Admin/Ops, Learning/Research) — this is the default for backwards compatibility with the user's setup.
 
 **IMPORTANT — Fathom dependency:** Step 1c (Fathom) must complete before the work categorization in this step, because Fathom meeting summaries are used to categorize Zoom/Meet time into the correct work category. Run the data collection (bash commands below) in parallel with Fathom, but defer the categorization logic until Fathom results are available. If the builder profile has `fathom: false`, skip the Fathom dependency and categorize meetings by window title only.
 
@@ -112,7 +113,7 @@ Total active: 13.6 hours
 
 **Phase 3: Categorize captures into work categories (after Fathom completes)**
 
-Every capture gets assigned to exactly one **work category** based on app + window title. The categories represent Kevin's functional roles:
+Every capture gets assigned to exactly one **work category** based on app + window title. The categories represent the user's functional roles:
 
 | Work Category | What maps here |
 |---|---|
@@ -150,7 +151,7 @@ Zoom window titles just say "Zoom Meeting" and Google Meet shows the meeting nam
    - Titles containing "marketing", "campaign", "brand", "content" → **Marketing / Sales**
    - Titles containing "board", "investor", "strategy", "all-hands", "SLT" → **Management / People**
    - Titles containing "standup", "sync" → check Fathom summary for topic, default to **Product Management**
-3. Zoom/Meet captures that don't match any Fathom meeting → **Meetings (unmatched)** — show separately so Kevin can mentally assign them.
+3. Zoom/Meet captures that don't match any Fathom meeting → **Meetings (unmatched)** — show separately so the user can mentally assign them.
 
 **Chrome window title → category mapping:**
 
@@ -210,9 +211,9 @@ The "Doing vs. Orchestrating" line is a quick summary:
 - **Orchestrating** = Management / People + Meetings + Marketing / Sales
 - **Supporting** = Admin / Ops + Learning / Research + Product Management
 
-This gives Kevin a fast read on how much time he spent building things himself vs. directing others vs. overhead.
+This gives the user a fast read on how much time he spent building things himself vs. directing others vs. overhead.
 
-The **"Meeting time (calendar)"** line is an orthogonal metric — it cross-cuts all categories. A 1:1 with Chris counts as both "Management / People" time AND meeting time. This tells Kevin how much of his day was synchronous vs. async, regardless of topic. Derived from Google Calendar scheduled meeting times (not Familiar captures, which only see Zoom/Meet windows and miss categorized meetings). Solo calendar blocks (e.g., "Weekly processing", "Contract drafting") are excluded — only meetings with other attendees count.
+The **"Meeting time (calendar)"** line is an orthogonal metric — it cross-cuts all categories. A 1:1 with Chris counts as both "Management / People" time AND meeting time. This tells the user how much of his day was synchronous vs. async, regardless of topic. Derived from Google Calendar scheduled meeting times (not Familiar captures, which only see Zoom/Meet windows and miss categorized meetings). Solo calendar blocks (e.g., "Weekly processing", "Contract drafting") are excluded — only meetings with other attendees count.
 
 **1c. Fathom — meeting summaries and action items**
 
@@ -289,20 +290,20 @@ gmail_search_messages(
   maxResults=30
 )
 ```
-Extract: who Kevin emailed, subject, and the snippet (which captures his reply). Look for approvals, decisions, delegations, and follow-ups.
+Extract: who was emailed, subject, and the snippet (which captures his reply). Look for approvals, decisions, delegations, and follow-ups.
 
 **1e. Sent Slack — conversations and coordination**
 
 Use the `slack_search_public_and_private` MCP tool:
 ```
 slack_search_public_and_private(
-  query="from:<@U07TS8X7T7X> on:YYYY-MM-DD",
+  query="from:<@$SLACK_USER_ID> on:YYYY-MM-DD",
   sort="timestamp",
   limit=20,
   include_context=false
 )
 ```
-Kevin's Slack user ID is `U07TS8X7T7X`. Extract: who he messaged, what channels, key topics discussed. Group by conversation thread — don't list every individual message, summarize the thread topic. Distinguish work conversations from personal. Skip trivial messages ("ok", "thanks", reactions).
+Your Slack user ID is read from `.env` (`SLACK_USER_ID`). Extract: who was messaged, what channels, key topics discussed. Group by conversation thread — don't list every individual message, summarize the thread topic. Distinguish work conversations from personal. Skip trivial messages ("ok", "thanks", reactions).
 
 **1f. Claude session context**
 
@@ -321,7 +322,7 @@ ls -la ~/.claude/projects/-Users-k/*.jsonl | grep "$(date +%b\ %d)" 2>/dev/null
 
 Run in parallel with other data collection. Two calls:
 
-**Call 1: Get all incomplete tasks assigned to Kevin**
+**Call 1: Get all incomplete tasks assigned to the user**
 ```
 mcp__claude_ai_Asana__get_my_tasks(
   completed_since="now",
@@ -348,9 +349,9 @@ From the results, extract three lists:
 2. **Due today** — tasks with `due_on` = today's date
 3. **Upcoming** — tasks due in the next 3 days (context, not displayed unless relevant)
 
-Include the overdue and due-today lists in the daily note's `## Asana` section. These inform the Carrying Over section and help Kevin see what slipped.
+Include the overdue and due-today lists in the daily note's `## Asana` section. These inform the Carrying Over section and help the user see what slipped.
 
-**Filtering:** Skip auto-generated noise like "It's time to update your goal(s)" — only include real tasks Kevin created or was assigned.
+**Filtering:** Skip auto-generated noise like "It's time to update your goal(s)" — only include real tasks the user created or was assigned.
 
 ### Step 2: Identify projects touched
 
@@ -364,15 +365,15 @@ Match activity to projects using these signals (in priority order):
    - "GitHub" + repo name → match to project
    - "Slack" + channel name → match to project domain
 4. **Familiar URLs** — match known URLs:
-   - `airtable.com/appnXPTu01esWWbrK` → `people-ops`
-   - `airtable.com/appHDEHQA4bvlWwQq` → `meeting-automation`
+   - `airtable.com/$PEOPLE_OPS_BASE_ID` → `people-ops`
+   - `airtable.com/$SLT_BASE_ID` → `meeting-automation`
    - GitHub repo URLs → match to project
 
 Use the project mappings from `~/.claude/skills/log/SKILL.md` as the source of truth.
 
 ### Step 3: Draft the daily note
 
-Generate in this format (matching Kevin's existing `01-daily/` structure):
+Generate in this format (matching the user's existing `01-daily/` structure):
 
 ```markdown
 # YYYY-MM-DD — [Day of Week]
@@ -399,7 +400,7 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 [For each meeting from Calendar + Fathom:]
 - **HH:MM–HH:MM** — [Title] (with [attendees])
   - [Key takeaway from Fathom summary, 1-2 bullets max]
-  - Action: [any action items assigned to Kevin]
+  - Action: [any action items assigned to the user]
 
 ## Work Log
 [From Claude sessions + Familiar + sent email + sent Slack:]
@@ -426,17 +427,17 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 ## End of Day
 - Energy:
 
-### AI Suggested: Tomorrow's Top 3 (strategic, high-leverage, Kevin-only)
-1. **[Highest-impact item]** — [Why only Kevin can do this. What it blocks or unlocks.]
+### AI Suggested: Tomorrow's Top 3 (strategic, high-leverage, high-priority)
+1. **[Highest-impact item]** — [Why only the user can do this. What it blocks or unlocks.]
 2. **[Second item]** — [Strategic rationale.]
 3. **[Third item]** — [Strategic rationale.]
 
 ### AI Suggested: Delegate These
-1. **[Task]** → [Person] — [Why they're the right owner. What Kevin's role becomes (review/approve).]
+1. **[Task]** → [Person] — [Why they're the right owner. What the user's role becomes (review/approve).]
 2. **[Task]** → [Person] — [Rationale.]
 3. **[Task]** → [Person] — [Rationale.]
 
-### My Top 3 (Kevin fills in)
+### My Top 3 (user fills in)
 1.
 2.
 3.
@@ -445,16 +446,16 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 **Rules:**
 - Keep the Work Log to concrete outputs, not activities. "Imported 40-file board knowledge base to Obsidian" not "worked on Obsidian."
 - Meeting bullets come from Fathom summaries — pull only the 1-2 most important takeaways, not the full summary.
-- **Time Allocation** is the new primary time view. It shows work categories (Coding/Building, Management/People, etc.) with estimated hours, percentages, and top tools. The "Doing vs. Orchestrating" summary line gives Kevin a fast read on CEO time allocation. See Step 1b Phase 4 for the full format and category definitions.
+- **Time Allocation** is the new primary time view. It shows work categories (Coding/Building, Management/People, etc.) with estimated hours, percentages, and top tools. The "Doing vs. Orchestrating" summary line gives the user a fast read on CEO time allocation. See Step 1b Phase 4 for the full format and category definitions.
 - **Time Distribution** still appears below Time Allocation as a flat tool-level breakdown. Uses categorized captures, not raw app names. Chrome captures are broken down by window title into meaningful categories (Gmail, YouTube, Airtable, Google Docs, etc.) and presented as flat peers alongside Slack, Warp, Obsidian, etc. Never show "Google Chrome: X%" — that's useless. Round to whole numbers. Only show categories with ≥1% of total captures. Always **exclude personal finance** captures from the report and totals.
-- The `## Morning Check-in` section from Kevin's template is NOT auto-generated — that's for the start of day.
+- The `## Morning Check-in` section from the user's template is NOT auto-generated — that's for the start of day.
 - **Sent Email:** Include approvals, decisions, and delegations as Work Log bullets. Skip routine replies that don't represent a decision or action.
-- **Sent Slack:** Summarize by conversation thread/topic, not individual messages. Skip trivial messages ("ok", "thanks", single emoji). Focus on decisions, coordination, and substantive discussions. Group DMs with personal contacts (family) should be noted briefly or omitted — Kevin can decide. Flag any coaching/leadership conversations as those are often important context.
-- **AI Suggested Top 3:** Generate 3 strategic priorities for tomorrow based on carry-overs, meeting action items, deadlines, and Asana. Filter for items that are (a) high-impact/high-leverage, (b) fit Kevin's unique skills as CEO — relationship decisions, strategic judgment calls, cross-team visibility, contract/legal calls. Explain *why* each is Kevin-only and what it blocks/unlocks.
-- **AI Suggested Delegate:** Generate 3 important items someone else could own. Name the person and why they're the right fit. Kevin's role becomes review/approve, not execute. Look for: operational tasks with a clear domain owner, first-draft work where Kevin adds value in editing not creating, technical setup that doesn't require strategic judgment.
-- **My Top 3:** Always left blank for Kevin to fill in manually after reviewing the AI suggestions. Kevin may adopt, modify, or completely replace the AI suggestions.
+- **Sent Slack:** Summarize by conversation thread/topic, not individual messages. Skip trivial messages ("ok", "thanks", single emoji). Focus on decisions, coordination, and substantive discussions. Group DMs with personal contacts (family) should be noted briefly or omitted — the user can decide. Flag any coaching/leadership conversations as those are often important context.
+- **AI Suggested Top 3:** Generate 3 strategic priorities for tomorrow based on carry-overs, meeting action items, deadlines, and Asana. Filter for items that are (a) high-impact/high-leverage, (b) fit the user's unique skills as CEO — relationship decisions, strategic judgment calls, cross-team visibility, contract/legal calls. Explain *why* each is high-priority and what it blocks/unlocks.
+- **AI Suggested Delegate:** Generate 3 important items someone else could own. Name the person and why they're the right fit. the user's role becomes review/approve, not execute. Look for: operational tasks with a clear domain owner, first-draft work where the user adds value in editing not creating, technical setup that doesn't require strategic judgment.
+- **My Top 3:** Always left blank for the user to fill in manually after reviewing the AI suggestions. The user may adopt, modify, or completely replace the AI suggestions.
 
-### Step 4: Present draft to Kevin
+### Step 4: Present draft to user
 
 Show the full daily note draft. Ask:
 - "Anything to add or correct?"
@@ -464,7 +465,7 @@ Show the full daily note draft. Ask:
 
 Write to: `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/KP/01-daily/YYYY-MM-DD.md`
 
-**If the file already exists** (Kevin started it in the morning with priorities), **merge** — keep the existing Morning Check-in section and append/update the generated sections below it.
+**If the file already exists** (user started it in the morning with priorities), **merge** — keep the existing Morning Check-in section and append/update the generated sections below it.
 
 ### Step 6: Update project session logs
 
@@ -483,7 +484,7 @@ This step does three things: marks finished tasks done, adds progress notes to i
 
 **7a. Complete finished tasks**
 
-Cross-reference the day's Work Log against Kevin's open Asana tasks (fetched in Step 1g). For each Asana task that was clearly completed today, mark it done:
+Cross-reference the day's Work Log against the user's open Asana tasks (fetched in Step 1g). For each Asana task that was clearly completed today, mark it done:
 
 ```
 mcp__claude_ai_Asana__update_tasks(
@@ -495,7 +496,7 @@ mcp__claude_ai_Asana__update_tasks(
 
 **7b. Comment on in-progress tasks**
 
-For Asana tasks that Kevin worked on but didn't finish, add a progress comment:
+For Asana tasks that the user worked on but didn't finish, add a progress comment:
 
 ```
 mcp__claude_ai_asana__add_comment(
@@ -519,7 +520,7 @@ mcp__claude_ai_Asana__create_task_preview(
 )
 ```
 
-Then confirm with `mcp__claude_ai_Asana__create_task_confirm` using workspace `657431271309846`.
+Then confirm with `mcp__claude_ai_Asana__create_task_confirm` using workspace `$ASANA_WORKSPACE_GID`.
 
 **Priority framework (CEO lens):**
 
@@ -531,17 +532,17 @@ Then confirm with `mcp__claude_ai_Asana__create_task_confirm` using workspace `6
 
 **Priority inference rules:**
 - Commitments made to external parties (board, partners, candidates) → P1
-- Meeting action items Kevin owns with a stated deadline → use that deadline, infer priority from urgency
+- Meeting action items the user owns with a stated deadline → use that deadline, infer priority from urgency
 - Contract/legal/hiring items → P1-P2 (time-sensitive by nature)
 - Internal tooling, automation, documentation → P2-P3
 - "Would be nice to" or "explore" language → P3
 - If a carry-over item was also carry-over from a previous day → bump priority up one level
 
 **Rules for Asana write-back:**
-- **Only create tasks for actionable items Kevin owns.** Skip items that are someone else's action (e.g., "Davo sends proposal").
+- **Only create tasks for actionable items the user owns.** Skip items that are someone else's action (e.g., "Davo sends proposal").
 - **Don't duplicate.** Before creating, search Asana for similar task names. If a match exists, skip (or comment on it instead).
-- **Include source context** in the description so Kevin knows where the task came from.
-- **Present the full Asana sync plan to Kevin** before executing. Show three columns:
+- **Include source context** in the description so the user knows where the task came from.
+- **Present the full Asana sync plan to the user** before executing. Show three columns:
 
 ```
 ✅ Complete (2):
@@ -557,7 +558,7 @@ Then confirm with `mcp__claude_ai_Asana__create_task_confirm` using workspace `6
   - "Create GitHub repo for Red's feedback bot" — P3, due 3/31
 ```
 
-Kevin approves, modifies, or skips before any Asana writes happen.
+User approves, modifies, or skips before any Asana writes happen.
 
 ### Step 8: Seed tomorrow's daily note
 
@@ -599,9 +600,9 @@ SORT priority ASC
 - Energy:
 ```
 
-This seeds the next day with the AI-suggested priorities so Kevin sees them first thing in the morning. He overwrites "My Top 3" with his actual priorities during `/open-day` or manually.
+This seeds the next day with the AI-suggested priorities so the user sees them first thing in the morning. He overwrites "My Top 3" with his actual priorities during `/open-day` or manually.
 
-If the file already exists (Kevin or `/open-day` already created it), do NOT overwrite. Instead, check if it has the AI suggestion sections. If not, insert them after `## Morning Check-in`.
+If the file already exists (user or `/open-day` already created it), do NOT overwrite. Instead, check if it has the AI suggestion sections. If not, insert them after `## Morning Check-in`.
 
 ### Step 9: Write sentinel file
 
@@ -611,7 +612,7 @@ After successfully writing the daily note, write the sentinel so the 10 PM autom
 touch /tmp/close-day-YYYY-MM-DD.done
 ```
 
-This prevents the launchd auto-close-day from re-running if Kevin already ran `/close-day` manually.
+This prevents the launchd auto-close-day from re-running if the user already ran `/close-day` manually.
 
 ### Step 10: Confirm
 
@@ -621,8 +622,8 @@ Report: "Daily note written to `01-daily/YYYY-MM-DD.md`. Seeded tomorrow's note 
 
 ## Performance Notes
 
-- **Familiar scanning is fast** — grepping frontmatter across 1000+ files takes < 2 seconds. Do NOT read OCR content unless Kevin asks for specific recall.
-- **Fathom API is slow** — full paginated fetch can take 30-60 seconds. If Kevin ran `/close-day` already today, skip re-fetching.
+- **Familiar scanning is fast** — grepping frontmatter across 1000+ files takes < 2 seconds. Do NOT read OCR content unless the user asks for specific recall.
+- **Fathom API is slow** — full paginated fetch can take 30-60 seconds. If the user ran `/close-day` already today, skip re-fetching.
 - **Calendar is instant** — MCP tool returns in < 1 second.
 - **Asana is fast** — MCP tools return in < 2 seconds.
 - **The 7-day retention** — Familiar auto-cleans stills after 7 days (`storageAutoCleanupRetentionDays: 7`). Daily notes capture the signal before the raw data expires.

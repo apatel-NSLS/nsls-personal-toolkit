@@ -19,8 +19,9 @@ Morning, before first meeting. Can also be triggered mid-day to reset priorities
 
 ## Asana Reference
 
-- **Workspace GID:** `657431271309846`
-- **Kevin's user GID:** `1212312899409797`
+Read these from `~/.claude/local-plugins/nsls-personal-toolkit/.env`:
+- **Workspace GID:** `$ASANA_WORKSPACE_GID`
+- **User GID:** `$ASANA_USER_GID`
 
 ## Step-by-step Execution
 
@@ -102,7 +103,7 @@ Look for `### AI Suggested: Tomorrow's Top 3` and `### AI Suggested: Delegate Th
 
 ### Step 3: Draft Morning Check-in
 
-Present to Kevin. If AI suggestions were seeded by close-day, show them first as a starting point:
+Present to the user. If AI suggestions were seeded by close-day, show them first as a starting point:
 
 ```markdown
 ## Morning Check-in
@@ -150,11 +151,11 @@ If NO AI suggestions were seeded (close-day wasn't run, or this is a fresh week)
 4. Week plan priorities that haven't gotten attention yet
 5. Quick wins that unblock others
 
-### Step 4: Kevin reviews and adjusts
+### Step 4: the user reviews and adjusts
 
-Kevin sets his actual Top 3 and energy level. The AI and morning suggestions are starting points — Kevin may adopt, modify, or completely replace them.
+The user sets their actual Top 3 and energy level. The AI and morning suggestions are starting points — the user may adopt, modify, or completely replace them.
 
-After Kevin confirms his Top 3, write them to the `### My Top 3` section of the daily note.
+After the user confirms his Top 3, write them to the `### My Top 3` section of the daily note.
 
 ### Step 5: Write daily note
 
@@ -172,9 +173,9 @@ The daily note should include:
 # YYYY-MM-DD — [Day of Week]
 
 ## Morning Check-in
-- Energy: [blank for Kevin]
+- Energy: [blank — user fills in]
 - Top 3 priorities today:
-  1. [Kevin's chosen or suggested #1]
+  1. [User's chosen or suggested #1]
   2. [#2]
   3. [#3]
 
@@ -194,7 +195,7 @@ The `## Work Log`, `## Projects Touched`, `## Carrying Over`, and `## End of Day
 
 ### Step 6: Track priority alignment (if AI suggestions existed)
 
-If today's note had AI suggestions from close-day AND Kevin set his own Top 3, compare them and append a record to:
+If today's note had AI suggestions from close-day AND the user set his own Top 3, compare them and append a record to:
 ```
 ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/KP/03-meta/priority-alignment.md
 ```
@@ -203,16 +204,16 @@ Create this file if it doesn't exist, with this header:
 ```markdown
 # Priority Alignment Tracker
 
-Tracks how often the AI's overnight strategic suggestions match Kevin's morning priorities. Over time, this reveals whether the AI is reading the right signals — and where Kevin's judgment diverges.
+Tracks how often the AI's overnight strategic suggestions match the user's morning priorities. Over time, this reveals whether the AI is reading the right signals — and where the user's judgment diverges.
 
-| Date | AI #1 | AI #2 | AI #3 | Kevin #1 | Kevin #2 | Kevin #3 | Adopted | Modified | Replaced |
+| Date | AI #1 | AI #2 | AI #3 | the user #1 | the user #2 | the user #3 | Adopted | Modified | Replaced |
 |------|-------|-------|-------|----------|----------|----------|---------|----------|----------|
 ```
 
 For each day, append one row. Classification rules:
-- **Adopted**: Kevin's item is essentially the same as the AI suggestion (same task, same intent)
-- **Modified**: Kevin kept the spirit but changed scope, timing, or framing (e.g., AI said "draft contract" → Kevin said "review contract draft from legal")
-- **Replaced**: Kevin chose something entirely different
+- **Adopted**: User's item is essentially the same as the AI suggestion (same task, same intent)
+- **Modified**: User kept the spirit but changed scope, timing, or framing (e.g., AI said "draft contract" → the user said "review contract draft from legal")
+- **Replaced**: User chose something entirely different
 
 Count the totals: e.g., `2 adopted, 0 modified, 1 replaced`
 
@@ -221,7 +222,7 @@ Example row:
 | 2026-03-28 | Contract w/ IP carve-outs | Julia follow-up after vacation | Cash in cushions table | Contract w/ IP carve-outs | Review Chris's SNHU deck (Sat delivery) | Julia scheduling post-vacation | 2 | 1 | 0 |
 ```
 
-**Do NOT block the morning flow for this.** If Kevin is in a hurry, skip the tracker and catch up on the next `/close-day` or `/open-day`. The tracker is a background signal, not a gate.
+**Do NOT block the morning flow for this.** If the user is in a hurry, skip the tracker and catch up on the next `/close-day` or `/open-day`. The tracker is a background signal, not a gate.
 
 ### Day-of-Week Additions
 
@@ -233,6 +234,6 @@ Include role-specific reminders based on the day:
 
 ## Edge Cases
 
-- **Weekend:** Still generate if Kevin asks, but skip meeting prep and Asana overdue (he knows it's the weekend).
+- **Weekend:** Still generate if the user asks, but skip meeting prep and Asana overdue (he knows it's the weekend).
 - **No carry-overs:** Skip that section.
 - **Empty calendar:** Note "No meetings today — deep work day?" and suggest tackling overdue Asana items.

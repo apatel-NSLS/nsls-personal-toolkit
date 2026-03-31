@@ -17,11 +17,11 @@ import sys
 SYSTEM_PROMPT = (
     "You are analyzing NSLS leadership meeting transcripts. "
     "NSLS (National Society of Leadership and Success) is a leadership honor society serving college students. "
-    "Kevin Prentiss is Head of Product & Technology. "
+    "The user is the meeting host. "
     "You are extracting insights about the other participant for a person intelligence profile."
 )
 
-SUMMARY_PROMPT = """Analyze this 1:1 meeting transcript between Kevin Prentiss (NSLS, Head of Product & Technology) and {person_name}.
+SUMMARY_PROMPT = """Analyze this 1:1 meeting transcript between the user and {person_name}.
 
 Title: {title}
 Date: {date}
@@ -56,12 +56,12 @@ def infer_person_name(title):
     """Try to extract a person name from the meeting title."""
     if not title:
         return "the other participant"
-    # Common patterns: "Name / Kevin 1:1", "Kevin / Name 1:1", "Name <> Kevin"
+    # Common patterns: "Name / User 1:1", "User / Name 1:1", "Name <> User"
     for sep in [" / ", " <> ", " & ", " and ", " - "]:
         if sep in title:
             parts = [p.strip() for p in title.split(sep)]
             for part in parts:
-                # Skip Kevin's name variants
+                # Skip the user's name variants
                 clean = part.replace("1:1", "").replace("1-on-1", "").strip()
                 if clean.lower() not in ("kevin", "kevin prentiss", "kp", ""):
                     return clean

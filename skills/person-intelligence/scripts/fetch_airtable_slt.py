@@ -18,16 +18,19 @@ import time
 import urllib.parse
 import urllib.request
 
-BASE_ID = "appHDEHQA4bvlWwQq"
+BASE_ID = os.environ.get("SLT_BASE_ID", "")
+if not BASE_ID:
+    print("ERROR: SLT_BASE_ID not set. Copy .env.example to .env and fill in your values.", file=sys.stderr)
+    sys.exit(1)
 API_BASE = f"https://api.airtable.com/v0/{BASE_ID}"
 
-# Table IDs
-TBL_MEMBERS = "tbl9GMiujOzOD7xXn"
-TBL_COACHING = "tbloYzpUhHBHOuYwr"
-TBL_ACTIONS = "tblasgjUjadHCqzrg"
-TBL_L1_GOALS = "tblFLHHpQUVpLrDjb"
-TBL_L2_GOALS = "tblpvFlUEy9GJflzB"
-TBL_MEETINGS = "tblpPC7Levj9SZEfx"
+# Table IDs — update these to match your Airtable base
+TBL_MEMBERS = os.environ.get("SLT_MEMBERS_TABLE", "tbl9GMiujOzOD7xXn")
+TBL_COACHING = os.environ.get("SLT_COACHING_TABLE", "tbloYzpUhHBHOuYwr")
+TBL_ACTIONS = os.environ.get("SLT_ACTIONS_TABLE", "tblasgjUjadHCqzrg")
+TBL_L1_GOALS = os.environ.get("SLT_L1_GOALS_TABLE", "tblFLHHpQUVpLrDjb")
+TBL_L2_GOALS = os.environ.get("SLT_L2_GOALS_TABLE", "tblpvFlUEy9GJflzB")
+TBL_MEETINGS = os.environ.get("SLT_MEETINGS_TABLE", "tblpPC7Levj9SZEfx")
 
 # Rate limiting: 0.25s between requests (4 req/sec, under 5 req/sec limit)
 RATE_DELAY = 0.25

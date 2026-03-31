@@ -9,13 +9,13 @@ Roll up the week's daily notes into a structured weekly review. Output is format
 
 ## When to Run
 
-Friday morning, before Kevin's quick notes reminder fires. Output feeds directly into the weekly journal.
+Friday morning, before the user's quick notes reminder fires. Output feeds directly into the weekly journal.
 
 ## Step-by-step Execution
 
 ### Step 0: Determine the week
 
-Default to the current week (Monday through today). Kevin can override: `/close-week 2026-03-17` (uses that Monday as the start).
+Default to the current week (Monday through today). User can override: `/close-week 2026-03-17` (uses that Monday as the start).
 
 Calculate:
 - Monday date = start of week
@@ -135,7 +135,7 @@ Full format with Dataview queries for projects touched/not touched.
 
 **Output B: Quick Notes format** (for copy-paste into NSLS Coach journal)
 
-Present this in the conversation for Kevin to copy:
+Present this in the conversation for the user to copy:
 
 ```
 Achievements:
@@ -195,10 +195,10 @@ These seed into the weekly note so `/plan-week` can reference them alongside its
 - Lead with achievements, not activities.
 - Learnings should be genuine insights, not platitudes. "Discovered DDC IT overage is $15k/mo — need to renegotiate" not "Learned about vendor management."
 - Project progress should flag what needs CEO attention, not just list updates.
-- Time allocation should make Kevin think: "Am I spending time on what matters?"
+- Time allocation should make the user think: "Am I spending time on what matters?"
 - Priorities vs. Reality is the accountability moment — be honest.
 
-### Step 4: Present to Kevin
+### Step 4: Present to user
 
 Show both outputs. Ask:
 - "Anything to add or adjust before I write the weekly note?"
@@ -215,11 +215,11 @@ Create any new tasks surfaced by the weekly review:
 - Carry-forward items that have been carrying all week → bump to P1
 - Process improvements identified in Learnings → P3 tasks
 
-Use the same Asana write-back pattern as `/close-day` — present plan, Kevin approves, then create.
+Use the same Asana write-back pattern as `/close-day` — present plan, user approves, then create.
 
 ## Edge Cases
 
 - **Missing daily notes:** Some days may not have `/close-day` run. Use whatever exists — even partial daily notes have Morning Check-in priorities.
 - **No Familiar data for a day:** Skip that day in time allocation, note the gap.
 - **Short week (holiday, PTO):** Adjust date range. Still generate — even a 3-day week deserves a roll-up.
-- **Kevin ran /close-week already this week:** Check if `02-weekly/YYYY-[W]WW.md` exists. If so, ask if he wants to regenerate or append.
+- **User ran /close-week already this week:** Check if `02-weekly/YYYY-[W]WW.md` exists. If so, ask if they want to regenerate or append.

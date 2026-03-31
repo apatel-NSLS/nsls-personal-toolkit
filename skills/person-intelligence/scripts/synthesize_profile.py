@@ -16,8 +16,8 @@ import sys
 from datetime import date
 
 SYSTEM_PROMPT = (
-    "You are building a person intelligence profile for Kevin Prentiss's Obsidian knowledge base. "
-    "Kevin is Head of Product & Technology at NSLS (National Society of Leadership and Success). "
+    "You are building a person intelligence profile for the user's Obsidian knowledge base. "
+    "The user is reviewing this person for their professional context. "
     "You synthesize data from multiple sources into a structured profile. "
     "Use direct quotes where available. Be factual and specific — no filler. "
     "Write in a direct, plain-language style. Numbers over adjectives. Short sentences."
@@ -154,7 +154,7 @@ Now produce the profile for {name} following this exact structure. Output ONLY t
 Sections to include (omit any section that has no supporting data):
 
 ## Role
-One paragraph. What they do, how they relate to Kevin's work.
+One paragraph. What they do, how they relate to the user's work.
 
 ## What {name} Cares About
 Bullet points of recurring themes across all sources. Be specific — cite topics, not vague categories.
@@ -169,7 +169,7 @@ Specific recommendations, suggestions, or offers they've made. Actionable items.
 Frameworks, analogies, metaphors, and thinking patterns they reach for. Format: "Model name — explanation"
 
 ## How to Work With {name}
-Practical advice for Kevin based on observed patterns. What works, what to avoid, what they respond to.
+Practical advice based on observed patterns. What works, what to avoid, what they respond to.
 
 ## Projects Together
 Format each as: `- [[20-projects/project-slug|Project Name]] — their role or contribution`

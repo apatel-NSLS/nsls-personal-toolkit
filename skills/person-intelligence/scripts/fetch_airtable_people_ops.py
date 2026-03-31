@@ -19,13 +19,17 @@ import urllib.request
 import urllib.parse
 import urllib.error
 
-BASE_ID = "appnXPTu01esWWbrK"
+BASE_ID = os.environ.get("PEOPLE_OPS_BASE_ID", "")
+if not BASE_ID:
+    print("ERROR: PEOPLE_OPS_BASE_ID not set. Copy .env.example to .env and fill in your values.", file=sys.stderr)
+    sys.exit(1)
 BASE_URL = f"https://api.airtable.com/v0/{BASE_ID}"
 
-EMPLOYEES_TABLE = "tblpa8L4JPnqByINh"
-LOP_GOALS_TABLE = "tblWWupDuX8AiYiId"
+# Table and field IDs — update these to match your Airtable base
+EMPLOYEES_TABLE = os.environ.get("PEOPLE_OPS_EMPLOYEES_TABLE", "tblpa8L4JPnqByINh")
+LOP_GOALS_TABLE = os.environ.get("PEOPLE_OPS_LOP_GOALS_TABLE", "tblWWupDuX8AiYiId")
 
-# Field IDs for Employees
+# Field IDs for Employees — update if your schema differs
 EMPLOYEE_FIELDS = {
     "fldkA557zfIC2p8y2": "name",
     "fld3CmPWkul8GodI2": "email",
@@ -38,7 +42,7 @@ EMPLOYEE_FIELDS = {
     "fld8Wg5gwCEw6nCfw": "status",
 }
 
-# Field IDs for LOP Goals
+# Field IDs for LOP Goals — update if your schema differs
 LOP_GOAL_FIELDS = {
     "fldAdSTJLl35VfylP": "name",
     "flddRhzpx0wi212M7": "description",
