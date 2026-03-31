@@ -4,6 +4,10 @@ These skills are your personal workflow — edit anything, delete what you don't
 
 This is a fork of Kevin's personal setup. It's one person's answer to "how do I manage my day, week, and notes?" — not a mandate. Take what works, ignore what doesn't.
 
+## First Time? Run `/setup`
+
+Say `/setup` in Claude Code and it walks you through connecting your accounts (Slack, Asana, Airtable). Takes about 2 minutes. It auto-detects most values — you only need to paste your Airtable API key.
+
 ## Skills
 
 | Skill | What it does |
