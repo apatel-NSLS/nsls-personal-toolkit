@@ -162,7 +162,7 @@ This file is gitignored — your keys stay on your machine.
 If any values are missing, note which skills won't work until they're added:
 ```
 ⚠ Fathom not configured — /close-day won't include meeting summaries.
-⚠ Airtable not configured — /person-intelligence won't work until you add it.
+⚠ Airtable not configured — /person-intelligence will work from Fathom + Obsidian but won't pull SLT meeting data or People Ops org data.
   Run /personal-setup again anytime to add missing keys.
 ```
 
