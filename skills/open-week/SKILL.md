@@ -112,6 +112,33 @@ If "skip" — proceed with normal open-week, skip all strategy steps (1.6 throug
 
 Also check if the operating memo's `next-review` date has passed. If so, nudge: "Your operating memo was last updated [date]. Want to review it before planning this week, or keep going?"
 
+### Step 1.55: Automation portfolio check
+
+Check if the builder has automations that could be moved toward Org-Owned.
+
+1. Read builder email from `~/.claude/local-plugins/nsls-personal-toolkit/.env` or `git config user.email`
+2. Call `GET https://web-production-6281e.up.railway.app/builder-stats/{email}`
+3. If the builder has no automations, skip this step silently
+4. If the builder has automations at Prototype or Production, surface them:
+
+> **Automation check:** You have automations that could level up this week:
+>
+> **[Automation Name]** — at [Stage], [checklist_complete]/[checklist_total] checklist items done.
+> Remaining:
+> - [ ] [remaining item 1 — with a brief "how": e.g., "Write `docs/runbook.md` with deployment steps and recovery procedures"]
+> - [ ] [remaining item 2]
+> - [ ] ...
+>
+> Moving this to Org-Owned is the highest-impact thing you can do for your builder progression. Want to add it to your Top 3 this week?
+
+5. If they say yes: add as a concrete Top 3 item with:
+   - The specific checklist tasks as sub-items
+   - Estimated time: "~2-3 hours to write runbook + architecture doc"
+   - The payoff: "Completing this moves the automation to Org-Owned eligible"
+6. If they say no: move on — coaching, not blocking
+
+**Only surface automations at Prototype or Production.** If `days_at_stage` isn't available from the API, surface any Prototype or Production automation.
+
 ### Step 1.6: Mode detection (push vs protect)
 
 Scan for crisis indicators:
