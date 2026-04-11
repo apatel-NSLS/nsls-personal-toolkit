@@ -278,7 +278,7 @@ Priorities vs. Reality:
 3. [Monday priority] → [Done/Partial/Missed]
 ```
 
-**Output C: AI-Suggested Next Week Priorities** (seeded into the weekly note for `/plan-week` to pick up)
+**Output C: AI-Suggested Next Week Priorities** (seeded into the weekly note for `/open-week` to pick up)
 
 Generate next week's priorities using the same pattern as close-day's "AI Suggested: Tomorrow's Top 3" but at weekly scope:
 
@@ -302,7 +302,7 @@ Generate next week's priorities using the same pattern as close-day's "AI Sugges
 - **Delegate** — surface tasks that consumed the builder's time but could be owned by someone else. Use Familiar data to find patterns: "You spent 3.2h in Airtable this week — could [person] own the data entry?"
 - **Stop Doing** — NEW for weekly scope. Identify one activity that consumed disproportionate time relative to its impact. Use time allocation data as evidence. This is the coaching equivalent of "you're spending 15% of your week on X — is that the best use of your role?"
 
-These seed into the weekly note so `/plan-week` can reference them alongside its own analysis.
+These seed into the weekly note so `/open-week` can reference them alongside its own analysis.
 
 **Rules for quick notes format:**
 - Keep it tight. This goes into a Slack bot journal — not a novel.
@@ -320,7 +320,7 @@ Show both outputs. Ask:
 
 ### Step 5: Write weekly note
 
-Write Output A to `02-weekly/YYYY-[W]WW.md`. Include the AI-Suggested Next Week sections at the end — these are picked up by `/plan-week` as a starting point for next week's planning.
+Write Output A to `02-weekly/YYYY-[W]WW.md`. Include the AI-Suggested Next Week sections at the end — these are picked up by `/open-week` as a starting point for next week's planning.
 
 ### Step 6: Asana sync
 

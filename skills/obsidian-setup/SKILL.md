@@ -20,7 +20,7 @@ Obsidian must be installed first. If not installed:
 
 ## Step 0: Builder Onboarding Interview
 
-Before creating anything, ask these questions **one at a time** to understand the builder's role and configure the skills that depend on this vault (close-day, open-day, plan-week, log). The answers drive what gets generated in daily notes, what time categories are tracked, and what sections appear in templates.
+Before creating anything, ask these questions **one at a time** to understand the builder's role and configure the skills that depend on this vault (close-day, open-day, open-week, log). The answers drive what gets generated in daily notes, what time categories are tracked, and what sections appear in templates.
 
 **Question 1: Role and level**
 
@@ -91,7 +91,7 @@ mkdir -p $OBSIDIAN_VAULT_PATH
 
 ## Step 1a: Generate Builder Profile
 
-Based on the onboarding answers, create `$OBSIDIAN_VAULT_PATH/50-reference/builder-profile.md`. This file is the single source of truth that close-day, open-day, and plan-week read to customize their output.
+Based on the onboarding answers, create `$OBSIDIAN_VAULT_PATH/50-reference/builder-profile.md`. This file is the single source of truth that close-day, open-day, and open-week read to customize their output.
 
 ```markdown
 ---
@@ -417,7 +417,7 @@ The builder profile at `50-reference/builder-profile.md` is read by:
 |---|---|---|
 | **close-day** | `time_categories`, `time_tracking_mode`, `data_sources` | Determines work category breakdown, summary line format, and which data sources to pull |
 | **open-day** | `time_tracking_mode`, `work_schedule` | Adjusts morning planning prompts (e.g., "Doing vs. Orchestrating" goal for the day) |
-| **plan-week** | `role`, `departments`, `time_tracking_mode` | Frames weekly priorities through the right lens (executive portfolio vs. IC sprint plan) |
+| **open-week** | `role`, `departments`, `time_tracking_mode` | Frames weekly priorities through the right lens (executive portfolio vs. IC sprint plan) |
 | **log** | `time_categories` | Tags session logs with the matching work category |
 
 If the builder changes roles or responsibilities, they update the profile once and all skills adapt.

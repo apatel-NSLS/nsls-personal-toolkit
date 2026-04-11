@@ -15,7 +15,7 @@ To reconfigure later (change Slack ID, Airtable key, etc.), say `/personal-setup
 | Skill | What it does |
 |-------|-------------|
 | `/open-day` | Morning planning — calendar, tasks, priorities, schedule focus blocks + vitality time |
-| `/plan-week` | Weekly planning — project stack ranking, push/protect mode, strategy alignment |
+| `/open-week` | Weekly planning — project stack ranking, push/protect mode, strategy alignment |
 | `/close-day` | End-of-day summary — what happened, what's next |
 | `/close-week` | Friday roll-up — weekly achievements, stack rank review, alignment scoring |
 | `/self-insight` | Personal insight — analyzes your calendar, meetings, and behavior to build a personal profile + operating memo |
@@ -26,7 +26,7 @@ To reconfigure later (change Slack ID, Airtable key, etc.), say `/personal-setup
 
 ## Strategy Layer (Optional)
 
-Your first `/plan-week` will offer to set up a **strategy layer** — a system that connects your daily/weekly planning to company goals and personal strategy:
+Your first `/open-week` will offer to set up a **strategy layer** — a system that connects your daily/weekly planning to company goals and personal strategy:
 
 - **Operating memo** — "I Do / I Don't / My Traps" generated from your behavioral data
 - **Personal profile** — your strengths, energy patterns, values, and working genius

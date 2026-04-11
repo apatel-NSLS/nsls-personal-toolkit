@@ -11,7 +11,7 @@ description: >-
 
 # Self-Insight
 
-Analyze behavioral data to generate a personal operating memo — a strategic alignment doc that plan-week and open-day use for coaching and trap detection.
+Analyze behavioral data to generate a personal operating memo — a strategic alignment doc that open-week and open-day use for coaching and trap detection.
 
 ## Philosophy
 
@@ -21,8 +21,8 @@ The output is honest, not flattering. If you spend 60% of your time on things yo
 
 ## When to Run
 
-- During initial Obsidian strategy setup (called by `/plan-week` opt-in flow)
-- Quarterly refresh (plan-week nudges when `next-review` date passes)
+- During initial Obsidian strategy setup (called by `/open-week` opt-in flow)
+- Quarterly refresh (open-week nudges when `next-review` date passes)
 - Manually when you want to reassess your focus
 
 ## Data Sources (in priority order)

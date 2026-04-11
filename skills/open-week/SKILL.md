@@ -1,9 +1,9 @@
 ---
-name: plan-week
-description: Sunday/Monday weekly planning — sets week priorities from role, goals, last week's review, and Asana backlog. Includes leadership coaching patterns. Trigger phrases: plan week, week plan, weekly planning, plan my week, what should I focus on this week, weekly priorities, set priorities
+name: open-week
+description: Sunday/Monday weekly planning — sets week priorities from role, goals, last week's review, and Asana backlog. Includes leadership coaching patterns. Trigger phrases: open week, plan week, week plan, weekly planning, plan my week, what should I focus on this week, weekly priorities, set priorities
 ---
 
-# Plan Week
+# Open Week
 
 Set the week's priorities by reviewing last week's close-week output, the Asana backlog, upcoming calendar, and the builder's role/goals. Includes leadership coaching — pattern detection across weeks to surface misalignments between stated priorities and actual behavior.
 
@@ -46,7 +46,7 @@ Extract:
 - **AI Suggested: Delegate Next Week** (if present)
 - **AI Suggested: Stop Doing** (if present)
 
-If the close-week AI suggestions exist, present them to the builder as a starting point alongside the plan-week recommendations. Show where they agree and where they differ — close-week suggestions are based on last week's data patterns, while plan-week recommendations factor in the upcoming calendar and Asana state.
+If the close-week AI suggestions exist, present them to the builder as a starting point alongside the open-week recommendations. Show where they agree and where they differ — close-week suggestions are based on last week's data patterns, while open-week recommendations factor in the upcoming calendar and Asana state.
 
 **1b. Asana backlog**
 
@@ -92,8 +92,8 @@ Check if `$OBSIDIAN_VAULT_PATH/10-strategy/operating-memo.md` exists.
 **If it does NOT exist:**
 > "A strategy layer is available that connects your projects to company goals, does weekly stack ranking, and checks alignment with your operating memo. It starts with a 15-minute reflective conversation to build your personal operating memo. Set up now, or skip for this week?"
 
-If "now" — pause plan-week and walk through the operating memo generation process (5 reflective questions about role, strengths, traps, measures, meetings). Write the result to `10-strategy/operating-memo.md`. Then continue.
-If "skip" — proceed with normal plan-week, skip all strategy steps (1.6 through 1.10) below.
+If "now" — pause open-week and walk through the operating memo generation process (5 reflective questions about role, strengths, traps, measures, meetings). Write the result to `10-strategy/operating-memo.md`. Then continue.
+If "skip" — proceed with normal open-week, skip all strategy steps (1.6 through 1.10) below.
 
 **If it exists:** Continue to Step 1.6.
 
