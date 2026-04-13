@@ -1,11 +1,13 @@
 ---
 name: person-intelligence
 description: >-
-  Build or update a person profile, or run a biweekly relationship health check.
+  Build or update a person profile, run a biweekly relationship health check,
+  manage coaching goals, or prep for a meeting with someone.
   Trigger: "person intel", "synthesize [name]", "build profile for [name]",
   "update [name]'s profile", "who is [name]", "person intelligence",
   "people profile", "refresh profiles", "relationship check", "health check",
-  "biweekly check", "relationship health"
+  "biweekly check", "relationship health", "prep for [name]",
+  "meeting prep [name]", "coaching goals"
 ---
 
 # Person Intelligence
@@ -245,6 +247,135 @@ This skill supports incremental updates:
 2. Re-pull Airtable data (goals/actions change frequently)
 3. Merge new data with existing profile content
 4. Surface new project suggestions if topics have shifted
+
+## Personal Details
+
+### Automatic extraction (from Fathom transcripts)
+
+The meeting summarizer (`summarize_meeting.py`) extracts personal facts mentioned in small talk — kids, hobbies, vacations, life events. These come back as a `personal_facts` array in the summary output.
+
+During profile synthesis (Step 5), deduplicate and merge personal facts into a `## Personal` section in the profile:
+
+```markdown
+## Personal
+
+- **Family**: Three kids (ages ~8, 11, 14). Wife Sarah teaches high school math.
+- **Interests**: Trail running, woodworking, Denver Nuggets
+- **Life events**: Moving to new house (Feb 2026). Daughter started middle school.
+- **Last updated**: YYYY-MM-DD
+```
+
+### Prompted during health checks
+
+After scoring and coaching goal review, check each person's `## Personal` section:
+- **Missing or empty**: "I don't have any personal details for [name] yet — family, hobbies, anything worth remembering?"
+- **Stale (60+ days since `Last updated`)**: "[Name]'s personal section was last updated [date]. Anything new?"
+- **Fresh and populated**: Skip — no prompt needed.
+
+Kevin types what he knows. "Skip" moves on. Never pressure.
+
+### Privacy rules
+
+- Only include facts explicitly stated in transcripts or provided by Kevin — never inferences
+- Sensitive facts (health issues, family conflict, financial) get flagged for Kevin's approval before writing
+- The personal section is private intelligence — never shared with the person profiled
+
+## Coaching Goals
+
+### Profile format
+
+Add a `## Coaching Goals` section to scored profiles, after `## How to Work With` and before `## Relationship Health`:
+
+```markdown
+## Coaching Goals
+
+### Active: [Goal title]
+status: active | created: YYYY-MM-DD | dimension: [health dimension]
+
+**Why**: [1-2 sentences — what the data shows and why this matters]
+
+**Actions**:
+- [ ] [Concrete, observable action Kevin can take]
+- [ ] [Another action]
+- [ ] [Another action]
+
+**Evidence**:
+- YYYY-MM-DD: [Specific observation from transcript or meeting]
+- YYYY-MM-DD: [Another observation]
+
+### Completed: [Goal title]
+status: completed | created: YYYY-MM-DD | completed: YYYY-MM-DD | dimension: [dimension]
+**Outcome**: [One sentence — what changed]
+```
+
+### Goal generation rules
+
+- Max 2 active goals per person (one professional, one personal/relational)
+- Goals are about what **Kevin** does differently — not what the other person should do
+- Each goal ties to a specific health dimension (lowest-scoring gets priority)
+- Actions must be concrete and observable — things you'd notice in a meeting or Slack message
+- Goals are **proposed by AI, approved by Kevin**. Never auto-written to the profile.
+
+### Goal generation pipeline
+
+**Inputs:**
+1. The person's profile — patterns, evolution arc, working style, what they care about
+2. Kevin's patterns — from Jack's coaching framework (`20-projects/leadership-growth/`), coaching patterns memory ("IC work is my unregulated excitement," hero tendencies)
+3. Health scores — which dimensions are lowest?
+4. Recent Fathom transcripts — what's actually happening in meetings?
+
+**When goals are generated:**
+- During the biweekly health check (after scoring), the AI:
+  1. Checks active goals for new evidence from recent Fathom transcripts
+  2. Appends evidence lines if found
+  3. Proposes goal updates if evidence suggests progress or the goal needs evolving
+  4. Proposes new goals if a dimension dropped or a new pattern emerged
+- Kevin approves, edits, or rejects each proposal before anything is written
+
+**Presentation format:**
+
+```
+🎯 Coaching Goal Updates:
+  Lauren — "Support authority growth": 2 new evidence items from Apr retros.
+    She opened both meetings and set agendas without prompting.
+    → Recommend: upgrade action #1 to "ask her to present sprint status to SLT directly"
+
+  Gary — No active goal. Propose: "Build shared decision framework"
+    targeting alignment (🟢 3). Based on pattern: Gary routes ideas
+    through Kevin that should go directly to SLT members.
+
+  Accept all / Edit / Skip?
+```
+
+## Meeting Prep
+
+Trigger: "prep for [name]", "meeting prep [name]", "prep for my meeting with [name]"
+
+Pull everything into a quick brief:
+
+```
+📋 Meeting Prep: [Name]
+
+Role: [role] | Health: [emoji] [score] | Last check: [date]
+
+🎯 Active goal: [goal title] ([dimension] [emoji] [score])
+   Actions: [action summary]
+   Recent evidence: [latest evidence line]
+
+👤 Personal: [key personal details]
+
+📊 Recent pattern: [behavioral observation from recent transcripts]
+
+💡 For this meeting: [contextual suggestion based on meeting type — if sprint,
+   suggest something sprint-specific; if 1:1, suggest a question to ask]
+```
+
+**How to generate the contextual suggestion:**
+- Read today's calendar to identify the meeting type (sprint, 1:1, product sync, etc.)
+- Cross-reference the active coaching goal with the meeting type
+- Produce one specific, actionable suggestion for this particular meeting
+
+If no coaching goal exists for this person, skip the 🎯 section and focus on personal details and recent patterns.
 
 ## Known People Registry
 
