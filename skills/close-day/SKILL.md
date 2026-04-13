@@ -461,6 +461,33 @@ Show the full daily note draft. Ask:
 - "Anything to add or correct?"
 - "Ready to write?"
 
+### Step 4b: Coaching Check-in (after work summary, before daily note write)
+
+If today had meetings with people who have active coaching goals in `$OBSIDIAN_VAULT_PATH/30-people/*.md`:
+
+1. For each person with an active goal who was in a meeting today:
+   - Check if a Fathom transcript is available for that meeting (from the Fathom fetch in Step 1c)
+   - **If transcript available**: Extract behavioral evidence relevant to the coaching goal. Present it:
+     ```
+     🎯 Coaching Check-in
+
+       Lauren (Sprint Retro): Lauren spoke 28%, opened the meeting, created 3 tickets.
+         → Evidence logged to "Support authority growth" goal.
+     ```
+     Append the evidence line to the `**Evidence**:` section of the coaching goal in the profile.
+   - **If no transcript**: Prompt Kevin for a brief self-assessment:
+     ```
+     🎯 Coaching Check-in
+
+       Lauren (Sprint Retro): Did you let her lead?
+       [Type a one-line observation, or "skip"]
+     ```
+     If Kevin provides input, log it as evidence. If "skip", move on.
+
+2. Keep this lightweight — one line per person, no survey. The daily note captures the full meeting summary; this is just the coaching lens.
+
+3. Write evidence directly to `30-people/[Name].md` under the active goal's `**Evidence**:` section. New entries go at the top (reverse-chron).
+
 ### Step 5: Write daily note
 
 Write to: `$OBSIDIAN_VAULT_PATH/01-daily/YYYY-MM-DD.md`

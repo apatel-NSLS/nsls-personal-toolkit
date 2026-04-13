@@ -49,6 +49,9 @@ Specific recommendations or suggestions.
 ## Topics Discussed
 Bullet list of distinct topics covered (used for project inference).
 
+## Personal Facts
+Extract any personal details mentioned in small talk or conversation — family (kids, spouse, parents), hobbies, interests, sports teams, pets, vacations, life events (moving, health, milestones), side projects. Only include facts explicitly stated, not inferences. If no personal details were mentioned, write "None mentioned."
+
 Keep it factual and direct. Preserve their voice."""
 
 
@@ -124,15 +127,31 @@ def main():
 
     summary = message.content[0].text
 
+    # Parse ## Personal Facts section into a structured list
+    personal_facts = []
+    in_personal_facts = False
+    for line in summary.splitlines():
+        if line.strip() == "## Personal Facts":
+            in_personal_facts = True
+            continue
+        if in_personal_facts:
+            # Stop at the next ## section
+            if line.startswith("## "):
+                break
+            stripped = line.strip().lstrip("- ").strip()
+            if stripped and stripped.lower() != "none mentioned.":
+                personal_facts.append({"fact": stripped, "date": date})
+
     result = {
         "date": date,
         "title": title,
         "person_name": person_name,
         "summary": summary,
+        "personal_facts": personal_facts,
     }
 
     print(json.dumps(result), file=sys.stdout)
-    print(f"Done. Summary length: {len(summary)} chars", file=sys.stderr)
+    print(f"Done. Summary length: {len(summary)} chars, personal facts: {len(personal_facts)}", file=sys.stderr)
 
 
 if __name__ == "__main__":

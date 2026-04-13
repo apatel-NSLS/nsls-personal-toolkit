@@ -313,6 +313,51 @@ Present to the builder:
 
 The builder adjusts the Top 3, accepts or rejects coaching, and commits to the week's focus.
 
+### Step 4.5: Relationship Health Check Trigger
+
+After weekly priorities are set, check `$OBSIDIAN_VAULT_PATH/30-people/*.md` for the most recent `health_last_assessed` date across all scored profiles.
+
+If **14 or more days** have passed since the last assessment:
+
+```
+⏰ Relationship health check is due (last run: [date], [N] days ago).
+   Running biweekly check now...
+```
+
+Then execute the full Relationship Health Check flow from the person-intelligence skill:
+1. Present health dashboard with current scores
+2. AI proposes updated scores based on recent data
+3. Kevin confirms or adjusts
+4. Coaching goal review — new evidence, goal updates, new proposals
+5. Personal details prompt for profiles with gaps
+6. Growth reflection (Jack's 5 questions)
+
+If fewer than 14 days have passed, skip silently.
+
+### Step 4.6: Coaching Goals Portfolio
+
+Regardless of whether the health check runs, display the active coaching portfolio:
+
+```
+🎯 Active Coaching Goals ([N] people)
+  [Name] — [goal title] ([duration], [N] evidence items, trending [↑/→/↓])
+  [Name] — [goal title] ([duration], [N] evidence items, trending [↑/→/↓])
+  [Name] — [goal title] (new, proposed last check)
+```
+
+**How to determine trend:**
+- Count evidence items in the last 14 days vs. the 14 days before
+- More recent evidence = ↑ (trending up)
+- Same = → (steady)
+- Less or none = ↓ (stalling)
+
+**How to gather this data:**
+- Scan all `30-people/*.md` files for `status: active` lines in `## Coaching Goals` sections
+- Parse the goal title, created date, and count evidence entries
+- If no active coaching goals exist across any profile, skip this section
+
+This gives Kevin a birds-eye view of which relationships he's actively developing and whether momentum is building.
+
 ### Step 5: Write week plan
 
 Write to: `$OBSIDIAN_VAULT_PATH/02-weekly/YYYY-[W]WW.md`
