@@ -157,7 +157,7 @@ Rollup = average of 6 dimensions, mapped to emoji: ≥3.5 = 💚, ≥2.5 = 🟢,
 
 ### How the Check Works
 
-1. Read all `$OBSIDIAN_VAULT_PATH/30-people/*.md` files that have `health:` in frontmatter. **Skip files with `status: departed`** — their history is closed, no new assessments.
+1. Read all `$OBSIDIAN_VAULT_PATH/30-people/*.md` files that have `health:` in frontmatter. **Skip files with `status: departed`** — their history is closed, no new assessments. Departed profiles use `health-departed` tag (dark gray on graph) instead of `health-attention` to avoid visual noise.
 2. Present current state:
 
 ```
@@ -256,6 +256,7 @@ This skill supports incremental updates:
 | Ashleigh Smith | (check Airtable) | SLT Airtable, People Ops |
 | Michael O'Brien | (check Airtable) | SLT Airtable, People Ops |
 | Anish Patel | (check Airtable) | SLT Airtable, People Ops, Board KB |
+| Lauren Prentiss | lprentiss@nsls.org | Obsidian daily/weekly notes, cross-profile refs (contractor — not in People Ops) |
 
 Update this table as you profile new people.
 
