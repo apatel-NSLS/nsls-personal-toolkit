@@ -498,6 +498,12 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 1.
 2.
 3.
+
+## Insight Reflection
+
+[Paragraph 1 — primary pattern: what the data reveals that you might not have noticed. One concrete data point must anchor it. Max 3 sentences.]
+
+[Paragraph 2 — second dimension or implication: what this pattern might mean going forward, or a second non-obvious angle. Max 3 sentences. Omit if there's nothing genuinely interesting to add.]
 ```
 
 **Rules:**
@@ -511,6 +517,29 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 - **AI Suggested Top 3:** Generate 3 strategic priorities for tomorrow based on carry-overs, meeting action items, deadlines, and Asana. Filter for items that are (a) high-impact/high-leverage, (b) fit the user's unique skills as CEO — relationship decisions, strategic judgment calls, cross-team visibility, contract/legal calls. Explain *why* each is high-priority and what it blocks/unlocks.
 - **AI Suggested Delegate:** Generate 3 important items someone else could own. Name the person and why they're the right fit. the user's role becomes review/approve, not execute. Look for: operational tasks with a clear domain owner, first-draft work where the user adds value in editing not creating, technical setup that doesn't require strategic judgment.
 - **My Top 3:** Always left blank for the user to fill in manually after reviewing the AI suggestions. The user may adopt, modify, or completely replace the AI suggestions.
+
+**Generating the Insight Reflection:**
+
+Apply full-shape thinking to the day itself — treat the day as the subject being analyzed. From all data collected, pick the 2 most interesting dimensions and write one paragraph per dimension. Max 2 paragraphs total.
+
+Dimensions to check (choose the most non-obvious):
+
+| Dimension | Question |
+|---|---|
+| **Plan vs. reality gap** | What was on Asana / carried over vs. what actually got done? What slipped, and is there a pattern? |
+| **Doing vs. Orchestrating skew** | Does the actual time split match what the user thinks they're doing? Is there a surprise in the ratio? |
+| **Hidden theme** | Is there a thread connecting meetings, work, and decisions that doesn't appear on any single list? |
+| **Unrecorded completions** | Did Task Evidence Detection surface things that were finished but not tracked? What does that say about how work gets done? |
+| **Negative space** | What was conspicuously absent today that usually shows up? What didn't happen that should have? |
+| **Energy distribution** | Did the highest-stake work happen at peak hours, or was it squeezed into leftover time? |
+
+**Rules for what makes a good Insight Reflection:**
+- Must be non-obvious — don't restate what's already in the Work Log
+- Must be anchored to a specific number, person, task name, or time (not abstract)
+- Declarative framing: "The slide deck consumed 4.3x more time than contracted work" not "It's interesting that..."
+- Second-person or "we" framing — the user should feel seen, not lectured
+- Omit the second paragraph if there's no second insight that clears the bar. One sharp insight beats two generic ones.
+- **Never summarize the day.** That's what the rest of the note is for.
 
 ### Step 4: Present draft to user
 
