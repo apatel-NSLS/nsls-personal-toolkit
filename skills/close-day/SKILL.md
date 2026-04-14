@@ -217,6 +217,8 @@ The **"Meeting time (calendar)"** line is an orthogonal metric — it cross-cuts
 
 **1c. Fathom — meeting summaries and action items**
 
+> **IMPORTANT — API URL:** Use ONLY `https://api.fathom.ai/external/v1/meetings`. The domain `api.fathom.video` does NOT exist and will cause a DNS error. Do not try it, do not add it as a first attempt, do not use it as a fallback. One URL. Always.
+
 Fetch today's meetings from Fathom using a focused Python script:
 
 ```bash
