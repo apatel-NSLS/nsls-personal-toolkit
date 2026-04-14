@@ -355,6 +355,61 @@ Include the overdue and due-today lists in the daily note's `## Asana` section. 
 
 **Filtering:** Skip auto-generated noise like "It's time to update your goal(s)" — only include real tasks the user created or was assigned.
 
+**1h. Task Evidence Detection — find what you finished but haven't checked off**
+
+After Steps 1a–1g are collected, cross-reference open Asana tasks and any SLT Meeting Actions against evidence of completion or significant progress. **This step detects — it does not write.** Confirmations happen in Step 7.
+
+**Sources to scan (use data already collected above):**
+
+| Source | What to look for |
+|---|---|
+| **Obsidian session logs** | Scan `## What Was Done` sections of all `*/sessions/$DATE.md` files found under `20-projects/` |
+| **Familiar window titles** | High capture count (≥30) on a window title related to the task — indicates substantial work time |
+| **Slack sent messages (1e)** | Outbound messages mentioning the task or deliverable with completion language ("done", "sent", "finished", "shared", "pushed", "complete") |
+| **Fathom meeting notes (1c)** | Action items from meetings confirmed complete, or attendee acknowledged receiving a deliverable |
+| **Claude/Warp session context (1f)** | Session title or working directory matching the task's project |
+| **Sent email (1d)** | The artifact the task described was sent (attachment, link, approval) |
+
+**Evidence scoring:**
+
+| Signal | Classification |
+|---|---|
+| Obsidian session log lists it in `## What Was Done` | ✅ Completed |
+| Slack: user said "done", "sent", "finished", etc. about this specific task | ✅ Completed |
+| Sent email delivers the artifact the task described | ✅ Completed |
+| Fathom: deliverable confirmed received or action marked done | ✅ Completed |
+| Familiar: 30–49 captures on task-related window title | 🔶 Significant progress |
+| Familiar: 50+ captures on task-related window title | ✅ Completed (strong signal) |
+| Obsidian session log mentions it without `## What Was Done` | 🔶 Worked on it |
+
+At least one ✅ signal → **Completed candidate**. Moderate signals only → **Progress candidate** (suggest Asana comment, not mark-complete). Skip tasks with no signals — don't surface noise.
+
+**Obsidian session log scan:**
+```bash
+VAULT="$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/KP"
+find "$VAULT/20-projects" -path "*/sessions/$DATE.md" 2>/dev/null | while read f; do
+  echo "=== $f ==="; cat "$f"
+done
+```
+
+**Output format (show before Step 2):**
+
+```
+## Task Evidence Check
+
+✅ Likely completed (not yet checked off):
+- "All Staff deck" — Familiar: 74 caps on "All Staff Meeting - April 2026 - Google Slides"; Slack: messaged Danielle about it
+- "LOP Q2 Reset" — Familiar: 58 caps on "L2 Goal Modifications - Google Docs"; Obsidian session log confirms
+
+🔶 Significant progress (not finished):
+- "Finalize hiring contracts" — Familiar: 337 Warp caps on slt-ops session
+
+Do you want me to mark the ✅ items complete in Asana (and SLT if applicable)?
+I'll show you the exact changes before writing anything.
+```
+
+**Pass-through to Step 7:** The confirmed list feeds Step 7a (mark complete) and 7d (SLT sync). Step 7 still presents the full plan before any writes.
+
 ### Step 2: Identify projects touched
 
 Match activity to projects using these signals (in priority order):
