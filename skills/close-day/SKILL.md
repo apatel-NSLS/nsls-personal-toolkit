@@ -428,6 +428,16 @@ Match activity to projects using these signals (in priority order):
 
 Use the project mappings from `~/.claude/skills/log/SKILL.md` as the source of truth.
 
+**Annotate with week rank:** After identifying projects touched, read this week's stack rank file:
+`$OBSIDIAN_VAULT_PATH/10-strategy/stack-rank/YYYY-WNN.md`
+
+Parse the stack-rank table rows to build a `project → rank` map for this week's Top 5. For each project touched today, append one of:
+- `*(week rank: N)*` if the project is in this week's Top 5
+- `*(not in week's Top 5)*` if the project exists but wasn't ranked
+- *(omit annotation)* if no stack rank exists or project isn't matched
+
+This surfaces alignment between daily effort and weekly priorities — spending half a day on an unranked project is a signal worth seeing, not hiding.
+
 ### Step 3: Draft the daily note
 
 Generate in this format (matching the user's existing `01-daily/` structure):
@@ -481,8 +491,8 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 - [ ] [Task name] — [project if any]
 
 ## Projects Touched
-- [[20-projects/[slug]|[slug]]] — [1-line summary of what happened]
-- [[20-projects/[slug]|[slug]]] — [1-line summary]
+- [[20-projects/[slug]|[slug]]] *(week rank: N)* — [1-line summary of what happened]
+- [[20-projects/[slug]|[slug]]] *(not in week's Top 5)* — [1-line summary]
 
 ## Carrying Over
 - [Unfinished items from Claude tasks, meeting action items, or Asana overdue]
@@ -577,6 +587,38 @@ If today had meetings with people who have active coaching goals in `$OBSIDIAN_V
 2. Keep this lightweight — one line per person, no survey. The daily note captures the full meeting summary; this is just the coaching lens.
 
 3. Write evidence directly to `30-people/[Name].md` under the active goal's `**Evidence**:` section. New entries go at the top (reverse-chron).
+
+### Step 4c: Knowledge Graph Insight Proposals
+
+If `$OBSIDIAN_VAULT_PATH/60-nsls-knowledge/` exists, scan today's meetings and reading for potential knowledge graph contributions.
+
+1. **Match topics**: Compare today's meeting summaries, Familiar screen activity, and conversation context against the topic files in `60-nsls-knowledge/`. Look for topic name matches, related keywords, and frontmatter `related:` links.
+
+2. **Filter for insights**: For matched topics, look for signals of genuine new knowledge — NOT just "discussed X":
+   - Debates or disagreements with specific positions taken
+   - Surprising data points or numbers that contradict assumptions
+   - Changed positions — someone shifted their view on something
+   - New frameworks or mental models introduced
+   - Decisions that resolve an open question
+
+3. **Surface 0-3 candidates** with specific evidence:
+   ```
+   📚 Knowledge Graph
+
+     You had a detailed exchange with Ashleigh about chapter health.
+     She argued advisor turnover is the primary driver of stale chapters,
+     citing UPhoenix and two other examples. This contradicts the
+     assumption that it's event frequency.
+
+     → Add to [[chapter-health]] Key Decisions? (y/n)
+   ```
+
+4. **If approved**, append a dated one-liner to the topic file:
+   - Decisions → `## Key Decisions` section
+   - State changes → `## Current State` section
+   - Format: `- YYYY-MM-DD: [One sentence with specific evidence]`
+
+5. **If 0 candidates** — skip silently. No noise. This should fire on fewer than half of close-days.
 
 ### Step 5: Write daily note
 

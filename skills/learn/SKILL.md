@@ -125,11 +125,33 @@ From the results, build a scaffolded **Learning Path** — a sequence of 4-8 ite
 - A checkbox `[ ]`
 - A title in bold
 - Estimated time in parentheses
-- The resource link and a 1-sentence description
+- A wikilink to the resource file in `50-reference/` and a 1-sentence description
 
 Present the draft learning path to the user: "Here's what I'd suggest. Want to reorder, add, or remove anything?"
 
-After approval, write the Learning Path and Resources sections to the topic dashboard.
+After approval:
+
+1. **Write resource files to `50-reference/`**: For each resource in the learning path, create a file at `$OBSIDIAN_VAULT_PATH/50-reference/[slug].md`:
+   ```yaml
+   ---
+   type: resource
+   format: article|video|course|book
+   url: "https://..."
+   source: "[Site/Author name]"
+   date-clipped: YYYY-MM-DD
+   topics: []
+   learning-goal: "[[topic-slug]]"
+   ---
+
+   # [Resource Title]
+
+   [1-sentence description from the learning path]
+   ```
+   If a topic in `60-nsls-knowledge/` matches (e.g., learning about "retention" and `60-nsls-knowledge/retention.md` exists), add it to the `topics:` list as `"[[retention]]"`.
+
+2. **Update the topic dashboard**: Write the Learning Path (with wikilinks to `50-reference/` files) and Resources sections. The Resources section becomes a list of `[[50-reference/slug|Title]]` wikilinks.
+
+This connects learning resources to the broader vault graph — resources link to knowledge topics, knowledge topics link to people and projects.
 
 ### Step 8: Confirm
 

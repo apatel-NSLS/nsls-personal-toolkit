@@ -257,6 +257,25 @@ Rules:
 
 The Insight Reflection is the **first section** in the weekly note (Output A), before Achievements. It is also summarized as a single "Insight of the Week" sentence in Output B.
 
+### Step 2b: Knowledge Graph Consolidation
+
+If `$OBSIDIAN_VAULT_PATH/60-nsls-knowledge/` exists, do a weekly pass on the knowledge graph:
+
+1. **Review this week's entries**: Read all `60-nsls-knowledge/*.md` files that were modified this week (check `last-updated` frontmatter or git log). Look at what close-day added.
+
+2. **Consolidate**: If multiple daily entries on the same topic say essentially the same thing, merge them into one clearer entry. Remove redundancy.
+
+3. **Update Current State**: For any topic where the week's decisions or insights meaningfully changed the overall picture, rewrite the `## Current State` section to reflect the new reality. Keep it to 2-3 sentences.
+
+4. **Surface neglected topics** (optional, light touch): If there are topics owned by Kevin with no activity in 4+ weeks, mention them: "Revenue Strategy hasn't been updated since March 15 — still accurate?" Don't do this every week; once a month is enough.
+
+5. **Report**: At the end of the weekly note, add a brief line:
+   ```
+   📚 Knowledge graph: [N] topics updated this week, [M] entries consolidated
+   ```
+
+Keep this lightweight. The goal is quality control on what close-day added, not a major writing exercise.
+
 ### Step 3: Generate two outputs
 
 **Output A: Weekly Review note** (for Obsidian)
