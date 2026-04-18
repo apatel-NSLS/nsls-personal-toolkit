@@ -1,10 +1,10 @@
 ---
 date: 2026-04-18
 slug: announce-update-and-release-log
-last_commit: fea5ed2
-commit_range: 1f8cf9d..fea5ed2
+last_commit: 2f5dcf9
+commit_range: 1f8cf9d..2f5dcf9
 skills_changed: [announce-update, update-personal-productivity]
-files_changed: 11
+files_changed: 14
 cost_to_adopt: "15 min"
 breaking: false
 ---
@@ -81,5 +81,5 @@ After pulling, run `/update-personal-productivity`. It will find all the backfil
 
 ## Commits Included
 
+- `2f5dcf9` — feat: release-aware /update-personal-productivity + backfilled log
 - `fea5ed2` — feat: /announce-update skill + updates/ release log
-- `1f8cf9d` — feat: weekly stack rank flows into open-day and open-week *(bundled in prior release doc)*
