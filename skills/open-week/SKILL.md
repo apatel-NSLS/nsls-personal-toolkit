@@ -105,6 +105,27 @@ Extract:
 - Days since last session per goal (from `next-session` or Progress Log)
 - Unprocessed inbox link count
 
+**1f. Knowledge context scan** (parallel call to the builder toolkit's `knowledge-researcher` agent)
+
+Launch the agent:
+
+```
+Task(
+  subagent_type="nsls-builder-toolkit:research:knowledge-researcher",
+  prompt="Weekly strategic planning context. Surface:
+    - Tier 1: any LOPs at risk or needing attention this week
+    - Tier 2 (if available): SLT knowledge graph topics owned by the builder — flag any that are present-but-unpopulated or stale (last-updated > 60 days)
+    - Tier 3: active learning goals with no progress in 2+ weeks; any operating-memo 'My Traps' items that match recurring themes
+  Keywords: <names of this builder's owned LOPs from tier 1, and any projects in 20-projects/ flagged role: owner>"
+)
+```
+
+The agent returns structured findings grouped by tier. Use its output to:
+- **Enrich Step 1.7 (stack rank):** owned SLT topics that are stale or unpopulated are candidates for Top 5 (structural gap — institutional knowledge not accreting).
+- **Feed Step 2 (coaching):** any "trap" overlap the agent surfaces becomes a coaching signal ("your 'I Don't' zone shows up in 3 of your proposed Top 5 — deliberate?").
+
+If the agent returns "Tier 2 not available" or the tier 2 section is empty, that's fine — this step is purely additive. Log the coverage summary so the builder can see which tiers were read.
+
 ### Step 1.5: Strategy layer check
 
 Check if `$OBSIDIAN_VAULT_PATH/10-strategy/operating-memo.md` exists.
@@ -178,6 +199,7 @@ Read last week's stack rank from `10-strategy/stack-rank/` (if exists) to see wh
 5. Projects untouched > 2 weeks get flagged as stale
 6. In push mode: explorer and new-lever projects get boosted
 7. In protect mode: fix/stabilize projects get boosted
+8. **Knowledge-graph signal (from Step 1f):** if an owned SLT topic is marked present-but-unpopulated or stale, the related project gets a "knowledge gap" note in the "Why This Rank" column. Not a boost — just a visibility flag so the builder can decide if closing the knowledge gap matters this week.
 
 **Present Top 5 with rationale:**
 > "Here's your proposed stack rank for this week:
@@ -266,6 +288,7 @@ Before suggesting priorities, surface patterns:
 - **Learning stagnation:** If an active learning goal hasn't had progress in 3+ weeks, flag it: "[Topic] has been active for [N] weeks with no progress. Either schedule a deep dive this week, park it, or admit it's not a priority right now."
 - **Learning vs. filler:** If last week's close-week showed >5h of YouTube/news but <1h of structured learning, note: "Last week had [X]h of media consumption but only [Y]h of intentional learning. Consider converting one filler session into a 15-min micro-learning block."
 - **Cross-week insight signal:** If the same theme appeared in the `## Insight Reflection` of 2+ consecutive weekly notes (from Step 1d), escalate it: "This is week [N] of [theme] surfacing in your weekly reflection. That's a structural pattern, not a one-off. What would it take to address it?"
+- **Knowledge graph accretion gap (from Step 1f):** If the knowledge-researcher flagged owned SLT topics as present-but-unpopulated for 2+ weeks running, surface it: "You own [N] SLT topics in the knowledge graph with no recorded Current State, Key Decisions, or Open Questions. The graph has [X] meeting mentions for these topics but zero synthesis. Either close-day 4c isn't firing on topics you own, or the graph is noise. Which?"
 
 ### Step 3: Draft week plan
 
