@@ -46,6 +46,31 @@ Read timezone from `$OBSIDIAN_VAULT_PATH/50-reference/builder-profile.md` (the `
 date +%Y-%m-%d
 ```
 
+### Step 1.5: Verify yesterday's /close-day ran (visible gate)
+
+`/close-day` is a separate ritual from `/open-day` — it intentionally closes the workday and produces the plan-vs-actual reflection that makes today's Top 3 honest instead of performative. `/open-day` does not subsume it. If it didn't run last night, surface that explicitly before continuing — don't silently move on.
+
+**Check:**
+```bash
+YESTERDAY=$(date -v-1d +%Y-%m-%d 2>/dev/null || date -d 'yesterday' +%Y-%m-%d)
+if ! grep -q "^## Insight Reflection" "$OBSIDIAN_VAULT_PATH/01-daily/$YESTERDAY.md" 2>/dev/null; then
+  echo "MISSING"
+fi
+```
+
+(The `## Insight Reflection` header is only written by `/close-day`, so its presence is the reliable signal that yesterday was processed.)
+
+**If MISSING — pause and ask {user}:**
+
+> ⚠️ Yesterday's `/close-day` didn't run — no Insight Reflection in `01-daily/$YESTERDAY.md`.
+>
+> Close-day is the bridge between yesterday's plan and today's priorities. Want me to run `/close-day $YESTERDAY` first, then continue open-day? (Y/n — only skip if you've already processed yesterday elsewhere.)
+
+- If {user} approves → invoke the close-day skill with yesterday's date, wait for completion, then continue to Step 2.
+- If {user} skips → continue to Step 2 but note the skip in the morning check-in so it's visible, not silent.
+
+**If present:** Continue silently to Step 2.
+
 ### Step 2: Collect data (run in parallel)
 
 **2a. Google Calendar — today's meetings**
