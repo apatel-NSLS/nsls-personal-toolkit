@@ -331,9 +331,15 @@ def post_to_target_channel(channel: str, body: str) -> tuple[bool, str]:
 
 
 def discovery_phase(state: dict) -> int:
-    """Find new SLT meetings → draft digest → write pending + DM Anish. Return count drafted."""
+    """Find new SLT meetings → draft digest → write pending + DM Anish. Return count drafted.
+
+    On first run (last_check is None), only look back 30 minutes — avoids the
+    Fathom API quirk where an unbounded `recorded_after` can return much older
+    meetings. Steady-state runs at 15-min cadence so 30 min backfill gives 2x
+    safety margin on each poll.
+    """
     now = datetime.now(timezone.utc)
-    since = state.get("last_check") or (now - timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    since = state.get("last_check") or (now - timedelta(minutes=30)).strftime("%Y-%m-%dT%H:%M:%SZ")
     try:
         meetings = fetch_recent_meetings(since)
     except Exception as e:
