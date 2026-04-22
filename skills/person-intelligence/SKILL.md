@@ -30,6 +30,26 @@ Ask for or confirm: full name, known email(s). Check the Known People Registry b
 
 ### Step 2: Discover available data
 
+**Behavioral Instincts section (added 2026-04-21):** Every profile should include a `## Behavioral Instincts` section with six subsections: Decision pattern, Stress response, Motivators, Defaults & blind spots, How they build trust, Working-with cheat sheet. The `synthesize_profile.py` template now requests this by default. For data sources beyond what the Python pipeline fetches:
+
+**Gmail threads (recommended for behavioral depth):**
+```
+mcp__9b014556-1195-4e6d-ab17-08677a2ddaa4__search_threads(
+  query="(from:{email} OR to:{email}) newer_than:180d -subject:'Accepted:' -subject:'Declined:' -subject:'Invitation:'",
+  pageSize=20-30
+)
+```
+Look for: writing style, decision pattern, response time, tone under pressure, vendor/billing patterns, escalation behavior.
+
+**Slack messages (if rate limits allow):**
+```
+mcp__9434446a-b10a-4e49-aa8b-e71c53d0025f__slack_search_public_and_private(
+  query="from:@{username} after:YYYY-MM-DD",
+  limit=20
+)
+```
+Look for: casual register, default channel preference, reaction patterns, thread iteration behavior.
+
 Run these in parallel where possible. Each outputs JSON to stdout, status to stderr.
 
 **Fathom 1:1s** (if email known):

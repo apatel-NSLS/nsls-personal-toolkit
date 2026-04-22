@@ -168,8 +168,29 @@ Specific recommendations, suggestions, or offers they've made. Actionable items.
 ## Mental Models
 Frameworks, analogies, metaphors, and thinking patterns they reach for. Format: "Model name — explanation"
 
+## Behavioral Instincts
+Synthesized behavioral profile. Include these six subsections:
+
+### Decision pattern
+How they decide — fast/slow, data/gut, consensus/decider, async/sync, delegate/own. 2-3 sentences grounded in specific observed behavior (cite meetings or emails).
+
+### Stress response
+What happens when pressure hits. Withdraw, over-communicate, take over, escalate, go quiet, stay in format, pull in outside counsel, etc. Cite specific stress moments observed.
+
+### Motivators
+3-5 bullets — what energizes them intrinsically. Not titles or rewards; the underlying drivers (speed, clarity, recognition, mission, team cohesion, process rigor, etc.).
+
+### Defaults & blind spots
+Default channels, default response shapes, default approvers they route through. Then 2-4 specific blind spots with examples — patterns where their strength becomes a trap, things they don't see about themselves.
+
+### How they build trust
+What moves the needle for them. What they trust from others (specificity, follow-through, direct language, etc.) and what they signal when they trust you back (tone shift, emoji, casual sign-off).
+
+### Working-with cheat sheet
+6-8 numbered, actionable tips for collaborating with them. Prescriptive ("do X") not descriptive.
+
 ## How to Work With {name}
-Practical advice based on observed patterns. What works, what to avoid, what they respond to.
+Practical advice based on observed patterns. What works, what to avoid, what they respond to. (This section complements Behavioral Instincts; keep it shorter and more tactical.)
 
 ## Projects Together
 Format each as: `- [[20-projects/project-slug|Project Name]] — their role or contribution`

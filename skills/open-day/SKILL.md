@@ -1,38 +1,55 @@
 ---
 name: open-day
 description: >-
-  Morning planning routine — pulls Google Calendar events, Asana tasks,
+  Morning planning routine — pulls Google Calendar events, Airtable tasks,
   overdue items, and yesterday's carry-overs to set daily priorities, schedule
   focus blocks and vitality time on the calendar, and populate the Morning
   Check-in in today's Obsidian daily note. Use when the user says "open day",
   "plan day", "plan my day", "start my day", "morning", "good morning",
   "what's on my plate", "what do I have today", "daily planning", or opens a
-  new session in the morning. Requires Google Calendar and Asana access.
+  new session in the morning. Requires Google Calendar access. Tasks come from
+  Airtable SLT Meeting Intelligence base (Meeting Actions table).
 ---
 
 # Open Day
 
-Pull today's calendar, Asana tasks, overdue items, and yesterday's carry-overs. Help the builder set priorities across work and vitality, schedule them on the calendar, and populate today's daily note.
+Pull today's calendar, Airtable tasks, overdue items, and yesterday's carry-overs. Lay out the complete task list for today and populate the daily note.
 
-## Philosophy
+## Behavioral Contract (supersedes older sections below)
 
-Productivity is one pillar of a good day — not the whole thing. This skill plans around three pillars:
+> **Established 2026-04-21 from user feedback; baked into the skill 2026-04-22.**
+
+The builder has explicitly asked for a **comprehensive task list, not curated priorities**. When running this skill:
+
+- **Lead with all tasks** — Airtable tasks + carry-overs + commitments + inbound deadlines + admin items. Everything the builder needs to get done today, not a distilled Top 3.
+- **Keep** the meetings, logistics, and live-threads sections — those stay useful.
+- **Drop** the "My Top 3", "Vitality", "pick one from each pillar", and "three pillars" framing. **Do NOT** ask the builder to fill in energy, vitality, or Top 3 before writing the note.
+- **If close-day seeded AI suggestions for today**, render them as *"Suggested priorities from last night's close"* — informational only. Do not force a selection step.
+- **If cross-referencing the pre-meeting briefing agent** (`/pre-meeting-briefing`), surface the filenames from `00-inbox/pre-meeting/` rather than duplicating meeting-prep work here.
+
+> **Rationale:** User said on 2026-04-21: *"I don't really need top three, just all of the tasks I need to get."* Completeness over curation. This contract overrides the "Philosophy" section below (retained for historical context only).
+
+## Philosophy (legacy — superseded by the Behavioral Contract above)
+
+Productivity is one pillar of a good day — not the whole thing. This skill *originally* planned around three pillars:
 
 1. **Productivity** — Top 3 work priorities. High-leverage, builder-only.
 2. **Growth** — Intentional learning from `40-learning/` goals. Daily: 15-min micro-learning block (one article, one tutorial, one inbox link). Weekly: 1.5h deep dive scheduled by `/open-week`. Coaching and skill development also count.
 3. **Vitality** — Exercise, hobbies, relationships, rest. The stuff that keeps the engine running.
 
-A day with all three pillars touched is a good day, even if the Asana list didn't shrink.
+A day with all three pillars touched is a good day, even if the task list didn't shrink. **(See Behavioral Contract above — this framing is no longer used.)**
 
 ## When to Run
 
 Morning, before first meeting. Can also be triggered mid-day to reset priorities and reschedule.
 
-## Asana Reference
+## Task Source: Airtable
 
-Read these from `~/.claude/local-plugins/nsls-personal-toolkit/.env` or `$OBSIDIAN_VAULT_PATH/50-reference/builder-profile.md`:
-- **Workspace GID:** `$ASANA_WORKSPACE_GID`
-- **User GID:** `$ASANA_USER_GID`
+Read these from `~/.claude/local-plugins/nsls-personal-toolkit/.env`:
+- **PAT:** `$AIRTABLE_PAT`
+- **Base ID:** `$AIRTABLE_SLT_BASE_ID` (SLT Meeting Intelligence)
+- **Table ID:** `$AIRTABLE_TASKS_TABLE_ID` (Meeting Actions)
+- **Builder email:** `$BUILDER_EMAIL` (used to filter tasks by `assignee_email`)
 
 ## Timezone
 
@@ -86,30 +103,24 @@ gcal_list_events(
 
 Extract: meeting title, start/end time, attendees. Flag meetings that need prep (external attendees, board members, candidates).
 
-**2b. Asana — what's due and overdue**
+**2b. Airtable — what's due and overdue**
 
-Two parallel calls:
+Fetch open tasks from the SLT Meeting Intelligence base's Meeting Actions table using the Airtable REST API. Read `$AIRTABLE_PAT`, `$AIRTABLE_SLT_BASE_ID`, and `$AIRTABLE_TASKS_TABLE_ID` from `.env`.
 
-```
-mcp__claude_ai_Asana__get_my_tasks(
-  completed_since="now",
-  limit=100,
-  opt_fields="name,due_on,projects.name,assignee_section.name"
-)
+**Call 1: All open tasks assigned to the builder**
+
+```bash
+curl -s -H "Authorization: Bearer $AIRTABLE_PAT" \
+  "https://api.airtable.com/v0/$AIRTABLE_SLT_BASE_ID/$AIRTABLE_TASKS_TABLE_ID?filterByFormula=AND({assignee_email}='$BUILDER_EMAIL',OR({status}='Not Started',{status}='In Progress'),{action_type}='Task')&sort[0][field]=due_date&sort[0][direction]=asc"
 ```
 
-```
-mcp__claude_ai_Asana__search_tasks_preview(
-  assignee_any="me",
-  completed=false,
-  due_on_before="YYYY-MM-DD+1"
-)
-```
+From the results, extract fields: `action_description`, `status`, `Priority`, `due_date`, `meeting_date`, `Notes`, and the record `id`.
 
 Categorize:
-- **Overdue** — due before today
-- **Due today** — due today
-- **Do today section** — tasks in "Do today" Asana section regardless of due date
+- **Overdue** — `due_date` is before today
+- **Due today** — `due_date` equals today
+- **Priority "1 - Today"** — tasks marked priority 1 regardless of due date
+- **Active (no date)** — open tasks without a due date
 
 Filter out auto-generated noise ("It's time to update your goal(s)").
 
@@ -223,12 +234,12 @@ After displaying today's meetings, scan attendees against `$OBSIDIAN_VAULT_PATH/
 - The contextual action should be specific to the meeting type (sprint → sprint-specific action, 1:1 → relationship action)
 - If no attendees have coaching goals or personal details, skip this section entirely — don't show an empty block
 
-### Morning Top 3 (fresh from Asana + calendar + carry-overs)
+### Morning Top 3 (fresh from Airtable + calendar + carry-overs)
 1. [P1 — explain why it's #1]
 2. [Next most important]
 3. [Third — balance strategic and tactical]
 
-*Based on: [N] overdue Asana tasks, [N] carry-overs from yesterday.*
+*Based on: [N] overdue Airtable tasks, [N] carry-overs from yesterday.*
 
 ### Overdue ([count])
 - [ ] [Task] (due [date]) — [project]
@@ -249,7 +260,7 @@ If NO AI suggestions were seeded, skip the "Last Night's AI Suggestions" section
 **Priority inference for Top 3:**
 1. Anything with an external deadline today (meeting prep, deliverable due)
 2. Stack rank: if a Top 5 project hasn't been touched yet this week, boost it
-3. P1 Asana tasks that are overdue
+3. P1 Airtable tasks that are overdue
 4. Carry-overs that have been carrying for multiple days
 5. Week plan priorities that haven't gotten attention yet
 6. Quick wins that unblock others
@@ -481,9 +492,9 @@ Example format (customize per builder):
 
 ## Edge Cases
 
-- **Weekend:** Still generate if the builder asks, but lean toward vitality and growth blocks over work. Skip meeting prep and Asana overdue.
+- **Weekend:** Still generate if the builder asks, but lean toward vitality and growth blocks over work. Skip meeting prep and Airtable overdue.
 - **No carry-overs:** Skip that section.
-- **Empty calendar:** Note "No meetings today — deep work day?" Suggest tackling overdue Asana items. Schedule larger focus blocks.
+- **Empty calendar:** Note "No meetings today — deep work day?" Suggest tackling overdue Airtable items. Schedule larger focus blocks.
 - **Back-to-back meetings all day:** Note the constraint. Suggest one vitality micro-block (15 min walk between meetings). Don't force focus blocks into 20-min gaps.
 - **Mid-day reset:** If the builder runs `/open-day` mid-day, pull updated calendar, check what's been accomplished, and reschedule remaining priorities into afternoon blocks. Remove morning blocks that already passed.
 - **Builder declines scheduling:** That's fine. The skill works without calendar scheduling — just write the daily note with priorities and move on. Don't push.
@@ -496,4 +507,4 @@ The following features only activate when `$OBSIDIAN_VAULT_PATH/10-strategy/oper
 - **Operating memo check** (Step 3) — scans proposed priorities against "I Don't" and "My Traps" sections
 - **Teach/delegate/do ladder** (Step 3) — suggests pairing or delegation based on project roles in the memo
 
-Without an operating memo, the skill runs as a straightforward morning planner: calendar + Asana + carry-overs + vitality. No strategy nudges, no trap warnings. Run `/self-insight` to generate your operating memo when you're ready.
+Without an operating memo, the skill runs as a straightforward morning planner: calendar + Airtable + carry-overs + vitality. No strategy nudges, no trap warnings. Run `/self-insight` to generate your operating memo when you're ready.

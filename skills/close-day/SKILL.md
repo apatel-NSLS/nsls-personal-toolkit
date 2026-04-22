@@ -10,7 +10,7 @@ description: >-
 
 # Daily Close
 
-Synthesize your full day from seven data sources into a daily note and project session updates. Write carry-over tasks to Asana.
+Synthesize your full day from seven data sources into a daily note and project session updates. Write carry-over tasks to Airtable.
 
 ## Data Sources
 
@@ -21,14 +21,16 @@ Synthesize your full day from seven data sources into a daily note and project s
 | **Fathom** | Meeting summaries, topics, action items, decisions | Bash: Python script calling Fathom API (see below) |
 | **Sent Email** | Approvals, decisions, outbound communications | `gmail_search_messages` MCP tool (`from:me after:YYYY/M/DD before:YYYY/M/DD+1`) |
 | **Sent Slack** | Conversations, decisions, coordination, context | `slack_search_public_and_private` MCP tool (`from:<@$SLACK_USER_ID> on:YYYY-MM-DD`) |
-| **Asana** | Pending tasks, overdue items, what was due today | `mcp__claude_ai_Asana__get_my_tasks` and `mcp__claude_ai_asana__asana_search_tasks` MCP tools |
+| **Airtable (Meeting Actions)** | Pending tasks, overdue items, what was due today | Airtable REST API with `$AIRTABLE_PAT` against SLT Meeting Intelligence base |
 | **Claude session context** | What was built, decided, and discussed in this conversation | Conversation history in current session |
 
-## Asana Reference
+## Task Source: Airtable
 
 Read these from `~/.claude/local-plugins/nsls-personal-toolkit/.env`:
-- **Workspace GID:** `$ASANA_WORKSPACE_GID`
-- **User GID:** `$ASANA_USER_GID`
+- **PAT:** `$AIRTABLE_PAT`
+- **Base ID:** `$AIRTABLE_SLT_BASE_ID` (SLT Meeting Intelligence)
+- **Table ID:** `$AIRTABLE_TASKS_TABLE_ID` (Meeting Actions)
+- **Builder email:** `$BUILDER_EMAIL` (used to filter tasks by `assignee_email`)
 
 ---
 
@@ -121,7 +123,7 @@ Every capture gets assigned to exactly one **work category** based on app + wind
 | **Management / People** | Slack DMs with direct reports, Slack `#nsls-leadership`, Gmail (people-related), Messages, 1:1 meetings (from Fathom), Google Docs that are work journals (e.g. "Journal", "Work Journal") |
 | **Product Management** | Slack product/engineering channels (see list below), Figma, Airtable, Clay, product-related Google Docs, product/strategy meetings (from Fathom) |
 | **Marketing / Sales** | Slack marketing channels (see list below), recruiting tools, marketing Google Docs, sales meetings (from Fathom) |
-| **Admin / Ops** | Obsidian, Asana, Google Calendar, NetSuite, Ramp, billing dashboards, revenue reports, Calendly |
+| **Admin / Ops** | Obsidian, Airtable, Google Calendar, NetSuite, Ramp, billing dashboards, revenue reports, Calendly |
 | **Learning / Research** | YouTube, news sites (NYT, CNN, The Athletic), Reddit, documentation sites, tech blogs |
 | **Personal** | **EXCLUDE from all totals** — Charles Schwab, Chase, Mercury, Monarch, IRS, SBA, any brokerage/bank/tax/loan/personal finance site |
 
@@ -320,44 +322,32 @@ Also check if any other Claude Code sessions ran today by scanning:
 ls -la ~/.claude/projects/-Users-k/*.jsonl | grep "$(date +%b\ %d)" 2>/dev/null
 ```
 
-**1g. Asana — pending tasks and what was due**
+**1g. Airtable — pending tasks and what was due**
 
-Run in parallel with other data collection. Two calls:
+Run in parallel with other data collection. Fetch open tasks from the SLT Meeting Intelligence base's Meeting Actions table.
 
-**Call 1: Get all incomplete tasks assigned to the user**
-```
-mcp__claude_ai_Asana__get_my_tasks(
-  completed_since="now",
-  limit=100,
-  opt_fields="name,due_on,projects.name,assignee_section.name"
-)
+Read `$AIRTABLE_PAT`, `$AIRTABLE_SLT_BASE_ID`, `$AIRTABLE_TASKS_TABLE_ID`, and `$BUILDER_EMAIL` from `.env`.
+
+**Call: Get all incomplete tasks assigned to the builder**
+```bash
+curl -s -H "Authorization: Bearer $AIRTABLE_PAT" \
+  "https://api.airtable.com/v0/$AIRTABLE_SLT_BASE_ID/$AIRTABLE_TASKS_TABLE_ID?filterByFormula=AND({assignee_email}='$BUILDER_EMAIL',OR({status}='Not Started',{status}='In Progress'),{action_type}='Task')&sort[0][field]=due_date&sort[0][direction]=asc"
 ```
 
-**Call 2: Search for tasks that were due today or are overdue**
-```
-mcp__claude_ai_asana__asana_search_tasks(
-  assignee_any="me",
-  completed=false,
-  due_on_before="YYYY-MM-DD",  // the target date
-  sort_by="due_date",
-  sort_ascending=true,
-  opt_fields="name,due_on,projects.name",
-  limit=50
-)
-```
+Extract fields: `action_description`, `status`, `Priority`, `due_date`, `meeting_date`, `Notes`, and the record `id` (needed for Step 7 write-back).
 
 From the results, extract three lists:
-1. **Overdue tasks** — incomplete tasks with `due_on` before today
-2. **Due today** — tasks with `due_on` = today's date
+1. **Overdue tasks** — incomplete tasks with `due_date` before today
+2. **Due today** — tasks with `due_date` = today's date
 3. **Upcoming** — tasks due in the next 3 days (context, not displayed unless relevant)
 
-Include the overdue and due-today lists in the daily note's `## Asana` section. These inform the Carrying Over section and help the user see what slipped.
+Include the overdue and due-today lists in the daily note's `## Airtable Tasks` section. These inform the Carrying Over section and help the user see what slipped.
 
-**Filtering:** Skip auto-generated noise like "It's time to update your goal(s)" — only include real tasks the user created or was assigned.
+**Filtering:** Skip auto-generated noise like "It's time to update your goal(s)" — only include real tasks where `action_type` = "Task".
 
 **1h. Task Evidence Detection — find what you finished but haven't checked off**
 
-After Steps 1a–1g are collected, cross-reference open Asana tasks and any SLT Meeting Actions against evidence of completion or significant progress. **This step detects — it does not write.** Confirmations happen in Step 7.
+After Steps 1a–1g are collected, cross-reference open Airtable tasks and any SLT Meeting Actions against evidence of completion or significant progress. **This step detects — it does not write.** Confirmations happen in Step 7.
 
 **Sources to scan (use data already collected above):**
 
@@ -382,7 +372,7 @@ After Steps 1a–1g are collected, cross-reference open Asana tasks and any SLT 
 | Familiar: 50+ captures on task-related window title | ✅ Completed (strong signal) |
 | Obsidian session log mentions it without `## What Was Done` | 🔶 Worked on it |
 
-At least one ✅ signal → **Completed candidate**. Moderate signals only → **Progress candidate** (suggest Asana comment, not mark-complete). Skip tasks with no signals — don't surface noise.
+At least one ✅ signal → **Completed candidate**. Moderate signals only → **Progress candidate** (suggest Airtable comment, not mark-complete). Skip tasks with no signals — don't surface noise.
 
 **Obsidian session log scan:**
 ```bash
@@ -404,7 +394,7 @@ done
 🔶 Significant progress (not finished):
 - "Finalize hiring contracts" — Familiar: 337 Warp caps on slt-ops session
 
-Do you want me to mark the ✅ items complete in Asana (and SLT if applicable)?
+Do you want me to mark the ✅ items complete in Airtable (and SLT if applicable)?
 I'll show you the exact changes before writing anything.
 ```
 
@@ -483,7 +473,7 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 - [Decisions/approvals from sent email — e.g., "Approved Fathom/Zoom fix (Jim Corriveau)"]
 - [Coordination from Slack — e.g., "Sent Red's contractor info to Heather for onboarding"]
 
-## Asana
+## Airtable
 **Overdue:**
 - [ ] [Task name] (due [date]) — [project if any]
 
@@ -495,7 +485,7 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 - [[20-projects/[slug]|[slug]]] *(not in week's Top 5)* — [1-line summary]
 
 ## Carrying Over
-- [Unfinished items from Claude tasks, meeting action items, or Asana overdue]
+- [Unfinished items from Claude tasks, meeting action items, or Airtable overdue]
 
 ## Brain Dump
 *Capture anything on your mind throughout the day — ideas, half-formed plans, decisions to make, things to figure out, reminders. Close-day routes these at end of day.*
@@ -528,7 +518,7 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 - The `## Morning Check-in` section from the user's template is NOT auto-generated — that's for the start of day.
 - **Sent Email:** Include approvals, decisions, and delegations as Work Log bullets. Skip routine replies that don't represent a decision or action.
 - **Sent Slack:** Summarize by conversation thread/topic, not individual messages. Skip trivial messages ("ok", "thanks", single emoji). Focus on decisions, coordination, and substantive discussions. Group DMs with personal contacts (family) should be noted briefly or omitted — the user can decide. Flag any coaching/leadership conversations as those are often important context.
-- **AI Suggested Top 3:** Generate 3 strategic priorities for tomorrow based on carry-overs, meeting action items, deadlines, and Asana. Filter for items that are (a) high-impact/high-leverage, (b) fit the user's unique skills as CEO — relationship decisions, strategic judgment calls, cross-team visibility, contract/legal calls. Explain *why* each is high-priority and what it blocks/unlocks.
+- **AI Suggested Top 3:** Generate 3 strategic priorities for tomorrow based on carry-overs, meeting action items, deadlines, and Airtable. Filter for items that are (a) high-impact/high-leverage, (b) fit the user's unique skills as CEO — relationship decisions, strategic judgment calls, cross-team visibility, contract/legal calls. Explain *why* each is high-priority and what it blocks/unlocks.
 - **AI Suggested Delegate:** Generate 3 important items someone else could own. Name the person and why they're the right fit. the user's role becomes review/approve, not execute. Look for: operational tasks with a clear domain owner, first-draft work where the user adds value in editing not creating, technical setup that doesn't require strategic judgment.
 - **My Top 3:** Always left blank for the user to fill in manually after reviewing the AI suggestions. The user may adopt, modify, or completely replace the AI suggestions.
 
@@ -540,7 +530,7 @@ Dimensions to check (choose the most non-obvious):
 
 | Dimension | Question |
 |---|---|
-| **Plan vs. reality gap** | What was on Asana / carried over vs. what actually got done? What slipped, and is there a pattern? |
+| **Plan vs. reality gap** | What was on Airtable / carried over vs. what actually got done? What slipped, and is there a pattern? |
 | **Doing vs. Orchestrating skew** | Does the actual time split match what the user thinks they're doing? Is there a surprise in the ratio? |
 | **Hidden theme** | Is there a thread connecting meetings, work, and decisions that doesn't appear on any single list? |
 | **Unrecorded completions** | Did Task Evidence Detection surface things that were finished but not tracked? What does that say about how work gets done? |
@@ -637,49 +627,60 @@ Also update each project's home note:
 - `next-action:` if there's a clear next step
 - Add `[[sessions/YYYY-MM-DD|YYYY-MM-DD]]` to the Sessions list
 
-### Step 7: Sync Asana — complete, comment, and create
+### Step 7: Sync Airtable — complete, comment, and create
 
 This step does three things: marks finished tasks done, adds progress notes to in-progress tasks, and creates new tasks from carry-overs.
 
+Read `$AIRTABLE_PAT`, `$AIRTABLE_SLT_BASE_ID`, `$AIRTABLE_TASKS_TABLE_ID`, and `$BUILDER_EMAIL` from `.env`.
+
 **7a. Complete finished tasks**
 
-Cross-reference the day's Work Log against the user's open Asana tasks (fetched in Step 1g). For each Asana task that was clearly completed today, mark it done:
+Cross-reference the day's Work Log against the user's open Airtable tasks (fetched in Step 1g). For each task that was clearly completed today, mark it done:
 
-```
-mcp__claude_ai_Asana__update_tasks(
-  tasks=[{"task": "[GID]", "completed": true}]
-)
-```
-
-**How to match:** Compare Asana task names against Work Log bullets, sent emails, Fathom action items marked done, and Claude session accomplishments. Be conservative — only mark complete if there's clear evidence the task is finished, not just worked on.
-
-**7b. Comment on in-progress tasks**
-
-For Asana tasks that the user worked on but didn't finish, add a progress comment:
-
-```
-mcp__claude_ai_asana__add_comment(
-  task_id="[GID]",
-  text="Progress 3/25: [what was done]. Remaining: [what's left]."
-)
+```bash
+curl -s -X PATCH \
+  -H "Authorization: Bearer $AIRTABLE_PAT" \
+  -H "Content-Type: application/json" \
+  "https://api.airtable.com/v0/$AIRTABLE_SLT_BASE_ID/$AIRTABLE_TASKS_TABLE_ID" \
+  -d '{"records": [{"id": "recXXXXXX", "fields": {"status": "Completed", "Task Complete": true}}]}'
 ```
 
-This keeps Asana as a living record of where things stand.
+**How to match:** Compare Airtable `action_description` against Work Log bullets, sent emails, Fathom action items marked done, and Claude session accomplishments. Be conservative — only mark complete if there's clear evidence the task is finished, not just worked on.
+
+**7b. Add progress notes to in-progress tasks**
+
+For Airtable tasks that the user worked on but didn't finish, append a progress note to the `Notes` field:
+
+```bash
+curl -s -X PATCH \
+  -H "Authorization: Bearer $AIRTABLE_PAT" \
+  -H "Content-Type: application/json" \
+  "https://api.airtable.com/v0/$AIRTABLE_SLT_BASE_ID/$AIRTABLE_TASKS_TABLE_ID" \
+  -d '{"records": [{"id": "recXXXXXX", "fields": {"Notes": "[existing notes]\n\nProgress YYYY-MM-DD: [what was done]. Remaining: [what is left]."}}]}'
+```
+
+Read the existing `Notes` value first and append the new progress line — do not overwrite. This keeps Airtable as a living record of where things stand.
 
 **7c. Create new carry-over tasks**
 
-For each item in **Carrying Over** that doesn't already exist in Asana, create it with priority and due date:
+For each item in **Carrying Over** that doesn't already exist in Airtable, create it:
 
+```bash
+curl -s -X POST \
+  -H "Authorization: Bearer $AIRTABLE_PAT" \
+  -H "Content-Type: application/json" \
+  "https://api.airtable.com/v0/$AIRTABLE_SLT_BASE_ID/$AIRTABLE_TASKS_TABLE_ID" \
+  -d '{"records": [{"fields": {
+    "action_description": "[carry-over item description]",
+    "assignee_email": "$BUILDER_EMAIL",
+    "assignee": "Anish Patel",
+    "status": "Not Started",
+    "action_type": "Task",
+    "Priority": "[1 - Today | 2- This week | 3 - Later]",
+    "due_date": "YYYY-MM-DD",
+    "Notes": "Source: [meeting / email / Claude session]\nContext: [1-line why this matters]"
+  }}]}'
 ```
-mcp__claude_ai_Asana__create_task_preview(
-  taskName="[carry-over item]",
-  assignee="me",
-  dueDate="YYYY-MM-DD",
-  description="Priority: [P1/P2/P3]\nSource: [meeting / email / Claude session]\nContext: [1-line why this matters]"
-)
-```
-
-Then confirm with `mcp__claude_ai_Asana__create_task_confirm` using workspace `$ASANA_WORKSPACE_GID`.
 
 **Priority framework (CEO lens):**
 
@@ -697,11 +698,11 @@ Then confirm with `mcp__claude_ai_Asana__create_task_confirm` using workspace `$
 - "Would be nice to" or "explore" language → P3
 - If a carry-over item was also carry-over from a previous day → bump priority up one level
 
-**Rules for Asana write-back:**
+**Rules for Airtable write-back:**
 - **Only create tasks for actionable items the user owns.** Skip items that are someone else's action (e.g., "Davo sends proposal").
-- **Don't duplicate.** Before creating, search Asana for similar task names. If a match exists, skip (or comment on it instead).
+- **Don't duplicate.** Before creating, search Airtable for similar task names. If a match exists, skip (or comment on it instead).
 - **Include source context** in the description so the user knows where the task came from.
-- **Present the full Asana sync plan to the user** before executing. Show three columns:
+- **Present the full Airtable sync plan to the user** before executing. Show three columns:
 
 ```
 ✅ Complete (2):
@@ -717,7 +718,7 @@ Then confirm with `mcp__claude_ai_Asana__create_task_confirm` using workspace `$
   - "Create GitHub repo for Red's feedback bot" — P3, due 3/31
 ```
 
-User approves, modifies, or skips before any Asana writes happen.
+User approves, modifies, or skips before any Airtable writes happen.
 
 **7d. Brain Dump Routing**
 
@@ -727,7 +728,7 @@ For each item, classify and propose a route:
 
 | Classification | Criteria | Action |
 |---|---|---|
-| **Task** | Actionable, owned by user, completable in 1-2 sessions | Create Asana task with priority/due date |
+| **Task** | Actionable, owned by user, completable in 1-2 sessions | Create Airtable task with priority/due date |
 | **Project idea** | Bigger than a task, needs dedicated planning and a note | Suggest creating Obsidian project note or adding to-do to an existing project |
 | **Decision** | A fork to resolve before other work can proceed | Surface in tomorrow's AI Suggested Top 3 |
 | **Learning / research** | Link, article, tech to explore, skill to build | Add to `40-learning/_inbox.md` |
@@ -742,15 +743,15 @@ For each item, classify and propose a route:
 | # | Item | Classification | Proposed action |
 |---|---|---|---|
 | 1 | "gary's enrollment funnel → SLT EA Bot?" | Decision | Add to tomorrow's Top 3: "Decide: Gary funnel routing" |
-| 2 | "LOP dashboard split" | Task | Create Asana P2: "Split LOP dashboard from SLT base" |
-| 3 | "NCO quality update" | Task | Create Asana P2: "NCO quality update — who owns?" |
+| 2 | "LOP dashboard split" | Task | Create Airtable P2: "Split LOP dashboard from SLT base" |
+| 3 | "NCO quality update" | Task | Create Airtable P2: "NCO quality update — who owns?" |
 
 Approve to route, or tell me which to change/skip.
 ```
 
-After confirmation: create Asana tasks (`create_task_preview` → `create_task_confirm`), append to Obsidian files for Project/Learning/Parking lot items. Decisions surface in Step 8 (tomorrow's note).
+After confirmation: create Airtable tasks (POST to the Meeting Actions table), append to Obsidian files for Project/Learning/Parking lot items. Decisions surface in Step 8 (tomorrow's note).
 
-**Do not create Asana tasks for items already in Asana or already in today's Carrying Over section.**
+**Do not create Airtable tasks for items already in Airtable or already in today's Carrying Over section.**
 
 ### Step 8: Seed tomorrow's daily note
 
@@ -802,7 +803,7 @@ If the file already exists (user or `/open-day` already created it), do NOT over
 
 ### Step 9: Confirm
 
-Report: "Daily note written to `01-daily/YYYY-MM-DD.md`. Seeded tomorrow's note at `01-daily/YYYY-MM-DD+1.md`. Updated session logs for: [project list]. Asana: [N] completed, [N] updated, [N] created."
+Report: "Daily note written to `01-daily/YYYY-MM-DD.md`. Seeded tomorrow's note at `01-daily/YYYY-MM-DD+1.md`. Updated session logs for: [project list]. Airtable: [N] completed, [N] updated, [N] created."
 
 ---
 
@@ -811,7 +812,7 @@ Report: "Daily note written to `01-daily/YYYY-MM-DD.md`. Seeded tomorrow's note 
 - **Familiar scanning is fast** — grepping frontmatter across 1000+ files takes < 2 seconds. Do NOT read OCR content unless the user asks for specific recall.
 - **Fathom API is slow** — full paginated fetch can take 30-60 seconds. If the user ran `/close-day` already today, skip re-fetching.
 - **Calendar is instant** — MCP tool returns in < 1 second.
-- **Asana is fast** — MCP tools return in < 2 seconds.
+- **Airtable is fast** — MCP tools return in < 2 seconds.
 - **The 7-day retention** — Familiar auto-cleans stills after 7 days (`storageAutoCleanupRetentionDays: 7`). Daily notes capture the signal before the raw data expires.
 
 ## Edge Cases
