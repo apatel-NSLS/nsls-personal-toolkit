@@ -1,44 +1,367 @@
 {
-  "last_check": "2026-04-22T20:01:31Z",
-  "posted": [
-    124473473,
-    139356930,
-    130603143,
-    131334152,
-    126472957,
-    132044938,
-    128221327,
-    133456787,
-    137507865,
-    127271846,
-    131958574,
-    130231343,
-    139438384,
-    127569841,
-    130688434,
-    124554678,
-    137881659,
-    135679810,
-    135527370,
-    125444045,
-    133173200,
-    127538641,
-    126570448,
-    128304471,
-    136741338,
-    137064282,
-    135983202,
-    129561189,
-    125716201,
-    138674026,
-    135598828,
-    125300972,
-    126837102,
-    128709232,
-    137844722,
-    128411000,
-    139414780,
-    132387965,
-    124909822
-  ]
+  "last_check": "2026-04-22T20:17:20Z",
+  "pending": {
+    "139438384": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-04-20 17:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Heather Darnell, Michael O'Brien, Kevin Prentiss, Adam Stone\nhttps://fathom.video/share/dt5rB-nBDNq6SCtNo54D_Hsudv7yCLx-\n\n*Takeaways*\n\u2022 **Retreat Logistics Finalized:** The retreat agenda is set, including a working lunch on Wednesday and a tentative axe-throwing dinner at Gary's land. Anish will use Kevin's Zoom for hybrid sessions.\n\u2022 **CS Team Goal Misalignment:** The CS team's spring goal is too high relative to its budget, creating a perception of underperformance. Anish will work with Ashley to reallocate goals for a more balanced fall.\n\u2022 **AI Tools Show High ROI:** New AI tools are delivering immediate value. Josh's quote-puller automates content creation, and the SLT EA bot enabled Chelsea to ramp up in just two hours.\n\n*Action items*\n\u2022 Update Thu lunch order for Katie\n\u2022 Send section invites via Kevin's Zoom; include Heather\n\u2022 Invite Jordan to Thu meeting\n\u2022 Email Heather re: contractor all-staff/monthly policy\n\u2022 Email Anish + Heather re: Red's comp\n\u2022 Send Summit Budget pre-read to SLT",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-139438384-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "139414780": {
+      "title": "Anish / Jordan / Adam",
+      "body": ":clipboard: *Anish / Jordan / Adam* \u2014 2026-04-20 16:00 \u00b7 30m\n_With:_ Adam Stone, jtannenbaum@nsls.org, Anish Patel\nhttps://fathom.video/share/e6Aaux4DezPngum6sEAz9WxhvsgsiGry\n\n*Takeaways*\n\u2022 **SLT Presentation Confirmed:** Jordan will present the Q1/Q2 deck to SLT on Thursday at 11:15 AM ET, covering platform readiness, data infrastructure, and reporting capabilities.\n\u2022 **Strategic Shift:** The core message is a shift from a reactive \"data as a service\" model to a proactive \"AI enablement\" model, where users self-serve with Hex AI and the data team acts as governors.\n\u2022 **Chapter Health Score is Key:** This Q2 priority is the primary ROI driver. The goal is to save 10 at-risk chapters, a metric that repays the entire data investment.\n\n*Action items*\n\u2022 Email Danielle re: reschedule May 13 All Hands; if not, record demo + email\n\u2022 Email Ashley re: dashboard hours saved + at-risk chapters goal; update deck\n\u2022 Create SLT invite Thu 11:15 ET; add Jordan\n\u2022 Update SLT deck: platform readiness + data infra; remove costs; add org chart; send pre-read to SLT\n\u2022 Check w/ Lillian on data systems engineer offer status\n\u2022 Add SLT dashboard to Q2 priorities slide",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-139414780-Anish---Jordan---Adam.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "139356930": {
+      "title": "Finance/HR Lean In Meeting",
+      "body": ":clipboard: *Finance/HR Lean In Meeting* \u2014 2026-04-20 14:30 \u00b7 30m\n_With:_ Jenna Fontanez, Heather Darnell, Valerie English, Erin Muskat, Anish Patel\nhttps://fathom.video/share/yv8jonnppihBpc6myUuGUF58_UjvP69N\n\n*Takeaways*\n\u2022 **Devin's Plan Finalized:** Incentive pay is now set for March and September annually, with the first payment in September to accelerate his schedule.\n\u2022 **Contractor Comms Overhaul:** To prevent sensitive info leaks (e.g., SARS), the team will propose a new Slack structure: `#all-staff` for W2s only and a separate, inclusive channel for general announcements.\n\u2022 **New VP of Ops:** Chelsea Byers joins as fractional VP of Ops for a 90-day trial, with a potential conversion to a full-time W2 role.\n\n*Action items*\n\u2022 Send Devin incentive plan (annual payouts Mar/Sep)\n\u2022 Forward Kevin's sessions email to Anish; then Anish add Heather to invites\n\u2022 Add Slack contractor access/all-staff/People/note-taker policy to strategy session agenda\n\u2022 Ask Kevin in huddle re: Chelsea announcement timing/details\n\u2022 Ask DDCIT who owns Slack People channel; then remove Horatio/MEX members\n\u2022 Publish all-staff note-taker policy: 1 Fathom (LaShondra/HR); share recap post-meeting",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-139356930-Finance-HR-Lean-In-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "138674026": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-04-16 17:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Heather Darnell, Michael O'Brien, Kevin Prentiss, Adam Stone\nhttps://fathom.video/share/d1yM5vtsXsVoYyyCEdiTEKskWCpCzrBn\n\n*Takeaways*\n\u2022 **Impact Day Budget Overrun:** The event's success (11k participants) caused a \\~$60-70k budget overrun, driven by an uncapped spend on shipping. This highlighted a critical process failure and a need to re-evaluate the vendor relationship with Underground.\n\u2022 **Product Roadmap Blocked:** Development of the \"Freshness First\" feature is blocked by the urgent OA System of Record project. While still on track for fall, this delay prevents a planned NCO response rate boost.\n\u2022 **Strategic Partnership with Nexus:** A potential partnership with Nexus (a high-powered network) could provide a low-cost path to launch chapters at elite universities like Harvard and Columbia.\n\n*Action items*\n\u2022 Email teams: freshness visibility likely ready for fall\n\u2022 Email Kimberly re: OA scope; align on OA vs freshness/invite automation\n\u2022 Email Kimberly re: OA scope; align on OA vs freshness/invite automation\n\u2022 Email SLT re: AI meeting assessment ratings\n\u2022 Email Kevin re: David Adams announcement plan\n\u2022 Email Kevin re: Signal/Quick Notes rollout (PD, RevOps, CS); exclude MEX",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-138674026-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "138637654": {
+      "title": "GT/AS/HD/AP",
+      "body": ":clipboard: *GT/AS/HD/AP* \u2014 2026-04-16 16:00 \u00b7 30m\n_With:_ Heather Darnell, Gary Tuerack, Ashleigh Smith, Anish Patel\nhttps://fathom.video/share/_KEg-Ee7dfiHRPtDFrsf6h4s86LLWp8E\n\n*Takeaways*\n\u2022 **Marissa Carey:** Approved for $170k base + 30% commission, resolving a pay mix miscommunication. This decision prioritizes retaining a key contributor over strict adherence to the internal pay structure.\n\u2022 **Kimberly:** Approved for a $20k raise (to $115k) to recognize increased responsibilities. A future raise is contingent on improving soft skills (e.g., managing conflict with Royce) and taking on new projects.\n\u2022 **Mel:** Identified as significantly underpaid ($170k vs. $209k 25th percentile benchmark) due to operating at a VP level with a Senior Director title. A \"true-up\" raise is now a priority.\n\n*Action items*\n\u2022 Confirm Roomzy corporate incentive plan level w/ Jenna\n\u2022 Research Top Workplaces nomination; assess accreditation/business model\n\u2022 Email Gary LexisNexis website link\n\u2022 Email Ashleigh Kimberly bonus %; then Ashleigh/Heather align positioning/timing\n\u2022 Text Marissa re: comp; offer call; then Heather send Rippling addendum (170+30)",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-138637654-GT-AS-HD-AP.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "137881659": {
+      "title": "SLT Standing Meeting",
+      "body": ":clipboard: *SLT Standing Meeting* \u2014 2026-04-14 16:00 \u00b7 240m\n_With:_ Michael O'Brien, Gary Tuerack, Ashleigh Smith, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/oi4UfBojEQR4ADzazsh35piicnMdZzVf\n\n*Takeaways*\n\u2022 **Member Experience Crisis:** Member Experience (MEX) is facing a crisis, with phone abandonment rates at 18.53% (vs. a 7% goal) and a ticket backlog of nearly 2,200. This is driven by high volume and inefficient processes, causing member frustration and refunds.\n\u2022 **Strategic Alignment Framework:** The team approved the \"Signal\" framework to measure strategic alignment. It uses five metrics (Scorecard Coverage, Scorecard Health, Accountability, Comp Alignment, Quality of Hire) to create the data infrastructure needed for future AI-powered HR tools.\n\u2022 **Q1 Financials & Q2 Goals:** Q1 core revenue hit $12.6M (vs. a $10M budget), driven by higher-than-budgeted invitations and response rates. This puts the company \\~$300k ahead of spring revenue projections and on track to beat the annual EBITDA goal by a similar amount.\n\n*Action items*\n\u2022 Schedule Carta cap table walkthrough w/ Gary\n\u2022 Fix Carta cap table valuation calc (115M vs 100M)\n\u2022 Email SLT re: S&T mentorship proposal\n\u2022 Remove 'skip steps' from program slides\n\u2022 Grab Ashleigh's productivity testimonial video\n\u2022 Send MEX deck link to SLT",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-137881659-SLT-Standing-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "137844722": {
+      "title": "Manager Preview Meeting",
+      "body": ":clipboard: *Manager Preview Meeting* \u2014 2026-04-14 15:00 \u00b7 60m\n_With:_ Ashleigh Smith, Adam Stone, Danielle Mariani, Gary Tuerack, Heather Darnell, Hannah Stoneburner\nhttps://fathom.video/share/Lkp-4xwTD6A8Vy8NMc16NuP8PHJLEgNK\n\n*Takeaways*\n\u2022 **SARs for All:** Stock Appreciation Rights (SARs) are now for all full-time employees, not just a select group. This retroactive grant (Jan 1, 2026) aims to align everyone with long-term company growth, especially from the new subscription platform, Society.\n\u2022 **Society Platform Launch:** The \"Society\" platform is launching to current members post-induction, using AI to help them define career paths. A free version will expand the addressable market from the top 30% of students to the entire school population.\n\u2022 **Chapter Leader Roadmap:** A new roadmap will proactively communicate upcoming changes to chapter leaders, ensuring they are informed and engaged with NSLS's strategic direction.\n\n*Action items*\n\u2022 Post tomorrow's breakout question in Slack today\n\u2022 Schedule SARs office hours w/ Anish; send SARs explainer deck to staff\n\u2022 Schedule SARs office hours w/ Anish; send SARs explainer deck to staff\n\u2022 Send Chapter Leader Roadmap draft link in manager Slack; iterate slides based on feedback\n\u2022 Update tomorrow's deck w/ real national events stats + member/chapter stories\n\u2022 Create Society Slack channel; share weekly sprint updates",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-137844722-Manager-Preview-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "137507865": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-04-13 17:00 \u00b7 30m\n_With:_ Michael O'Brien, Gary Tuerack, Ashleigh Smith, Kevin Prentiss, Adam Stone, Heather Darnell\nhttps://fathom.video/share/6JVTTL96WD2nei2u_DznwGU3u-CxbgMy\n\n*Takeaways*\n\u2022 **Spring Revenue Forecast:** We are on track to beat our spring revenue goal by $300k\u2013$800k, a range dependent on new school/alumni top-of-funnel additions.\n\u2022 **Critical Mobile Web Fixes:** Performance issues and a persistent Apple Pay bug on Drupal were identified. This makes the off-season migration of all reactive flows from Drupal to React an even higher priority.\n\u2022 **Banking Relationship at Risk:** Our entire CMB banking team is leaving, jeopardizing our line of credit. We must now decide whether to follow them to a new, smaller bank or find a new partner.\n\n*Action items*\n\u2022 Sync w/ Kevin re: auto-grader feature request\n\u2022 Update Airtable w/ pre-vacation work\n\u2022 Discuss CMB banking relationship/LOC w/ Gary\n\u2022 Consult William re: banking relationship options\n\u2022 Confirm retreat Fri venue w/ Katie; update team\n\u2022 Follow up w/ Michael to set up personal productivity system",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-137507865-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "137064282": {
+      "title": "Sync on Contract Approvals",
+      "body": ":clipboard: *Sync on Contract Approvals* \u2014 2026-04-10 16:00 \u00b7 30m\n_With:_ Adam Stone, jtannenbaum@nsls.org, Anish Patel\nhttps://fathom.video/share/kfccxNtrcH1EN4TyaGnYgWhSySENzats\n\n*Takeaways*\n\u2022 **Data Foundation Approved:** A 4-week contractor engagement is approved to build a reusable data foundation (tables, AI skills), enabling consistent metrics across all dashboards and deprecating the costly Redshift instance.\n\u2022 **Snowflake Contract Strategy:** Jordan will negotiate a multi-year Snowflake contract, bundling Hex to leverage the Marketplace Capacity Drawdown Program and secure higher discounts. The goal is to sign before Snowflake's quarter-end.\n\u2022 **Revenue Forecast Corrected:** The revenue forecast will be adjusted down \\~$300k by applying a 90% \"haircut\" to \"expected remaining\" revenue, aligning the dashboard with CS feedback on at-risk deals.\n\n*Action items*\n\u2022 Meet contractors Apr 13; refine SOW; route via HR\n\u2022 Email Equals re: updated 3-mo invoice\n\u2022 Email Snowflake multi-year pricing options; schedule review w/ Anish + Adam\n\u2022 Analyze AWS cost spike; report findings\n\u2022 Update SLT forecast: apply 90% haircut to 'expected remaining' + 'new chapters'\n\u2022 Fix Hex dashboard: show Northbridge Alumni in 'not yet mailed'",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-137064282-Sync-on-Contract-Approvals.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "136741338": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-04-09 17:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Heather Darnell, Michael O'Brien, Kevin Prentiss, Adam Stone\nhttps://fathom.video/share/WcH3T26ysgPRGKFBss3szQfG1YseLfkU\n\n*Takeaways*\n\u2022 **Sales Velocity Doubled:** Days to close non-resale deals halved from \\~240 to 120, a major win for higher ed sales.\n\u2022 **Comp Tool Decision Looms:** The Comp Analyst contract expires in early June. We must decide whether to renew or switch to a tech-focused alternative like Carta's tool.\n\u2022 **Tech Blockers Emerge:** Snowflake refuses to contract with Florida-based companies, and Carta's Rippling integration is unavailable for LLCs, creating significant operational hurdles.\n\n*Action items*\n\u2022 Work out math for OA savings reallocation (20\u201330k) to 45h roles\n\u2022 Work out math for OA savings reallocation (20\u201330k) to 45h roles\n\u2022 Send valuation to Kevin for David Adams SARS\n\u2022 Review Ashleigh's Slack feedback; decide standard changes; push to leaders\n\u2022 Buy retreat flights\n\u2022 Discuss sales team presentation (product vs brand) w/ sales leaders; align w/ Ashleigh",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-136741338-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "135983202": {
+      "title": "SLT Standing Meeting",
+      "body": ":clipboard: *SLT Standing Meeting* \u2014 2026-04-07 17:00 \u00b7 90m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/GBKnosXUdLgPyw8am9c3smXU9iuZu5ze\n\n*Takeaways*\n\u2022 **Quick Notes Expansion:** The Quick Notes bot, now technically stable (v11/v12), will roll out to Ashleigh's and Anish's teams. Kevin will introduce it as a tool for getting credit for work, not for monitoring.\n\u2022 **LOP Reset:** The SLT will reset LOPs next week. Key changes include revising the \"Total Enrollment\" L2 to focus on \"share of market\" and moving the \"Talent Acquisition\" L2 to Q3 with new, specific metrics.\n\u2022 **SLT Dashboard Priority:** The SLT Dashboard is the top priority for the data team, which is resource-constrained (Jordan is the sole analyst). This creates a direct trade-off with revenue-enabling data work.\n\n*Action items*\n\u2022 Migrate Fixer.ai to NSLS Builder account\n\u2022 Present Quick Notes to Ashleigh\u2019s team Apr 15 2:45 pm; Anish\u2019s team Apr 15 10:00 am\n\u2022 Build L2 status states into NSLS Coach for quarterly LOP roll-ups\n\u2022 Remove conditional L1-at-risk logic; enable manual override\n\u2022 Move Launch Stakeholders Program L2 and response-rate L2 to Product Engagement\n\u2022 Surface LOP gate dependencies in NSLS Coach for Jordan",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-135983202-SLT-Standing-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "135679810": {
+      "title": "Anish / Jordan / Adam",
+      "body": ":clipboard: *Anish / Jordan / Adam* \u2014 2026-04-06 20:00 \u00b7 30m\n_With:_ Adam Stone, jtannenbaum@nsls.org, Anish Patel\nhttps://fathom.video/share/2r_SRru9A6LnHA-W3ugVNAXV-engFCGb\n\n*Takeaways*\n\u2022 **Staffing Crisis:** The data team is at critical capacity, with only Jordan available for ad-hoc requests. Calvin (CS) and Angelica (backfill) are dedicated to other teams, and Brandon is on an engineering project.\n\u2022 **Agency Pivot:** The planned analyst hire is paused. An agency will be engaged for a 4-week AI Hex Studio engagement to build foundational data pipelines, enabling future self-service.\n\u2022 **Strategic Reprioritization:** Focus is shifting from a 1:1 Feather dashboard migration to building three core dashboards (Founder, Chapter Health, Revenue) that answer key business questions.\n\n*Action items*\n\u2022 Review Calvin's CS placement w/ Ashley; decide by Apr 30\n\u2022 Define YOY data cleanup/re-attribution reqs; then plan Q3\u2013Q4 execution\n\u2022 Prioritize Q2 intake; pause non-L3 requests; align w/ L3 owners\n\u2022 Build chapter credits report (owed + lifetime) for Finance\n\u2022 Confirm w/ Mob & Rachel if legacy invitation-testing report is P0; then decide Hex migration\n\u2022 Discuss Chapter Inductions approach w/ Kevin; then define new process",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-135679810-Anish---Jordan---Adam.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "135598828": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-04-06 17:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Heather Darnell, Michael O'Brien, Kevin Prentiss, Adam Stone\nhttps://fathom.video/share/tqpErG3sgzxc3SG8b1JKSEc31pMjD3RT\n\n*Takeaways*\n\u2022 **Support Backlog:** A support backlog is driven by a 500% YoY increase in S\\&T submission *impressions* (not completions) and a faulty auto-grader that requires manual review of all subsequent S\\&Ts after a single failure.\n\u2022 **Season Projections:** The $14.8M revenue goal is achievable but tight, as the peak enrollment wave has passed. The risk is a lagging support volume spike from the 12,500+ new members who joined during the extended deadline.\n\u2022 **Strategic Initiatives:** Key projects include a $20k Niche test for high school contacts, a Q2 LOP reset to improve goal clarity, and deprecating all Drupal enrollment flows for a fully React-based system next season.\n\n*Action items*\n\u2022 Send support volume chart (2020\u2013present, by pipeline/month) to Kevin, Anish, Adam\n\u2022 Send retreat room booking link to Adam, Kevin; collect confirmations\n\u2022 Hold 1:1 w/ Kevin re: roadmap, MEX/CS training, Niche test\n\u2022 Send Niche test materials to Kevin\n\u2022 Follow up w/ Chelsea (VP Ops candidate)\n\u2022 Follow up w/ Julia re: VP Ops role",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-135598828-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "135527370": {
+      "title": "Finance/HR Lean In Meeting",
+      "body": ":clipboard: *Finance/HR Lean In Meeting* \u2014 2026-04-06 14:30 \u00b7 30m\n_With:_ Jenna Fontanez, Heather Darnell, Valerie English, Erin Muskat, Anish Patel\nhttps://fathom.video/share/RSvA7nScMs2xeEE-QU2ymeE7h2rsjHfb\n\n*Takeaways*\n\u2022 **Devin's Incentive Finalized:** Devin's incentive is finalized with no exceptions. The \"foundation incentive\" is a separate issue, and the speaker broadcast commission will not be paid quarterly.\n\u2022 **Marissa's Incentive Under Review:** Marissa's incentive is under review. The current high base/low incentive structure, a 12-month accommodation, creates pay inequity with Mel. A decision is pending.\n\u2022 **Anniversary Proposal Decision:** Danielle's anniversary proposal will be sent this week for a simple \"go/no-go\" decision from Anish and Kevin.\n\n*Action items*\n\u2022 Email Marissa re: incentive vs base; request decision; then Jenna sends doc\n\u2022 Email Joanne updated agreement w/ salary increase + bonus",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-135527370-Finance-HR-Lean-In-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "133456787": {
+      "title": "SARs meeting",
+      "body": ":clipboard: *SARs meeting* \u2014 2026-03-27 15:00 \u00b7 60m\n_With:_ Gary Tuerack, Cory Capoccia, Anish Patel\nhttps://fathom.video/share/HCLfhoEvE8zdkrfk6TuXy75-tTX1R9Sx\n\n*Takeaways*\n\u2022 **Goal:** Establish a unit allocation philosophy, starting with a live discussion to build consensus before independent work.\n\u2022 **Context:** The meeting was rescheduled to accommodate participants' spring break travel, requiring a quick sync before the weekend.\n\u2022 **Tool:** A shared document, reviewed yesterday, will serve as the basis for the discussion.",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-133456787-SARs-meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "133173200": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-03-26 17:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Heather Darnell, Michael O'Brien, Kevin Prentiss, Adam Stone\nhttps://fathom.video/share/Zjy282WH4oMawYfTbCi39H9ZoDs18u_s\n\n*Takeaways*\n\u2022 **SARS Plan Finalizing:** The SARS plan is nearing completion with Carta as administrator; finalization awaits Gary and Corey's review of the broad allocation list.\n\u2022 **High-Impact Tests Validated:** A mailer legitimacy test (adding Newsweek/NCCRS badges) yielded a +0.34% lift, worth over $1M annually. A\\&E upsell button and GradSet bundle tests also showed significant, platform-specific ARPM gains.\n\u2022 **AI Recruiting Blocker:** AI-generated resumes and interview manipulation are severely degrading the talent acquisition pipeline, making it nearly impossible to vet candidates.\n\n*Action items*\n\u2022 Send graduation invite details to Ashleigh\n\u2022 Review Devin's school-specific insights; assess HubSpot feed for value reporting/sales\n\u2022 Email Gary & Adam: fall invitation testing roundup\n\u2022 Send Julia's VP candidate materials to Gary\n\u2022 Consolidate 'Cash in the cushions' ideas into central table w/ squad owners\n\u2022 Kick off future SLT huddles in standard order",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-133173200-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "132387965": {
+      "title": "SLT Standing Meeting (90-minutes)",
+      "body": ":clipboard: *SLT Standing Meeting (90-minutes)* \u2014 2026-03-24 16:00 \u00b7 90m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/-SqUqUmDPdRGxEUVv5mx9VzMTyrBx_Qx\n\n*Takeaways*\n\u2022 **Automated Support Overhaul:** High member frustration with automated support (chatbot, KB) will be addressed by assigning Isaiah to lead a Q2 L3 project. The strategy is to escalate users to an AI agent after one failed attempt, not to rebuild the current chatbot.\n\u2022 **New Shop Vendor Search:** The SLT will replace fulfillment partner Underground due to poor performance (no inventory counts, blame-shifting). Michael O'Brien will lead the search for a new vendor, with CampusDoc identified as a strong candidate for its co-branding licensing services.\n\u2022 **Data Dictionary & Regalia Policy:** A new, standard data dictionary will be created to resolve confusion around key metrics (LTV, ARPM, AOV). Separately, the SLT will investigate the revenue impact of enforcing an induction-only regalia policy to protect the society's honor.\n\n*Action items*\n\u2022 Reschedule 30-min overlapping mtg w/ Amy\n\u2022 Send Chelsea resume/LinkedIn to Ashleigh + Anish\n\u2022 Flag Tatiana gift w/ Heather pre-Thu; finalize approach\n\u2022 Collect Disney College Program context from Hannah + Stephanie; email Gary by Mar 30\n\u2022 Update L2 enrollment goal language re: chapter health + retention\n\u2022 Convene LTV/ARPM/AOV dictionary working group; propose definitions to SLT",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-132387965-SLT-Standing-Meeting--90-minutes.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "132044938": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-03-23 17:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/b4xGb8Yarz8R5UFz_TyNsUMdBxsdjq-P\n\n*Takeaways*\n\u2022 **New Disney Partnership:** Disney is interested in a partnership for its 4,000 interns, creating a potential pipeline for our internship program and a new revenue opportunity for our professional development services.\n\u2022 **Significant Revenue Win:** The Grad Set & Wooden Plaque Bundle test is a success, lifting desktop Average Revenue Per Member (ARPM) by \\~7.5% (an estimated $2M/year) and validating our enrollment flow optimization strategy.\n\u2022 **Marketing Efficiency:** The Marketing team's migration to Asana and new tool adoption will save $24k annually and has already yielded strong social media engagement (e.g., 350+ likes on a recent post).\n\n*Action items*\n\u2022 Send Family Office templates + parent page improvements to Michael\n\u2022 Share K-drama t-shirt social engagement numbers w/ team\n\u2022 Follow up w/ Gary re: SNT discussion; finalize before Tatiana out\n\u2022 Start Dylan onboarding w/ Jordan\n\u2022 Email Meredith + Gary ETA on Meredith's asks\n\u2022 Publish SLT agenda for 90-min meeting (Mar 24 12:00)",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-132044938-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "131958574": {
+      "title": "Finance/HR Lean In Meeting",
+      "body": ":clipboard: *Finance/HR Lean In Meeting* \u2014 2026-03-23 14:30 \u00b7 30m\n_With:_ Jenna Fontanez, Heather Darnell, Valerie English, Erin Muskat, Anish Patel\nhttps://fathom.video/share/zqx3yV93-Ps-9izS81gyqzH7GPi_-Hok\n\n*Takeaways*\n\u2022 **Devin Lasker's incentive plan is blocked.** Anish will confirm with Adam if Devin's requested changes (foundation commission, quarterly payouts) were truly agreed upon, as they conflict with the current plan.\n\u2022 **Department renaming is approved.** The Rippling-to-NetSuite update will proceed, with Erin creating new departments in NetSuite first to prevent data mapping errors.\n\u2022 **A new contractor request (Lila McAvoy) was flagged.** The request is unbudgeted and must follow the standard approval process (Lillian \u2192 Erin \u2192 Anish).\n\n*Action items*\n\u2022 Confirm Devin Lasker incentive plan w/ Adam: no Foundation; quarterly chapter starts; annual speaker; update Jenna\n\u2022 Update Rippling departments: set no-notify; test w/ Jenna; move employees; coordinate NetSuite w/ Erin; update Ramp\n\u2022 Slack Erin Lila McAvoy contractor details for Kevin email\n\u2022 Email Gus re: Karina backup/path forward\n\u2022 Prepare comp reviews for Anish\u2019s team (excl. Erin); send to Anish\n\u2022 File Christine claim w/ insurance; schedule call",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-131958574-Finance-HR-Lean-In-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "131334152": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-03-19 17:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/1HyiAxqV4um9yt3xRa-TJUN8_yNuw8xh\n\n*Takeaways*\n\u2022 **Product Launch on Track:** The Trigram product is on schedule for its Monday launch after a successful code freeze and final QA.\n\u2022 **New Contact Database:** A new database of 8,000 scraped contacts from 6,000 schools enables targeted B2B nurturing and saves on annual list purchases.\n\u2022 **Donor Program Revenue Blocked:** A new donor program covering 300 members/semester ($35k) is blocked from its full revenue potential because the enrollment flow lacks upsells for free members.\n\n*Action items*\n\u2022 Email HEX chapter performance list (YoY joins -20%) to SLT\n\u2022 Partner w/ Josh on B2B Squad\n\u2022 Coordinate w/ Colin, Paul, Tatiana, Pascal to produce Society intro handout\n\u2022 Screenshot Marissa Levin email open; send to Corey; request opener ID\n\u2022 Review agreements w/ Gary; send refinements to Nancy\n\u2022 Count Apr invites not yet queued; send to Anish; then identify schools for white-paper",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-131334152-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "130688434": {
+      "title": "Anish / Jordan / Adam",
+      "body": ":clipboard: *Anish / Jordan / Adam* \u2014 2026-03-17 19:30 \u00b7 30m\n_With:_ Adam Stone, jtannenbaum@nsls.org, Anish Patel\nhttps://fathom.video/share/aDyZHVwskdafW1y888uqhuxX6WVbyy1H\n\n*Takeaways*\n\u2022 **Data Bugs:** Jordan will fix five data bugs in the Chapter Health & SLT Summary dashboards, including a phantom revenue issue and an NCO forecast error, to prepare for their official launch.\n\u2022 **Founders Dashboard:** The team will scope the new dashboard on Friday, prioritizing a simple, board-level view (5\u20136 metrics) for an April launch, built on the existing \"gold layer\" data model.\n\u2022 **Cost Management:** Jordan will review data contracts (e.g., Equals, Redshift) to prevent auto-renewals; the Hex contract remains month-to-month due to a lower user count.\n\n*Action items*\n\u2022 Add 2025, 2026, 2026 EoS forecast to export table\n\u2022 Confirm DB size filter (mail vs deadline); then investigate 31 schools w/ 0 DB size + revenue\n\u2022 Break out NCO by deadline status; then update SLT Summary/Chapter Health forecasts\n\u2022 Verify Q not yet mailed logic; ensure expected returns reduce when Q increases",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-130688434-Anish---Jordan---Adam.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "130603143": {
+      "title": "SLT Standing Meeting",
+      "body": ":clipboard: *SLT Standing Meeting* \u2014 2026-03-17 17:00 \u00b7 90m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/E1TS1SY7idsWRW4ir37U5tV7YiPy1zMx\n\n*Takeaways*\n\u2022 **New L2 for Chapter Health:** The \"Grow total enrollment\" L2 will be replaced with a \"Chapter Health\" L2. This consolidates disparate churn-prevention efforts into a single, measurable strategy, using a new health score to drive retention.\n\u2022 **Split LTV Goal:** The combined $145 LTV L2 will be split into two separate L2s: one for enrollment ARPM and one for post-enrollment upsell revenue. This creates winnable goals by isolating performance from external factors.\n\u2022 **Greenlit Initiatives:** The team approved two key initiatives: 1) reallocating an internal developer to run revenue-generating A/B tests in the member area, and 2) continuing the personal email campaign to capture significant revenue despite its operational complexity.\n\n*Action items*\n\u2022 Draft analysis sharing process; require SFDs routed via Jordan; add SFD/source headers\n\u2022 Email Hannah re: NCO analysis; reset sharing norms\n\u2022 Email Erin Adam Munz SOW\n\u2022 Update SLT retreat invites: mark Mar 21 dinner optional; extend Mar 24 end time\n\u2022 Draft Chapter Health L2; post wording options in Slack\n\u2022 Send Fathom video to Ashley re: Chapter Health scoring edits",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-130603143-SLT-Standing-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "130231343": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-03-16 17:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/AYhP-ddASUvywaVnhS9KS_WBYcNEYE1V\n\n*Takeaways*\n\u2022 **iHeartMedia SEM ads launch next Monday,** targeting large schools outside major cities to maximize ROI. Michael will build end-to-end tracking to measure true value (application submissions, not just clicks).\n\u2022 **The OA team transition is underway,** with internal comms rolling out today. Ashleigh will send a Client Services email announcement and lead a deep-dive on Wednesday.\n\u2022 **The SPD team's new video-first hiring process is a success,** saving time and yielding higher-quality, more engaged intern candidates.\n\n*Action items*\n\u2022 Send Kevin list of Christine Pierce subscriptions; transfer business items before locking card\n\u2022 Email Gary iHeart school list for approval; send to iHeart after\n\u2022 Build end-to-end tracking for iHeart SEM w/ Andrew & Royce; include Typeform submission\n\u2022 Email Ashleigh NASPA post-comms plan/next steps\n\u2022 Email Heather & Danielle OA announcement draft for approval\n\u2022 Email Katie SLT offsite booking details: hotel + separate venue (Foundry/gallery), same locations, board meeting, Nathan food",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-130231343-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "129561189": {
+      "title": "Jordan / Ashleigh",
+      "body": ":clipboard: *Jordan / Ashleigh* \u2014 2026-03-12 20:00 \u00b7 60m\n_With:_ Ashleigh Smith, Adam Stone, jtannenbaum@nsls.org, Anish Patel\nhttps://fathom.video/share/mWxEvtN7BFDu6TS3vtGRwWc9mb6QjCsz\n\n*Takeaways*\n\u2022 **HubSpot as Source of Truth:** Adopted a long-term strategy to originate all chapter and checklist data in HubSpot, replacing the current Feather/Falcon system. This will eliminate unreliable data syncs and create a single source of truth.\n\u2022 **Improved Forecasting:** Jordan will pull HubSpot deal data from Snowflake to forecast revenue for unqueued chapters. This will use the `Forecast Probability` field (e.g., \\>90% for March) and `Deal Vertical` to map deals to the correct dashboard cohorts.\n\u2022 **Critical Risk Identified:** The Q3 2026 Drupal migration is at risk. Without a clear plan and stakeholder input, Tech could rebuild legacy systems in a new environment, perpetuating the current data silos and operational friction.\n\n*Action items*\n\u2022 Start thread w/ Royce, David, Juan re: HubSpot-first; include Rachel after comms w/ Michael\n\u2022 Add agenda item for Tue sync: Kevin in loop + Juan/David/Royce spike\n\u2022 Email Calvin re: system architecture diagrams; then fill gaps w/ Juan/David\n\u2022 Send Jordan HubSpot pipeline/stage/prob filters + resale list; then Jordan builds fuzzy-match forecast\n\u2022 Run manual actual+anticipated update for SLT\n\u2022 Coordinate w/ Marissa to send Cal State Dominguez alumni donation to foundation",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-129561189-Jordan---Ashleigh.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "128709232": {
+      "title": "SLT Standing Meeting",
+      "body": ":clipboard: *SLT Standing Meeting* \u2014 2026-03-10 17:00 \u00b7 90m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/Ns5ftziDSSPyJy3FL1iHzKQuzSQ9gxYx\n\n*Takeaways*\n\u2022 **Standardized Response Rate:** Defined a new default for the headline response rate KPI to ensure consistent analysis, excluding NCO/Alumni chapters and segmenting by New vs. Continuing schools.\n\u2022 **Contextualized Churn Data:** The recent churn report reflects a necessary cleanup of stale accounts, not a sudden performance drop. Ashleigh Smith will provide context to prevent misinterpretation before tactical action.\n\u2022 **New Evergreen Agreements:** New evergreen chapter agreements will be rolled out by mid-April, with a 5-year contingency plan for schools unable to sign the primary evergreen terms.\n\n*Action items*\n\u2022 Start NCO disentanglement spike w/ David Adams + Brandon; deliver roadmap by Mar 31\n\u2022 Publish response-rate defaults in Slack; update dashboard defaults w/ Jordan; add resale toggle\n\u2022 Comment on churn report; meet w/ Jordan to refine next week\n\u2022 Analyze national events impact on churn; surface actionable metrics\n\u2022 Draft Evergreen project plan; form B2B sub-squad\n\u2022 Send healthy-chapter requirements to attorney; include first-year T&Cs; request draft next week",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-128709232-SLT-Standing-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "128411000": {
+      "title": "Anish / Jordan / Adam",
+      "body": ":clipboard: *Anish / Jordan / Adam* \u2014 2026-03-09 20:30 \u00b7 30m\n_With:_ Adam Stone, jtannenbaum@nsls.org, Anish Patel\nhttps://fathom.video/share/4vB7N7X1fP_2iUF1rcJb5Q9jKAPLeFzY\n\n*Takeaways*\n\u2022 **Problem:** The forecast is inflated by a single outlier, Atlanta University Center.\n\u2022 **Cause:** A 10x increase in database size (94 \u2192 3,700) is causing the model to extrapolate an unsustainably high response rate.\n\u2022 **Impact:** This single chapter accounts for \\~$1M of the $1.8M forecast from returning chapters.\n\n*Action items*\n\u2022 Send Anish chapter-level list (forecast + stage); then Anish cap post-extension\n\u2022 Add subtotals to SLT summary sections\n\u2022 Fix OTT exclude bug; restore match-day filter\n\u2022 Build YoY response-rate report by category for board\n\u2022 Confirm w/ Rachel/Voice: for-profit/non-profit + stamp tracking; then Jordan spike data sources\n\u2022 Confirm w/ Rachel/Voice: for-profit/non-profit + stamp tracking; then Jordan spike data sources",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-128411000-Anish---Jordan---Adam.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "128304471": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-03-09 17:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/RP7iztAZgEYUf16rmuzehEiaBA-yX-GT\n\n*Takeaways*\n\u2022 **Vendor Change:** Underground will be replaced after repeated failures (e.g., insufficient books, missing banners at NASPA), forcing a search for a new partner.\n\u2022 **OA Team Transition Paused:** The transition is on hold pending a unit economics analysis to ensure the two new Mechs hires can cover the OA team's hours (est. 75% of total) and prevent business disruption.\n\u2022 **Parent Engagement Strategy:** A new strategy to engage parents via university portals was launched at NASPA, with a pilot at Duquesne University, to boost response rates.\n\n*Action items*\n\u2022 DM Michael on Slack re: university webpages analysis\n\u2022 Email Kevin, Adam, Gary NPS/CSAT results\n\u2022 Email Underground re: cover postage for mailed NASPA books\n\u2022 Meet Michael re: Christine termination impact on Rachel/OA; prep backup plan\n\u2022 Meet Michael re: Christine termination impact on Rachel/OA; prep backup plan\n\u2022 Schedule OA/Mechs hours-analysis offline w/ Anish, Ashleigh, Kevin",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-128304471-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "128221327": {
+      "title": "Finance/HR Lean In Meeting",
+      "body": ":clipboard: *Finance/HR Lean In Meeting* \u2014 2026-03-09 14:30 \u00b7 30m\n_With:_ Jenna Fontanez, Heather Darnell, Valerie English, Erin Muskat, Anish Patel\nhttps://fathom.video/share/_Q6jTtBdvNRFy5QhyUA7zzY-ZsLbsooy\n\n*Takeaways*\n\u2022 **Engineer Comp Discrepancy:** A $125k budget for a senior-level engineer JD is causing recruiting delays. The team will meet with Adam and Jordan to align on a higher, more competitive range.\n\u2022 **Hiring Process Breakdown:** The hiring process is fragmented, with tech leadership using direct networks and contractors, bypassing HR. This undermines HR's LOP goal and creates role confusion.\n\u2022 **New Comp Strategy:** HR will propose a new comp strategy to the SLT, replacing the current tool with a Rippling-integrated AI vendor and purchasing a dedicated tech salary survey for better data.\n\n*Action items*\n\u2022 Schedule offline call w/ Adam, Jordan, Heather, Jenna re: engineer comp/JD\n\u2022 Rerun comp analysis for engineer role; update JD if needed\n\u2022 Schedule Heather to present comp vendor/survey options to SLT\n\u2022 Discuss HR involvement in contractor interviews w/ SLT; add HR to interview list\n\u2022 Discuss hiring process alignment w/ Kevin & Adam\n\u2022 Draft SLT proposal re: hiring & comp process roles/timelines",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-128221327-Finance-HR-Lean-In-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "127569841": {
+      "title": "All Staff Meeting Prep",
+      "body": ":clipboard: *All Staff Meeting Prep* \u2014 2026-03-05 18:00 \u00b7 30m\n_With:_ Senior Leadership Team, Heather Darnell, Danielle Mariani, Cory Capoccia, Anish Patel\nhttps://fathom.video/share/aHipCgYADAqQW2RJMEa-qHSgTXrwaLqA\n\n*Takeaways*\n\u2022 **AI Adoption Strategy:** The meeting will use a positive framing (\"favorite AI use\") and a public \"build-in-public\" project in the `#ai-workbench` channel to encourage AI adoption.\n\u2022 **New Walking Pad Benefit:** A new perk will be announced, offering reimbursement for compact walking pads (not full treadmills) to promote movement and focus. The benefit is retroactive for all of 2025.\n\u2022 **Core Value Award Process Change:** The SLT will now have a vote in the Core Value Awards. This change ensures winners reflect strategic impact known to leadership, not just peer nominations.\n\n*Action items*\n\u2022 Post 401k deferrals link in leadership channel\n\u2022 Disable newsletter auto-archive to see all sends\n\u2022 Update AI opening slide: positive Q, remove 'warning' icon\n\u2022 Add slide 2 note: Kevin + Ashleigh to build Chapter Health AI pipeline in public\n\u2022 Add 'It's Alive' GIF to AI slide 2\n\u2022 Coordinate 60-sec NASPA update w/ Joe; designate presenter (Ashleigh/Mel/Joe)",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-127569841-All-Staff-Meeting-Prep.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "127538641": {
+      "title": "GT/AP/JT",
+      "body": ":clipboard: *GT/AP/JT* \u2014 2026-03-05 17:00 \u00b7 60m\n_With:_ Gary Tuerack, Adam Stone, jtannenbaum@nsls.org, Anish Patel\nhttps://fathom.video/share/Gscz3PnYvxZdxY7e-eKgxVdm4zUaEudj\n\n*Takeaways*\n\u2022 **Data Discrepancy Resolved:** The Feather vs. BEHEX response rate gap is due to Feather excluding NCOs and using a transactional date, while BEHEX includes NCOs and uses a deadline date.\n\u2022 **New `Whale` Definition:** The `Whale` filter will be redefined by database size (e.g., \\>10k invites) to enable strategic analysis of revenue concentration, replacing the legacy definition.\n\u2022 **Actionable Mailer Segmentation:** The dashboard will add filters for mailer type (physical vs. email) and sender (NSLS vs. campus) to identify performance drivers.\n\n*Action items*\n\u2022 Add mailer-type filters (physical, email-us, email-school); then add postage filters if RR differs\n\u2022 Add dynamic database-size filter; then align whale threshold w/ Ashley\n\u2022 Verify churn model math; then add hover tooltips w/ formulas\n\u2022 Sync w/ Ashley re: HubSpot new-school revenue; then implement manual weekly updates",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-127538641-GT-AP-JT.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "127271846": {
+      "title": "Anish / Jordan / Adam",
+      "body": ":clipboard: *Anish / Jordan / Adam* \u2014 2026-03-04 20:30 \u00b7 30m\n_With:_ Adam Stone, jtannenbaum@nsls.org, Anish Patel\nhttps://fathom.video/share/b6LDytJu_vTqsQFrFVixcpy35eL26tu6\n\n*Takeaways*\n\u2022 **Goal:** Analyze response rates by mailer type (email vs. physical) to diagnose a year-over-year decline.\n\u2022 **Blocker:** The dashboard's chapter-level grain prevents accurate analysis of checklist-level attributes like mailer type.\n\u2022 **Solution:** Jordan will implement a temporary fix (chapter-level mailer filters) while researching a permanent, checklist-level data model.\n\n*Action items*\n\u2022 Investigate alumni revenue sources/users; map Feather fields to categories; share logic w/ Anish; publish Hex update\n\u2022 Audit chapter vs checklist revenue attribution; confirm all revenue captured\n\u2022 Fix Hex dashboard light mode background\n\u2022 Email Kevin re: loop in Juan; pair Jordan w/ Juan for attribution/data quality",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-127271846-Anish---Jordan---Adam.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "126837102": {
+      "title": "SLT Standing Meeting",
+      "body": ":clipboard: *SLT Standing Meeting* \u2014 2026-03-03 18:00 \u00b7 90m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kimberly Campbell, Kevin Prentiss, Adam Stone\nhttps://fathom.video/share/xsBYv_JZnoY7W56FQQmQ195GufoFqnMX\n\n*Takeaways*\n\u2022 **Personal email outreach is a high-ROI lever.** A single email to American Public University (APUS) students' personal addresses drove 348 joins in one day\u2014\\~300 more than expected. A \"skunk works\" team will now develop a scalable strategy.\n\u2022 **MEX is evolving into a strategic asset.** The team is shifting from reactive support to proactive insights, using AI (Claude Code) to analyze customer data and inform product/marketing strategy.\n\u2022 **Hiring is a critical blocker.** The current process is failing to attract engineering talent due to low salary ranges ($100k\u2013$120k vs. a needed $125k\u2013$165k) and slow screening. The SARS program is also delaying offers.\n\n*Action items*\n\u2022 Send MEX deck to SLT\n\u2022 Review Capella inbox w/ Ashleigh; decide MEX vs Capella ownership\n\u2022 Audit IVR/phone tree as a student; tighten routing to MEX\n\u2022 Run contact-source/topic report (counts+%); share w/ Kevin\n\u2022 Schedule sync w/ Kimberly + Ashleigh re: brand rubric L3 + dashboard\n\u2022 Meet Jordan re: pre-sale pipeline inclusion in HACS",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-126837102-SLT-Standing-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "126570448": {
+      "title": "Anish / Jordan / Adam",
+      "body": ":clipboard: *Anish / Jordan / Adam* \u2014 2026-03-02 21:30 \u00b7 30m\n_With:_ Adam Stone, jtannenbaum@nsls.org, Anish Patel\nhttps://fathom.video/share/7W8GSwJNG4rQnnhyoJe8L7JTaqAnH1Aa\n\n*Takeaways*\n\u2022 **Prioritize Actionable Reports:** Focus on reports that enable immediate business decisions (e.g., Growth team's invite throughput) over historical analysis (e.g., CS team's past season performance).\n\u2022 **Rebuild Trust with Gary:** Address Gary's distrust by explaining the new methodology and reconciling discrepancies with the legacy \"Feather\" report. A weekly sync will be established.\n\u2022 **Fix Foundational Data:** Resolve critical data issues like the $300-400k in \"Over the Transom\" (OTT) revenue and the \"Feather vs. HEX\" dashboard mismatch.\n\n*Action items*\n\u2022 Research OTT/self-nom attribution; draft Tech ticket; add school-level unattributed revenue\n\u2022 Implement Chapter Health filters (NCO/Alumni/New/CS; PD/SPD; exclude prior-season no-sends); remove 14 speculative new chapters\n\u2022 Align w/ Ashley on HubSpot\u2192Feather chapter-ID mapping; implement\n\u2022 Add revenue-per-invitation metric to dashboards\n\u2022 Audit Feather vs Hex response-rate mismatch w/ Anish; add transaction-date filter\n\u2022 Audit Feather vs Hex response-rate mismatch w/ Anish; add transaction-date filter",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-126570448-Anish---Jordan---Adam.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "126472957": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-03-02 18:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/7sKBzs-YEP9rVgcEcH_B7vC_GrxiHFnw\n\n*Takeaways*\n\u2022 **Financials:** Revenue is strong, exceeding budget by \\>$560k. However, ARPM is down \\~$7 from budget ($133 vs. \\~$140), creating a \\~$700k revenue gap.\n\u2022 **A\\&E Upsell:** A test revealed a confusing A\\&E upsell flow that appears to be a required re-purchase, likely driving accidental buys. Fixing this will lower ARPM but improve brand trust.\n\u2022 **New Chapter:** Duke University is now a Registered Student Organization (RSO), a major win after years of effort. Its large grad student population (11k of 17k) offers a high-response-rate opportunity.\n\n*Action items*\n\u2022 Reconstruct Corey Powell docs; request records from SLT\n\u2022 Review Allison Trachtenberg incentive program\n\u2022 Send Aramark coffee order to Anish for signature; place order\n\u2022 Update T&Cs: add right to request full student body list + move data ownership up\n\u2022 Solidify Duke chapter start; secure student list\n\u2022 Email Michael O'Brien iHeartMedia contact re: geotargeting",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-126472957-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "125716201": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-02-26 18:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/ZYs4D4Q8TTy71mNWBHhEbGXx9odB9ASn\n\n*Takeaways*\n\u2022 **SARs Plan Blocked:** The SARs distribution plan is stalled pending a company valuation report (due mid-next week). This prevents finalizing a compensation package for key hire David Adams, who requires a concrete SARs offer.\n\u2022 **Dashboard Projections Understated:** Current financial projections are conservative, understating revenue by excluding the pipeline of 14 new schools and failing to model their higher response rates. The dashboard will be updated to pull live deal data from HubSpot for accuracy.\n\u2022 **Alumni Strategy Launching:** A new alumni strategy is launching, targeting strategic accounts and new schools. A key tactic is starting with alumni chapters at new schools to avoid cannibalization from existing collegiate chapters.\n\n*Action items*\n\u2022 Send Feb shop stats to Michael O'Brien\n\u2022 Email David Adams re: SARS timeline; extend old contract\n\u2022 Email Adam dashboard notes/changes\n\u2022 Email Michael O'Brien A&E/college-credit join flow proposal\n\u2022 Email Kevin Prentiss B2B strategy notes\n\u2022 Confirm next-week in-person w/ Gary; schedule remote if urgent",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-125716201-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "125444045": {
+      "title": "Jordan / Anish / Adam",
+      "body": ":clipboard: *Jordan / Anish / Adam* \u2014 2026-02-25 22:00 \u00b7 60m\n_With:_ Adam Stone, jtannenbaum@nsls.org, Anish Patel\nhttps://fathom.video/share/FFLUFBS2qzYYedhyP5rV-tJLku4iEnms\n\n*Takeaways*\n\u2022 **Projection Gap:** The model's $1.9M revenue gap is due to missing new chapters (NCOs, alumni, etc.), which have high response rates (\\~8%) and represent a $600k revenue opportunity.\n\u2022 **Data Mismatch:** Gary's 4.6% response rate is for a narrow segment (past-deadline, no alumni/NCOs), while the model's 4.2% average includes all chapters, causing confusion.\n\u2022 **New Baseline:** A raw data export will be created to establish a single source of truth, pausing UI development until the underlying data is validated.\n\n*Action items*\n\u2022 Export baseline CSV (season-level + daily joins/revenue) w/ NCO/CS/Alumni/New/Online/JHL/Email-only; share w/ Anish\n\u2022 Verify per-chapter mailer type consistency within seasons; document edge cases",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-125444045-Jordan---Anish---Adam.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "125300972": {
+      "title": "Conversation 4",
+      "body": ":clipboard: *Conversation 4* \u2014 2026-02-25 17:00 \u00b7 60m\n_With:_ Jenna Fontanez, Heather Darnell, Danielle Mariani, Adam Stone, Joe Cupka, Anish Patel\nhttps://fathom.video/share/g1d-XAExDQyMXmUaDGDEwiPWzMed_6ax\n\n*Takeaways*\n\u2022 **Decision:** The OA team restructuring is set for **Monday, March 16th**, to provide a full work week for internal communications and support, avoiding a Friday announcement that would leave staff in limbo over the weekend.\n\u2022 **Critical Path:** The new OA automation tool must be finalized before the 16th. If it's not ready, the transition will be significantly more difficult for the MEX team.\n\u2022 **Leadership Plan:** Kimberly (MEX) will absorb the OA team's email duties. To balance the restructuring news, several high-performing employees (LaShondra, Jordan, Dasha, Rachel) will receive concurrent title and comp upgrades.\n\n*Action items*\n\u2022 Draft project timeline for Mar 16; send to Adam, Joe, Heather, Jenna\n\u2022 Review OA SOPs; send gaps/needs to Danielle\n\u2022 Schedule Kimberly briefing re: OA email transition; include Danielle\n\u2022 Draft updated JDs for LaShondra, Jordan, Dasha; send to Heather\n\u2022 Move Marcus to LaShondra reporting\n\u2022 Email DTIC re: OA Gmail/alias forwarding to help desk; request pre-provisioning",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-125300972-Conversation-4.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "124909822": {
+      "title": "SLT Standing Meeting",
+      "body": ":clipboard: *SLT Standing Meeting* \u2014 2026-02-24 17:00 \u00b7 240m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/atx_iMHEHVGVs1ZYgfoeLmBJoJaEcZmh\n\n*Takeaways*\n\u2022 **Response rate is down at top schools,** but this is driven by specific checklist changes (e.g., excluding high-response grad students), not a universal decline. The focus is shifting from the blended metric to analyzing granular, chapter-level data to find actionable levers.\n\u2022 **The new LOP dashboard is live,** providing a single source of truth for L2 goals. The team will share status updates and comment narratives with the company for transparency and will automate L3 updates via Slack.\n\u2022 **The member lifecycle strategy is being overhauled** to increase LTV to $145. This includes condensing surveys from 8 to 3 and creating a \"red flag\" member sequence to proactively engage at-risk members.\n\n*Action items*\n\u2022 Email Adam & Michael parent-forum reputation ideas; cc Ashleigh & Joe\n\u2022 Share LOP dashboard w/ company; include narratives; exclude sensitive content\n\u2022 Infer L1 statuses from L2s; confirm w/ owners\n\u2022 Break automated invite workflow into L3s; assign to David\n\u2022 Ensure Heather receives L2 update prompts\n\u2022 Coordinate w/ Daniel to enable Slack updates for L3s",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-124909822-SLT-Standing-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "124554678": {
+      "title": "SLT Huddle",
+      "body": ":clipboard: *SLT Huddle* \u2014 2026-02-23 18:00 \u00b7 30m\n_With:_ Gary Tuerack, Ashleigh Smith, Michael O'Brien, Kevin Prentiss, Adam Stone, Anish Patel\nhttps://fathom.video/share/FYw-maKWTxeZJrbQNgPbsKemxDZYXoxh\n\n*Takeaways*\n\u2022 **SLT now owns financial performance.** The \"over-under\" sheet and cost analysis chart are now shared with the full SLT to drive collective ownership of revenue and profit.\n\u2022 **Critical HR tasks are due this week.** Commission plans and addendums must be sent to legal by EOD tomorrow, and the OA team transition is set for March 2.\n\u2022 **A major company event is being planned.** Kevin will lead a \"company culture gathering\" to celebrate 25 years and the 25M member goal, with Daniel Marinari managing logistics.\n\n*Action items*\n\u2022 Schedule Cost Analysis tab sync w/ Jordan + Gary + Adam\n\u2022 Fix NASPA form school dropdown; verify w/ Royce before next send\n\u2022 Coordinate w/ Heather + Daniel on 25th-anniversary gathering; align messaging\n\u2022 Coordinate w/ Heather + Daniel on 25th-anniversary gathering; align messaging\n\u2022 Send T&C drafts to Legal; send commission addendums\n\u2022 Schedule commission plan sign-off w/ Anish; then send plans",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-124554678-SLT-Huddle.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    },
+    "124473473": {
+      "title": "Finance/HR Lean In Meeting",
+      "body": ":clipboard: *Finance/HR Lean In Meeting* \u2014 2026-02-23 15:30 \u00b7 30m\n_With:_ Jenna Fontanez, Heather Darnell, Valerie English, Erin Muskat, Anish Patel\nhttps://fathom.video/share/TghgN3Q7CqSsqaF2CJWYnd5WsE2LcQqH\n\n*Takeaways*\n\u2022 **Tyler Laggerty Conversion:** A $40k GoFractional invoice for Tyler Laggerty's conversion is disputed. The agency's stated fee is 15%, making the amount excessive.\n\u2022 **Equipment Policies Approved:** New policies are approved: a lifetime $200 reimbursement for walking pads (after 1 year employment) and allowing employees with 3+ years' tenure to keep their wiped laptops upon termination.\n\u2022 **401(k) True-Up Accelerated:** The 401(k) true-up is accelerated to March to provide data for Gary's legal needs. Heather will use last year's figure to book an estimate.\n\n*Action items*\n\u2022 Schedule Feb 24 AM mtg w/ Heather re: OA team + David Adams offer\n\u2022 Draft laptop retirement policy: wipe + keep after 3 yrs; no overnight for Kevin's contractors\n\u2022 Update treadmill policy: walking pad only, $200, 1-yr tenure, lifetime, look-back ok\n\u2022 Review PD template for Gary's comments\n\u2022 Review GoFractional $40k invoice + SOW; reconcile w/ 15% fee\n\u2022 Email accounting firm re: expedite 2025 discrimination testing + true-ups",
+      "obsidian_path": "C:\\Users\\apate\\Obsidian\\AP\\00-inbox\\slt-digest\\2026-04-22-2018-124473473-Finance-HR-Lean-In-Meeting.md",
+      "dm_ts": null,
+      "target_channel": "",
+      "created": "2026-04-22T20:17:20Z",
+      "expires_at": "2026-04-24T20:17:20Z"
+    }
+  },
+  "posted": [],
+  "dismissed": []
 }

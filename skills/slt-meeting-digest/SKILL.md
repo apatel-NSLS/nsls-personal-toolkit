@@ -15,9 +15,25 @@ description: >-
 
 After every SLT meeting, a 3-bullet digest + action items gets posted to Slack so anyone who missed can catch up in 15 seconds. No more "can someone recap the SLT huddle?"
 
+## Approval contract (load-bearing)
+
+**Nothing gets posted to any Slack channel without Anish's explicit approval.** When the bot finds a new SLT meeting:
+
+1. It composes the digest draft
+2. It writes the draft to `Obsidian/AP/00-inbox/slt-digest/` as a *pending* markdown file
+3. It DMs the draft to Anish in Slack with approval instructions
+4. The digest **stays pending** until Anish either:
+   - Reacts with ✅ on the Slack DM → next poll posts to the target channel
+   - Reacts with ❌ on the Slack DM → marked dismissed, never posts
+   - Edits the Obsidian frontmatter to `approved: true` → next poll posts
+   - Edits the Obsidian frontmatter to `dismissed: true` → marked dismissed
+5. After 48 hours of no response → automatically expired, never posts
+
+**The target channel is empty by default.** Even with approval, if `DIGEST_TARGET_CHANNEL` isn't explicitly set in the credentials .env, approved digests stay in Obsidian only. Two-gate safety — approval AND explicit target channel must both be configured before any broadcast.
+
 ## Why this exists
 
-Fathom already generates meeting summaries. Problem: they live in Fathom's UI, nobody checks them, and half the SLT routinely misses 1–2 meetings/week due to travel, conflicts, or retreats. Broadcasting the 3-bullet version to Slack closes the gap.
+Fathom already generates meeting summaries. Problem: they live in Fathom's UI, nobody checks them, and half the SLT routinely misses 1–2 meetings/week due to travel, conflicts, or retreats. Broadcasting the 3-bullet version to Slack closes the gap — but only with Anish's review gate on every post.
 
 ## Architecture — polling, not webhooks
 
@@ -63,21 +79,25 @@ Single post. Threaded replies could be added later (not today).
 
 ### 1. Get a Slack bot token (5 min)
 
-Per the `connect` skill (Option B path), create a minimal Slack app at https://api.slack.com/apps:
+Create a minimal Slack app at https://api.slack.com/apps:
 - Name: `SLT Digest Bot`
-- Bot Token Scopes: `chat:write`, `chat:write.public`, `channels:read`
+- Bot Token Scopes needed: `chat:write`, `chat:write.public`, `im:write`, `im:history`, `reactions:read`
 - Install to workspace
 - Copy the `xoxb-...` token
+
+Also find Anish's Slack user ID (format `U...`): in Slack → Anish's profile → … menu → "Copy member ID".
 
 Store at `~/.claude/credentials/slt-meeting-digest.env`:
 ```
 SLACK_BOT_TOKEN=xoxb-...
-DIGEST_SLACK_CHANNEL=#slt-ops
+SLACK_ANISH_USER_ID=U...
+# Optional — where APPROVED digests post. Leave empty to keep everything in Obsidian only.
+DIGEST_TARGET_CHANNEL=#nsls-leadership
 ```
 
-### 2. Invite the bot to the channel
+### 2. Invite the bot to the target channel
 
-In Slack: `/invite @SLT Digest Bot` in the target channel.
+If you set `DIGEST_TARGET_CHANNEL`, in Slack: `/invite @SLT Digest Bot` in that channel. Without this, Slack will silently refuse posts.
 
 ### 3. Schedule the task
 
@@ -85,7 +105,9 @@ In Slack: `/invite @SLT Digest Bot` in the target channel.
 & "$HOME\.claude\local-plugins\nsls-personal-toolkit\skills\slt-meeting-digest\scripts\schedule_task.ps1"
 ```
 
-Runs every 15 min.
+Runs every 15 min. On each run:
+- Discovery phase pulls new SLT meetings → writes pending + DMs Anish
+- Approval phase checks pending for approval signals → posts approved ones
 
 ## Fallback: no Slack token yet
 
