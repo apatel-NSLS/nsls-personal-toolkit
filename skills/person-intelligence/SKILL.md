@@ -423,9 +423,42 @@ Update this table as you profile new people.
 
 | Script | Input | Output | Requires |
 |--------|-------|--------|----------|
-| `fetch_fathom_1on1s.py` | `--email`, `--list`/`--fetch-all`/`--date` | JSON lines to stdout | FATHOM_API_KEY |
+| `fetch_fathom_1on1s.py` | `--email`, `--list`/`--fetch-all`/`--date` | JSON lines to stdout | FATHOM_API_KEY (pre-MCP) |
 | `summarize_meeting.py` | JSON on stdin (transcript, title, date, person_name) | JSON line to stdout | ANTHROPIC_API_KEY |
 | `fetch_airtable_slt.py` | person name as arg | JSON to stdout | AIRTABLE_API_KEY |
 | `fetch_airtable_people_ops.py` | person name as arg | JSON to stdout | AIRTABLE_API_KEY |
 | `infer_projects.py` | JSON on stdin (goals, actions, topics) | JSON to stdout | None |
 | `synthesize_profile.py` | JSON on stdin (all data combined) | Markdown to stdout | ANTHROPIC_API_KEY |
+| `fetch_rippling_people.py` | none (or `--limit N`) | Enriches `30-people/*.md` frontmatter | Rippling session token |
+| `fetch_ramp.py` | none | Caches Ramp vendors/bills/transactions to `AppData\Local\nsls-private\ramp\` | Ramp OAuth creds |
+| `enrich_profiles_from_rippling.py` | none | Updates HR-data section in every person profile | Rippling cache from above |
+| `enrich_profiles_from_ramp.py` | none | Adds vendor/contractor flags to profiles | Ramp cache from above |
+| **`extract_24mo.py`** | none (reads from Fathom MCP) | Per-person digest JSONs at `~/.claude/.mcp-servers/fathom/cache/digest_<person>_v2.json` | Fathom MCP connected |
+| **`extract_personal.py`** | none (reads MCP) | Keyword-filtered + edge-segment digests for quick personal-signal mining | Fathom MCP |
+| **`extract_names.py`** | reads digests from disk | Speaker-attributed name-candidate lists per SLT member (surfaces kids/spouses as THEY themselves said them) | both digests above |
+
+### Deep-pass pattern (added 2026-04-22)
+
+The three bold-faced scripts above implement a reusable **24-month deep-pass** that surfaces personal-connection signals (family names, hobbies, places, preferences) from long meeting history:
+
+1. **`extract_24mo.py`** — paginates Fathom back 24 months, filters to small meetings (≤4 invitees) with target people, caches results.
+2. **`extract_personal.py`** — for each cached digest, keeps: first 20 + last 20 segments + any segment matching a family/geography/interest keyword regex. This keeps output tractable (~60KB/person vs. ~1MB raw).
+3. **`extract_names.py`** — speaker-attributed: only extracts names from segments where the target person is themselves speaking. Avoids picking up *Anish's* family names (which are plentiful in these same transcripts).
+
+This pattern surfaced: Ashleigh's son George (had sepsis as a baby); Adam's wife from Colorado, brother-in-law in Taipei, brother as recovering addict, mother-in-law + mother both passed in 6 months; Kevin's TWO kids + son plays baseball + dad helps at practice; Gary's kids live with ex "out there" + one kid with him in Asheville; Michael's wife does craft fairs + Jackson NJ extended family fire-hall Christmas tradition. All citation-backed, all from the person themselves. **No web scraping.**
+
+**Downstream consumer:** the `/pre-meeting-briefing` skill reads the enriched profiles this pattern produces.
+
+### Personal-section authoring rule
+
+When surfacing personal facts into a profile's Personal section:
+
+- **Cite the source** (recording_id + timestamp) for every claim that came from a transcript.
+- **If a dimension is blank after mining**, write `"— no signal in vault yet; capture in next 1:1"`. Do NOT invent, infer, or fill from elsewhere on the web. The signal's value is in the *asking*, not the *knowing*.
+- **Flag ambiguous signals** (e.g., "Alyssa" could be Ashleigh's daughter or a friend's daughter — transcript wasn't decisive). Don't promote to fact without confirmation.
+
+## Related skills
+
+- **`/pre-meeting-briefing`** — consumes profiles from this skill. Runs daily at 6 AM.
+- **`/connect`** — Fathom seed; set up the MCP before running the deep pass.
+- **`/biweekly-health-check`** — re-scores relationship health; should follow profile updates.
