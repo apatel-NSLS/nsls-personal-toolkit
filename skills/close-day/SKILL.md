@@ -217,73 +217,74 @@ This gives the user a fast read on how much time he spent building things himsel
 
 The **"Meeting time (calendar)"** line is an orthogonal metric — it cross-cuts all categories. A 1:1 with Chris counts as both "Management / People" time AND meeting time. This tells the user how much of his day was synchronous vs. async, regardless of topic. Derived from Google Calendar scheduled meeting times (not Familiar captures, which only see Zoom/Meet windows and miss categorized meetings). Solo calendar blocks (e.g., "Weekly processing", "Contract drafting") are excluded — only meetings with other attendees count.
 
-**1c. Fathom — meeting summaries and action items**
+**1c. Fathom — meeting summaries and action items (via MCP)**
 
-> **IMPORTANT — API URL:** Use ONLY `https://api.fathom.ai/external/v1/meetings`. The domain `api.fathom.video` does NOT exist and will cause a DNS error. Do not try it, do not add it as a first attempt, do not use it as a fallback. One URL. Always.
+The Fathom MCP (set up via `/connect`, documented at `~/.claude/.mcp-servers/fathom/server.py`) exposes the 6 tools we need. **Prefer the MCP tools over any inline HTTP script** — the MCP handles auth, pagination, rate limiting, and error formatting. If the MCP is not available, fall back to the HTTP script at the bottom of this subsection.
 
-Fetch today's meetings from Fathom using a focused Python script:
+```
+# Primary path — call the Fathom MCP
+mcp__fathom__list_meetings(
+  recorded_after="{TARGET_DATE}T00:00:00Z",
+  recorded_before="{TARGET_DATE}T23:59:59Z",
+  include_summary=True,
+  limit=50,
+)
+```
+
+For each meeting returned, extract:
+- `title` (or `meeting_title`), `scheduled_start_time`, `scheduled_end_time`
+- `calendar_invitees[].name` — who was on it
+- `share_url` — permalink for the daily note
+- `default_summary.markdown_formatted` — key takeaways (filter to lines starting with `- [**` or `- **`)
+- Call `mcp__fathom__get_action_items(recording_id)` per meeting if action items are needed beyond the summary
+
+Render each meeting as:
+
+```markdown
+### {title}
+**Time:** HH:MM–HH:MM
+**With:** {comma-separated attendee names}
+**Fathom:** {share_url}
+- {key takeaway 1}
+- {key takeaway 2}
+**Action items:**
+  - {action}
+```
+
+**Pagination:** if `next_cursor` is returned, pass it back to `list_meetings(cursor=...)`. For close-day's one-day window, 50 meetings is effectively always enough — pagination rarely triggers.
+
+**Rate limit:** 60 calls/min per API key. For close-day's single-day pull, well within budget.
+
+**Cross-reference to pre-meeting-briefing:** the same day's meetings were already digested for the *next* morning's briefings. When populating the daily note, also surface `ls ~/Obsidian/AP/00-inbox/pre-meeting/{next_day}*.md` so carry-overs into tomorrow inherit yesterday's context.
+
+<details>
+<summary>Legacy fallback — inline HTTP script (use only if the Fathom MCP isn't connected)</summary>
 
 ```bash
 PYTHONPATH=/tmp/pptx_deps python3.12 -c "
 import httpx, json, os, sys
 from pathlib import Path
 
-# Get API key
 key = os.environ.get('FATHOM_API_KEY', '')
 if not key:
-    env_file = Path.home() / 'nsls-skills/slt-ops/slt-bot/.env'
+    env_file = Path.home() / '.claude/settings.json'
     if env_file.exists():
-        for line in env_file.read_text().splitlines():
-            if line.startswith('FATHOM_API_KEY='):
-                key = line.split('=', 1)[1].strip().strip('\"\'')
-                break
+        import json as _j
+        s = _j.loads(env_file.read_text())
+        key = (s.get('mcpServers') or {}).get('fathom', {}).get('env', {}).get('FATHOM_API_KEY', '')
 if not key:
     print('NO_API_KEY'); sys.exit(0)
 
-TARGET_DATE = '$DATE'  # will be replaced by skill
+TARGET_DATE = '$DATE'
 headers = {'X-Api-Key': key}
 url = f'https://api.fathom.ai/external/v1/meetings?include_summary=true&include_action_items=true&created_after={TARGET_DATE}T00:00:00Z&created_before={TARGET_DATE}T23:59:59Z'
-meetings = []
-cursor = None
-
-while True:
-    page_url = url + (f'&cursor={cursor}' if cursor else '')
-    resp = httpx.get(page_url, headers=headers, timeout=30)
-    if resp.status_code != 200: break
-    data = resp.json()
-    items = data.get('items') or (data if isinstance(data, list) else [])
-    meetings.extend(items)
-    cursor = data.get('next_cursor') if isinstance(data, dict) else None
-    if not cursor: break
-
-todays = meetings  # already date-scoped by API params
-
-for m in sorted(todays, key=lambda x: x.get('scheduled_start_time', '')):
-    title = m.get('title', 'Unknown')
-    start = m.get('scheduled_start_time', '')
-    end = m.get('scheduled_end_time', '')
-    summary = (m.get('default_summary') or {}).get('markdown_formatted', '')
-    actions = [a.get('description', '') for a in (m.get('action_items') or [])]
-    attendees = [inv.get('name', '') for inv in (m.get('calendar_invitees') or []) if inv.get('name')]
-    fathom_url = m.get('url', '')
-
-    print(f'### {title}')
-    print(f'**Time:** {start[11:16]}–{end[11:16] if end else \"?\"}')
-    if attendees: print(f'**With:** {', '.join(attendees)}')
-    if fathom_url: print(f'**Fathom:** {fathom_url}')
-    if summary:
-        # Extract just key takeaways, not full summary
-        for line in summary.split('\n'):
-            if line.strip().startswith('- [**') or line.strip().startswith('- **'):
-                print(line.strip())
-    if actions:
-        print('**Action items:**')
-        for a in actions: print(f'  - {a}')
-    print()
+# ... (same pagination + rendering as before)
 "
 ```
 
-**Fathom API is now date-scoped** — uses `created_after` and `created_before` params to fetch only the target day's meetings. This is fast (< 5 seconds) instead of paginating through all meetings since 2023.
+> **API URL note:** Use `https://api.fathom.ai/external/v1/meetings`. `api.fathom.video` does NOT resolve.
+
+</details>
 
 **1d. Sent Email — outbound communications**
 
@@ -556,7 +557,8 @@ Show the full daily note draft. Ask:
 If today had meetings with people who have active coaching goals in `$OBSIDIAN_VAULT_PATH/30-people/*.md`:
 
 1. For each person with an active goal who was in a meeting today:
-   - Check if a Fathom transcript is available for that meeting (from the Fathom fetch in Step 1c)
+   - Pull the Fathom transcript via `mcp__fathom__get_transcript(recording_id)` (recording_id from Step 1c's `list_meetings` results). Falls back to prompting the user if the MCP isn't available.
+   - **Cross-reference `00-inbox/pre-meeting/`:** if a pre-meeting briefing was generated for today's 1:1 with this person (from the daily 6 AM scheduled briefing run), its "Where we left off" section is a primed evidence source — check it first before re-extracting from raw transcript.
    - **If transcript available**: Extract behavioral evidence relevant to the coaching goal. Present it:
      ```
      🎯 Coaching Check-in
