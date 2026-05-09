@@ -46,9 +46,9 @@ Read timezone from `$OBSIDIAN_VAULT_PATH/50-reference/builder-profile.md` (the `
 date +%Y-%m-%d
 ```
 
-### Step 1.5: Verify yesterday's /close-day ran (visible gate)
+### Step 1.5: Auto-run yesterday's /close-day if it didn't run
 
-`/close-day` is a separate ritual from `/open-day` — it intentionally closes the workday and produces the plan-vs-actual reflection that makes today's Top 3 honest instead of performative. `/open-day` does not subsume it. If it didn't run last night, surface that explicitly before continuing — don't silently move on.
+`/close-day` is a separate ritual from `/open-day` — it intentionally closes the workday and produces the plan-vs-actual reflection that makes today's Top 3 honest instead of performative. `/open-day` does not subsume it. **But if it didn't run last night, /open-day runs it automatically before continuing — no prompt, no skip.**
 
 **Check:**
 ```bash
@@ -60,14 +60,15 @@ fi
 
 (The `## Insight Reflection` header is only written by `/close-day`, so its presence is the reliable signal that yesterday was processed.)
 
-**If MISSING — pause and ask {user}:**
+**If MISSING — auto-invoke close-day, no prompt:**
 
-> ⚠️ Yesterday's `/close-day` didn't run — no Insight Reflection in `01-daily/$YESTERDAY.md`.
->
-> Close-day is the bridge between yesterday's plan and today's priorities. Want me to run `/close-day $YESTERDAY` first, then continue open-day? (Y/n — only skip if you've already processed yesterday elsewhere.)
+1. Tell {user} in one line: "Yesterday's /close-day didn't run — running it now before opening today."
+2. Invoke the close-day skill with yesterday's date (`/close-day $YESTERDAY`). Wait for completion.
+3. Continue to Step 2.
 
-- If {user} approves → invoke the close-day skill with yesterday's date, wait for completion, then continue to Step 2.
-- If {user} skips → continue to Step 2 but note the skip in the morning check-in so it's visible, not silent.
+The auto-run is the point: morning routine self-heals when the evening ritual was skipped. Builders who want to skip close-day entirely should remove this step from their fork rather than gate it with a prompt.
+
+**Edge case — double-run protection:** If close-day fails or partially writes Insight Reflection, the next /open-day will see the header present and skip. If you suspect a partial state (e.g., header present but the section is empty), surface it explicitly before re-running.
 
 **If present:** Continue silently to Step 2.
 
@@ -180,7 +181,7 @@ Also read:
 - `$OBSIDIAN_VAULT_PATH/40-learning/_weekly-plan.md` — today's micro-learning assignment
 - `$OBSIDIAN_VAULT_PATH/40-learning/_inbox.md` — count of unprocessed links for active goals
 
-**2j. Open PRs on watched repos**
+**2i. Open PRs on watched repos**
 
 Surface open pull requests on repos the builder maintains so they don't sit forgotten. Skip silently if `PR_WATCH_REPOS` is not set in `~/.claude/local-plugins/nsls-personal-toolkit/.env`, or if the `gh` CLI is unavailable.
 
@@ -204,7 +205,7 @@ Categorize results into two buckets:
 
 Skip the entire section in Step 3 if both buckets are empty.
 
-**2i. SLT Meeting Actions — open items from the SLT knowledge base**
+**2j. SLT Meeting Actions — open items from the SLT knowledge base**
 
 Pull Kevin's open Meeting Actions from the SLT Meeting Intelligence base. Symmetric with `/close-day` Step 1h. These are action items from SLT meetings tracked separately from Asana — many have no due date but are time-sensitive (retreat prep, offsite logistics, quarterly deliverables).
 
@@ -246,7 +247,7 @@ while True:
     offset = r.json().get('offset')
     if not offset: break
 
-my_actions = [r for r in all_records if '[BUILDER NAME]' in (r.get('fields', {}).get('fldmpu3lN0lrgrdSa') or '')]
+my_actions = [r for r in all_records if os.environ.get('BUILDER_NAME', '') in (r.get('fields', {}).get('fldmpu3lN0lrgrdSa') or '')]
 # Carry record IDs forward for Step 4a promotion.
 "
 ```
