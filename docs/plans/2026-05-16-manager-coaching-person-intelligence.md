@@ -338,7 +338,7 @@ These translate to behaviors the skill can detect from Fathom transcripts and su
 
 ---
 
-- [ ] **Unit 3: Biweekly sweep orchestrator**
+- [x] **Unit 3: Biweekly sweep orchestrator**
 
 **Goal:** A single entry point that runs the full biweekly sweep for the operating user — identity resolution, relationship enumeration, per-person multi-source ingest, profile updates, digest generation.
 
@@ -435,7 +435,7 @@ These translate to behaviors the skill can detect from Fathom transcripts and su
 
 ---
 
-- [ ] **Unit 5: Cross-relational digest**
+- [x] **Unit 5: Cross-relational digest**
 
 **Goal:** A team-pulse digest document generated each biweekly run, surfacing patterns across relationships (not per-profile) so the user sees the team-shaped picture.
 

@@ -133,6 +133,45 @@ collaborators: ["[[Gary Tuerack]]", "[[Cory Capoccia]]"]
 
 This enables Obsidian dataview queries in `30-people/` hub files.
 
+## Mode: Biweekly Sweep
+
+The biweekly sweep is the recurring cadence that keeps every tracked relationship fresh. Two scripts compose the pipeline:
+
+### Step 1: build the manifest
+
+```bash
+OPERATING_USER_EMAIL=you@nsls.org \
+OBSIDIAN_VAULT_PATH=/path/to/vault \
+python3.12 ~/.claude/local-plugins/nsls-personal-toolkit/skills/person-intelligence/scripts/biweekly_sweep.py
+```
+
+Outputs a manifest at `~/.cache/person-intelligence/biweekly-sweep-YYYY-MM-DD.manifest.json` listing each tracked relationship, last-synthesized date, count of new Fathom meetings since that date, and which ingest sources are available. The Claude orchestrator session reads this manifest and runs per-person synthesis as needed.
+
+Re-running on the same day is idempotent (`--resume` reads the existing manifest).
+
+### Step 2: generate the team-pulse digest
+
+After per-person synthesis, run:
+
+```bash
+ANTHROPIC_API_KEY=... \
+OBSIDIAN_VAULT_PATH=/path/to/vault \
+python3.12 ~/.claude/local-plugins/nsls-personal-toolkit/skills/person-intelligence/scripts/generate_team_pulse.py
+```
+
+Writes `30-people/_pulse/YYYY-MM-DD-team-pulse.md` — one digest per cycle with cross-relational patterns:
+
+- **Cadence Integrity** — who's stale, who's current
+- **Drift / Thrive / Attention** — health-score trends across the team
+- **Manager Mode Review** — time-allocation skew, attention prompts
+- **Proposed Coaching Updates** — per-person suggestions to accept/edit/reject
+
+Empty sections are omitted. Use `--dry-run` to preview the prompt before the API call.
+
+### Observability
+
+`~/.cache/person-intelligence/last-sweep-status.json` records the most recent sweep's exit code, error (if any), and relationships processed. `/open-day` reads this and surfaces a one-line alert if the last sweep failed or hasn't run in 18+ days.
+
 ## Keeping Obsidian frontmatter in sync with the org chart
 
 The Rippling → Airtable → GitHub pipeline keeps `org-chart.json` fresh (hourly cron). To flow those updates into the Obsidian people vault without touching curated content, run:
