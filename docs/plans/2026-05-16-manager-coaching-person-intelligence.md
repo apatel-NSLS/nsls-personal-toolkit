@@ -376,7 +376,7 @@ These translate to behaviors the skill can detect from Fathom transcripts and su
 
 ---
 
-- [ ] **Unit 4: Manager-coaching synthesizer with /full-shape discovery and two-way coaching**
+- [x] **Unit 4: Manager-coaching synthesizer with /full-shape discovery and two-way coaching**
 
 **Goal:** Extend `synthesize_profile.py` to apply `/full-shape` dimensional discovery per relationship and to produce both manager → report and report → manager coaching content based on the relationship type.
 
