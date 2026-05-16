@@ -508,7 +508,7 @@ These translate to behaviors the skill can detect from Fathom transcripts and su
 
 ---
 
-- [ ] **Unit 7: Backfill emoji rows for cadence integrity**
+- [x] **Unit 7: Backfill emoji rows for cadence integrity**
 
 **Goal:** Write biweekly emoji rows for the missed periods (2026-03-22 → today) for direct reports + SLT + key relationships, so the health table has cadence integrity when automation starts.
 
