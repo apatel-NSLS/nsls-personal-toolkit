@@ -133,6 +133,40 @@ collaborators: ["[[Gary Tuerack]]", "[[Cory Capoccia]]"]
 
 This enables Obsidian dataview queries in `30-people/` hub files.
 
+## Ingest Sources
+
+The skill pulls signal from three sources per tracked person. Full scoping and
+privacy posture in [`references/ingest-scoping.md`](references/ingest-scoping.md).
+
+| Source | What gets pulled | Auth |
+|---|---|---|
+| **Fathom** | 1:1 transcripts since the profile's `last-synthesized` date | `FATHOM_API_KEY` env var |
+| **Slack** | DMs + shared-thread messages from the last 14 days | User-authorized MCP (`/connect slack`) |
+| **Gmail** | Threads where both parties are direct participants, last 14 days | User-authorized MCP (`/connect gmail`) |
+
+Three filters apply before content reaches the synthesizer:
+1. **Third-party name stripping** — names other than you and the target person become role descriptors
+2. **`INGEST_EXCLUDE_THREADS` patterns** — subject/channel keywords skip the ingest entirely (defaults cover legal, payroll, HR)
+3. **Low-signal filter** — drops messages under 20 chars, pure emoji, routine logistics
+
+If a source's MCP isn't connected, the skill skips that source silently and notes it in the synthesis input (`sources_unavailable: ["slack"]`). To disable a source even when connected, set `SKIP_SLACK_INGEST=1` or `SKIP_GMAIL_INGEST=1` in your `.env`.
+
+## Identifying who to track
+
+The biweekly sweep composes its relationship set from three sources via [`scripts/list_relationships.py`](scripts/list_relationships.py):
+
+1. **Direct reports** — looked up from the `manages` array in the builder toolkit's `org-chart.json` (no Airtable key required)
+2. **Management peers** — people who share your manager, included only when `INCLUDE_MANAGEMENT_PEERS=1`
+3. **Key relationships** — newline- or comma-separated names in `KEY_RELATIONSHIPS` env var (contractors, board members, family, externals)
+
+Identity comes from `OPERATING_USER_EMAIL` (or `BUILDER_EMAIL` as fallback). The user's record in `org-chart.json` provides the `manages` list and manager reference.
+
+Run manually with:
+```bash
+OPERATING_USER_EMAIL=you@nsls.org python3.12 \
+  ~/.claude/local-plugins/nsls-personal-toolkit/skills/person-intelligence/scripts/list_relationships.py
+```
+
 ## Relationship Health Check
 
 Trigger: "relationship check", "health check", "biweekly check"
