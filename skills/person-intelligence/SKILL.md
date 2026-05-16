@@ -133,6 +133,26 @@ collaborators: ["[[Gary Tuerack]]", "[[Cory Capoccia]]"]
 
 This enables Obsidian dataview queries in `30-people/` hub files.
 
+## Scheduling
+
+The biweekly sweep is designed to run automatically every other Sunday at 7:00 AM ET — before the `/open-week` routine, so the team-pulse digest is ready to inform weekly planning.
+
+Register the schedule once per user via the `/schedule` skill:
+
+```
+/schedule create "Person-intelligence biweekly sweep" \
+  --cron "0 7 * * 0/2" \
+  --command "/person-intelligence biweekly sweep"
+```
+
+That cron pattern means "minute 0, hour 7, every other Sunday (day-of-week 0, step 2)". Adjust to your timezone via the dashboard if needed.
+
+**To pause** (e.g., vacation): `/schedule pause "Person-intelligence biweekly sweep"`
+**To resume**: `/schedule resume "Person-intelligence biweekly sweep"`
+**To run manually any time**: `/person-intelligence biweekly sweep` (no schedule needed)
+
+If a scheduled run fails, `/open-day` will surface an alert the next morning (from the `last-sweep-status.json` cache). You can re-run manually from there.
+
 ## Mode: Biweekly Sweep
 
 The biweekly sweep is the recurring cadence that keeps every tracked relationship fresh. Two scripts compose the pipeline:

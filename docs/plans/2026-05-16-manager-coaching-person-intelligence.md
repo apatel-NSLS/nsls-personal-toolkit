@@ -1,8 +1,9 @@
 ---
 title: Manager-Coaching Person Intelligence v2
 type: feat
-status: active
+status: completed
 date: 2026-05-16
+completed: 2026-05-16
 plan_depth: deep
 ---
 
@@ -476,7 +477,7 @@ These translate to behaviors the skill can detect from Fathom transcripts and su
 
 ---
 
-- [ ] **Unit 6: Schedule registration**
+- [x] **Unit 6: Schedule registration**
 
 **Goal:** Wire `/schedule` to fire the biweekly sweep at every other Sunday 7am ET for the operating user.
 
@@ -606,7 +607,7 @@ These translate to behaviors the skill can detect from Fathom transcripts and su
 
 ---
 
-- [ ] **Unit 9: Generalization, install flow, documentation**
+- [x] **Unit 9: Generalization, install flow, documentation**
 
 **Goal:** Make sure a fresh NSLS user installing the personal toolkit can opt into this system in under five minutes.
 
