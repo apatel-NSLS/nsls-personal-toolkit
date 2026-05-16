@@ -549,7 +549,7 @@ These translate to behaviors the skill can detect from Fathom transcripts and su
 
 ---
 
-- [ ] **Unit 8: Coaching-action surfacing in `/open-day` and `/open-week`**
+- [x] **Unit 8: Coaching-action surfacing in `/open-day` and `/open-week`**
 
 **Goal:** Make coaching insights actionable inside the user's daily and weekly routines, not just inert profile sections. After each biweekly sweep, the user's morning and weekly planning routines pre-load specific coaching moves tied to scheduled people.
 

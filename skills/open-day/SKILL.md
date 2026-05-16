@@ -285,24 +285,45 @@ Present to the builder. If AI suggestions were seeded by close-day, show them fi
 
 *[N] meetings, ~[X]h. Deep work windows: [list gaps >= 60 min].*
 
-### Relationship Context (after calendar display)
+### Coaching Actions for Today
 
-After displaying today's meetings, scan attendees against `$OBSIDIAN_VAULT_PATH/30-people/*.md` profiles. For each attendee who has an active coaching goal (grep for `status: active` in `## Coaching Goals`) or a `## Personal` section:
+After displaying today's meetings, collect the names of all attendees who are NSLS people, and pass them to the coaching-action surfacer:
+
+```bash
+# First make sure the action cache is fresh — extract from current profiles
+OPERATING_USER_EMAIL=$(grep '^OPERATING_USER_EMAIL=' ~/.claude/local-plugins/nsls-personal-toolkit/.env | cut -d= -f2 | tr -d '"') \
+OBSIDIAN_VAULT_PATH="$OBSIDIAN_VAULT_PATH" \
+python3.12 ~/.claude/local-plugins/nsls-personal-toolkit/skills/person-intelligence/scripts/extract_coaching_actions.py 2>/dev/null
+
+# Then surface up to 3 actions, prioritized by today's calendar
+echo "$ATTENDEE_NAMES" | python3.12 \
+  ~/.claude/local-plugins/nsls-personal-toolkit/skills/person-intelligence/scripts/surface_actions_for_day.py \
+  --people-stdin
+```
+
+The script returns JSON with `surfaced_actions` (up to 3 actions, distributed across scheduled people) and `sweep_status` (last biweekly sweep result).
+
+**Format in the morning note:**
 
 ```
-👥 Relationship Context for Today
+👥 Coaching Actions for Today
 
-  [time] — [meeting title] ([attendee name])
-    🎯 Active goal: [goal title]
-       → Today: [one-line contextual action from the goal's action list]
-    👤 Personal: [1-2 key personal details if available]
+  🎯 [Person] ([dimension]): [action text]
+     (from "[goal title]")
+
+  🎯 [Person] ([dimension]): [action text]
+     (from "[goal title]")
 ```
 
 **Rules:**
-- Only show people with active coaching goals or personal details — skip empty profiles
-- Compact: 2-3 lines per person max
-- The contextual action should be specific to the meeting type (sprint → sprint-specific action, 1:1 → relationship action)
-- If no attendees have coaching goals or personal details, skip this section entirely — don't show an empty block
+- Hard cap: 3 actions across all today's people-meetings
+- Distribute across people first (one per scheduled person before stacking)
+- Two-way coaching: if your manager is in today's calendar (e.g., Gary 1:1),
+  their managing-up actions surface here too
+- If `sweep_status.exit_code != 0` or last sweep was >18 days ago, show a
+  one-line alert: `⚠️ Last person-intelligence sweep failed/stale — run
+  /person-intelligence biweekly sweep`
+- If `surfaced_actions` is empty AND no sweep error, skip this section entirely
 
 ### Morning Top 3 (fresh from Asana + calendar + carry-overs)
 1. [P1 — explain why it's #1]

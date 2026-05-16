@@ -392,29 +392,40 @@ Then execute the full Relationship Health Check flow from the person-intelligenc
 
 If fewer than 14 days have passed, skip silently.
 
-### Step 4.6: Coaching Goals Portfolio
+### Step 4.6: Coaching Actions for the Week
 
-Regardless of whether the health check runs, display the active coaching portfolio:
+Collect all NSLS people on this week's calendar and run the action surfacer in weekly mode (cap 5):
+
+```bash
+OPERATING_USER_EMAIL=$(grep '^OPERATING_USER_EMAIL=' ~/.claude/local-plugins/nsls-personal-toolkit/.env | cut -d= -f2 | tr -d '"') \
+OBSIDIAN_VAULT_PATH="$OBSIDIAN_VAULT_PATH" \
+python3.12 ~/.claude/local-plugins/nsls-personal-toolkit/skills/person-intelligence/scripts/extract_coaching_actions.py 2>/dev/null
+
+echo "$WEEK_ATTENDEES" | python3.12 \
+  ~/.claude/local-plugins/nsls-personal-toolkit/skills/person-intelligence/scripts/surface_actions_for_day.py \
+  --people-stdin --weekly
+```
+
+**Format in the week plan:**
 
 ```
-🎯 Active Coaching Goals ([N] people)
-  [Name] — [goal title] ([duration], [N] evidence items, trending [↑/→/↓])
-  [Name] — [goal title] ([duration], [N] evidence items, trending [↑/→/↓])
-  [Name] — [goal title] (new, proposed last check)
+🎯 Coaching Actions for the Week ([N])
+  [Person] ([dimension]): [action text]
+    (from "[goal title]")
+  ...
 ```
 
-**How to determine trend:**
-- Count evidence items in the last 14 days vs. the 14 days before
-- More recent evidence = ↑ (trending up)
-- Same = → (steady)
-- Less or none = ↓ (stalling)
+**Also check the most recent team-pulse digest** at `$OBSIDIAN_VAULT_PATH/30-people/_pulse/YYYY-MM-DD-team-pulse.md`:
+- If a "Manager Mode Review" prompt exists, surface it under the week plan as a question for Kevin to consider
+- If "Proposed Coaching Updates" exist, surface them for review
 
-**How to gather this data:**
-- Scan all `30-people/*.md` files for `status: active` lines in `## Coaching Goals` sections
-- Parse the goal title, created date, and count evidence entries
-- If no active coaching goals exist across any profile, skip this section
+**Rules:**
+- Hard cap: 5 actions across the week
+- Round-robin distribution: one action per person before stacking
+- If `sweep_status.exit_code != 0` or last sweep was >18 days ago, alert
+- If no actions surface AND no sweep error, skip this section
 
-This gives Kevin a birds-eye view of which relationships he's actively developing and whether momentum is building.
+This gives Kevin a birds-eye view of which relationship moves to make this week, prioritized by who's actually on the calendar and what the data says is most important.
 
 ### Step 5: Write week plan
 
