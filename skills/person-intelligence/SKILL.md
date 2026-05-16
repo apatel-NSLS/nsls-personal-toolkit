@@ -133,6 +133,19 @@ collaborators: ["[[Gary Tuerack]]", "[[Cory Capoccia]]"]
 
 This enables Obsidian dataview queries in `30-people/` hub files.
 
+## Keeping Obsidian frontmatter in sync with the org chart
+
+The Rippling → Airtable → GitHub pipeline keeps `org-chart.json` fresh (hourly cron). To flow those updates into the Obsidian people vault without touching curated content, run:
+
+```bash
+OBSIDIAN_VAULT_PATH=/path/to/vault python3.12 \
+  ~/.claude/local-plugins/nsls-personal-toolkit/skills/person-intelligence/scripts/sync_obsidian_frontmatter.py --dry-run
+```
+
+The sync controls exactly **5 frontmatter fields**: `email`, `slack`, `department`, `title`, `manager`. Every other field — `tags`, `role` (your curated description), `health*`, `last-synthesized`, `sources`, `meetings_attended` — is left untouched. Body content is byte-preserved (tests assert this). Always run `--dry-run` first to inspect proposed changes.
+
+Match strategy: by frontmatter `email` first, then by exact filename `{Name}.md`. Employees with no matching file are reported but skipped — create the stub manually if you want them tracked.
+
 ## Ingest Sources
 
 The skill pulls signal from three sources per tracked person. Full scoping and
