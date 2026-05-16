@@ -664,7 +664,7 @@ These translate to behaviors the skill can detect from Fathom transcripts and su
 Identity resolution, org-chart-driven relationship enumeration, multi-source ingest scoping. Ship without changing any existing skill behavior so the existing manual synthesis flow keeps working. Verify by running `list_relationships.py` from CLI and inspecting the output for Kevin.
 
 ### Phase 2: Manager Coaching Synthesizer (Unit 4 + profile-template replacement)
-Apply `/full-shape` dimensional discovery to the synthesizer. Add the "What X Needs to Thrive" + "Coaching Up: What X Can Ask of Me" sections for direct reports. Add the Gary-style "My Stance" + coaching-goal pattern for the user's manager. Test by manually re-synthesizing one direct report (Adam Stone) and one upward relationship (Gary) and reviewing both with Kevin before any backfill or schedule.
+Apply `/full-shape` dimensional discovery to the synthesizer. For direct reports add `## What [Name] Needs to Thrive` (manager's private coaching) + `## How I Work with [Name]` (manager self-disclosure, optionally shareable). For the user's manager add `## My Stance: [emotions]` + `## How I Can Work More Effectively with [Name]` modeled on the Gary 2026-05-16 pattern. Preserve human-authored sections during re-synthesis. Test by manually re-synthesizing one direct report (Adam Stone) and one upward relationship (Gary) and reviewing both with Kevin before any backfill or schedule.
 
 ### Phase 3: Orchestration + Digest (Units 3 + 5)
 Wire the biweekly sweep orchestrator and the team-pulse digest. Run manually on Kevin's data, review the digest, iterate on the format before scheduling.
