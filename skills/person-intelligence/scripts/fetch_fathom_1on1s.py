@@ -154,11 +154,25 @@ def fetch_all_meetings(api_key: str, after_date: str | None = None, before_date:
 
 
 def fetch_all_meetings_cached(api_key: str, after_date: str | None = None, before_date: str | None = None) -> list[dict]:
-    # Only use cache for full (unscoped) fetches
-    if not after_date and not before_date:
-        cached = load_cached_meetings()
-        if cached is not None:
+    # Try cache first regardless of date params — filter the cached set in-process
+    # to avoid hammering the Fathom API with redundant scoped fetches.
+    cached = load_cached_meetings()
+    if cached is not None:
+        if not after_date and not before_date:
             return cached
+        # Filter by date window
+        filtered = []
+        for m in cached:
+            m_date = m.get("scheduled_start_time", "") or m.get("created_at", "") or ""
+            # Extract just the YYYY-MM-DD portion for comparison
+            m_iso = m_date[:10] if m_date else ""
+            if after_date and m_iso and m_iso < after_date:
+                continue
+            if before_date and m_iso and m_iso > before_date:
+                continue
+            filtered.append(m)
+        print(f"Using cached meetings, filtered to {len(filtered)} in date window", file=sys.stderr)
+        return filtered
     return fetch_all_meetings(api_key, after_date, before_date)
 
 
@@ -305,6 +319,10 @@ def main():
         "--after",
         help="Only return meetings on or after YYYY-MM-DD",
     )
+    parser.add_argument(
+        "--before",
+        help="Only return meetings on or before YYYY-MM-DD",
+    )
     args = parser.parse_args()
 
     emails = {e.lower().strip() for e in args.email}
@@ -318,7 +336,7 @@ def main():
 
     # Scope API call by date when possible to avoid full pagination
     api_after = args.after if args.after else None
-    api_before = None
+    api_before = args.before if args.before else None
     if args.date:
         # Single day: scope API to just that day
         api_after = args.date
