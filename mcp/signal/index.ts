@@ -93,6 +93,21 @@ const TOOLS = [
       required: ['slug'],
     },
   },
+  {
+    name: 'signal_person_history',
+    description:
+      'Per-week Quick Notes history for one person — raw narration verbatim, structured extraction (wins, work, challenges, growth, sentiment_quotes, quality_score), entry_text rendered for the journal. ' +
+      'Use when you need depth: "what did Stephanie actually say in week X?", "how has her language shifted over the quarter?", "are there recurring themes in her challenges?". ' +
+      'Manager scope: 403 unless the slug is your direct report or yourself. Window: 1-52 weeks, default 12.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        slug: { type: 'string', description: 'The person\'s slug.' },
+        weeks: { type: 'number', description: 'Window in weeks (1-52). Default 12.' },
+      },
+      required: ['slug'],
+    },
+  },
 ]
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }))
@@ -122,6 +137,13 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
         const slug = String(a.slug ?? '').trim()
         if (!slug) throw new Error('slug is required')
         data = await apiGet(`/api/mcp/person/${encodeURIComponent(slug)}`)
+        break
+      }
+      case 'signal_person_history': {
+        const slug = String(a.slug ?? '').trim()
+        if (!slug) throw new Error('slug is required')
+        const weeks = typeof a.weeks === 'number' ? a.weeks : 12
+        data = await apiGet(`/api/mcp/person/${encodeURIComponent(slug)}/history?weeks=${weeks}`)
         break
       }
       default:
