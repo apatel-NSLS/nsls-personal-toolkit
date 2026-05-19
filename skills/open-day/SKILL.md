@@ -159,6 +159,58 @@ gcal_find_my_free_time(
 
 This returns all free blocks >= 30 min between 7 AM and 8 PM. Used in Step 5 for scheduling.
 
+**2i. Slack follow-up scan**
+
+If `data_sources.slack: true` in the builder profile, scan recent Slack to surface threads where the builder owes a reply or made a commitment they may not have acted on.
+
+**Window:** last 2 work days (skip weekends if today is Mon).
+
+**Two queries to run in parallel:**
+
+1. **Builder's recent sent messages** — surface unverified commitments
+   ```
+   slack_search_public_and_private(
+     query="from:<@$SLACK_USER_ID> after:YYYY-MM-DD",
+     sort="timestamp",
+     limit=20,
+     include_context=false
+   )
+   ```
+   Filter results for commitment language: phrases like "I'll", "I will", "I can", "let me", "I'll put X on the calendar", "going to", "by EOD", "by Friday", "happy to", "I'll send", "I'll draft", "I'll follow up". Each match becomes a candidate "did you do this?" item.
+
+2. **Recent DMs and threads where someone is awaiting a reply** — surface outstanding asks
+   ```
+   slack_search_public_and_private(
+     query="to:<@$SLACK_USER_ID> after:YYYY-MM-DD",
+     sort="timestamp",
+     limit=20,
+     include_context=false
+   )
+   ```
+   For the top channels/DMs that appear, use `slack_read_channel` with `limit=3` to check whether the most recent message is from the builder or someone else. If someone else is the last responder *and* they asked a question or proposed an action, flag as "owes a reply."
+
+**Output in Morning Check-in:**
+
+```markdown
+### Slack follow-ups
+
+**Outstanding asks (someone else's message is last in thread):**
+- [Channel/DM with Name]: "[last 80-char snippet]" — [permalink]
+- ...
+
+**Your commitments (verify these landed):**
+- [Date HH:MM] in [channel/DM]: "I'll [thing]" — [permalink]
+- ...
+```
+
+If the list is empty, omit the section entirely. If a candidate appears in last week's daily notes (already followed up), suppress it.
+
+**Rules:**
+- Skip casual reactions, "ok thanks", single emoji, and obvious non-commitments
+- Skip the builder's own bot DMs (NSLS Coach, SLT EA Bot, etc.) unless they contain a commitment to a person
+- Group by recipient, not by message (one line per person if multiple messages)
+- Surface up to 5 outstanding asks and 5 unverified commitments — beyond that the list becomes noise
+
 **2h. Learning inbox ingestion**
 
 If `learning_capture_method` in the builder profile is set to `slack`, scrape the builder's Slack self-DMs for URLs:
@@ -324,6 +376,9 @@ The script returns JSON with `surfaced_actions` (up to 3 actions, distributed ac
   one-line alert: `⚠️ Last person-intelligence sweep failed/stale — run
   /person-intelligence biweekly sweep`
 - If `surfaced_actions` is empty AND no sweep error, skip this section entirely
+
+### Slack follow-ups
+*Populated only if Step 2i found anything. Outstanding asks and unverified commitments surface here so the day starts with the threads visible.*
 
 ### Morning Top 3 (fresh from Asana + calendar + carry-overs)
 1. [P1 — explain why it's #1]
