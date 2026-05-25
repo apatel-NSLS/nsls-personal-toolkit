@@ -460,6 +460,18 @@ I'll show you the exact changes before writing anything.
 
 **Pass-through to Step 7:** The confirmed list feeds Step 7a (mark complete) and 7d (SLT sync). Step 7 still presents the full plan before any writes.
 
+**1i. Active quarterly goals (for daily-light reflection)**
+
+Read all goal files from `$OBSIDIAN_VAULT_PATH/10-strategy/goals/*.md` with `status: active` (skip dashboards and archive). Parse frontmatter for each — pull `slug`, `title`, `anchor`, `weekly_action`.
+
+Carry forward as `active_goals` list. Step 4b (Coaching Check-in) uses this to prompt a one-line touch per goal; Step 5 (Write daily note) writes the `goal_<slug>_moved` boolean to frontmatter based on the user's response.
+
+If today is **not** an anchor day for a given goal, still ask — sometimes the action happens off-schedule. Frame the question accordingly:
+- Anchor day: "Did you do today's [goal] action? ([weekly_action])"
+- Non-anchor day: "Anything toward [goal] today? (often nothing — that's fine)"
+
+Skip this step silently if no goal files exist or none are active.
+
 ### Step 2: Identify projects touched
 
 Match activity to projects using these signals (in priority order):
@@ -553,6 +565,7 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 
 ## End of Day
 - Energy:
+- Goals moved today: [one line per active goal — "[Goal title]: yes — [one phrase]" or "[Goal title]: no"]
 
 ### AI Suggested: Tomorrow's Top 3 (strategic, high-leverage, high-priority)
 1. **[Highest-impact item]** — [Why only the user can do this. What it blocks or unlocks.]
@@ -727,6 +740,29 @@ If `$OBSIDIAN_VAULT_PATH/60-nsls-knowledge/` exists, scan today's meetings and r
 Write to: `$OBSIDIAN_VAULT_PATH/01-daily/YYYY-MM-DD.md`
 
 **If the file already exists** (user started it in the morning with priorities), **merge** — keep the existing Morning Check-in section and append/update the generated sections below it.
+
+**Goal frontmatter:** For each `active_goals` entry from Step 1i, add to the daily note's frontmatter:
+
+```yaml
+goal_{slug}_moved: true   # or false, based on user's response in End of Day
+```
+
+Example for a daily note with two active goals:
+```yaml
+---
+sleep_total_hrs: 6.54
+# ... other health frontmatter ...
+goal_vo2_max_moved: true
+goal_kid_focus_time_moved: false
+---
+```
+
+If the response was ambiguous or skipped, omit the key (don't write `null` — the Dataview hit-rate query specifically counts notes that have the key set to true/false). Boolean only.
+
+These keys feed:
+- `personal-goals.md` hit-rate dashboard (last 28 days)
+- Per-goal Tracker chart in each goal file's body
+- `/close-week` reflection (weekly hit rate per goal)
 
 ### Step 6: Update project session logs
 

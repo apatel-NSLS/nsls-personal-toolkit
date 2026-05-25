@@ -172,6 +172,89 @@ The agent returns structured findings grouped by tier. Use its output to:
 
 If the agent returns "Tier 2 not available" or the tier 2 section is empty, that's fine — this step is purely additive. Log the coverage summary so the builder can see which tiers were read.
 
+**1g. Apple Health — weekly body trends**
+
+If the `apple-health` MCP is configured (`~/.claude.json` contains `mcpServers.apple-health`), pull 28 days of data in one call:
+
+```
+mcp__apple-health__apple_health_trends(days=28)
+```
+
+Returns an array of daily records with: `steps`, `active_energy`, `exercise_min`, `resting_hr`, `hrv`, `sleep_total_hrs`, `sleep_restorative_pct`, `weight`, `vo2_max`. Most days have null for `vo2_max` (Apple Watch only computes it on qualifying outdoor activity) and null for `resting_hr` (HAE's daily-aggregate CSV doesn't include it — gap, not error).
+
+If the call fails or returns `[]`, skip this step silently and omit the "Body & Recovery" section from Step 3. Don't surface the error to the builder.
+
+**Aggregate the 28-day window into these weekly metrics:**
+
+| Metric | How to compute |
+|---|---|
+| `vo2_max_latest` | most recent non-null `vo2_max` in the array |
+| `vo2_max_delta_4w` | `vo2_max_latest` − oldest non-null `vo2_max` in the array (28-day trajectory) |
+| `hrv_avg_7d` | mean of `hrv` over the most recent 7 days (skip nulls) |
+| `hrv_delta_vs_prior_7d` | `hrv_avg_7d` − mean of days 8-14 |
+| `rhr_avg_7d` | mean of `resting_hr` over the most recent 7 days; usually null (gap) |
+| `exercise_min_total_7d` | sum of `exercise_min` over the most recent 7 days |
+| `sleep_total_avg_7d` | mean of `sleep_total_hrs` over the most recent 7 days |
+| `sleep_consistency_stddev` | stddev of `sleep_total_hrs` over the most recent 7 days (lower = more consistent) |
+| `sleep_restorative_avg_7d` | mean of `sleep_restorative_pct` over the most recent 7 days |
+
+Carry these forward to Step 3. The CDC target for `exercise_min_total_7d` is 150 minutes/week (moderate-to-vigorous).
+
+**1h. Active quarterly goals**
+
+Read all goal files from `$OBSIDIAN_VAULT_PATH/10-strategy/goals/*.md` with `status: active` (skip `personal-goals.md` and `work-goals.md` — those are dashboards). Parse frontmatter for each.
+
+For each active goal, compute weekly progress:
+
+**Metric goals** (`type: metric`, `metric_source` set):
+- If `metric_source` starts with `apple_health.`, query the apple-health MCP for the current value:
+  - `apple_health.vo2_max` → latest non-null from `apple_health_trends(days=14).vo2_max`
+  - `apple_health.sleep_total_avg` → `apple_health_trends(days=7).sleep_total_hrs` mean
+  - `apple_health.exercise_min_total` → `apple_health_trends(days=7).exercise_min` sum
+  - `apple_health.hrv_avg` → `apple_health_trends(days=7).hrv` mean
+  - `apple_health.steps` → `apple_health_trends(days=7).steps` sum
+  - `apple_health.weight` → `apple_health_trends(days=14).weight` latest non-null
+- If `metric_source` is `manual`, look in the goal's Weekly Log for the most recent value.
+- Compute progress = `(current - baseline) / (target - baseline) * 100`. Clamp to [0, 100+] (100+ means over-target).
+
+**Behavior goals** (`type: behavior`):
+- Count days in past 7 where `goal_{slug}_moved: true` in daily note frontmatter.
+- Progress = `count / target_freq_per_week * 100`.
+
+**Relationship goals** (`type: relationship`):
+- Same as behavior — count moved days from daily frontmatter.
+
+**Hit rate calculation** (used in coaching push):
+- Past 7 days: count of `goal_{slug}_moved: true` / count of daily notes that have the key
+- Past 28 days: same, longer window
+- If 0 daily notes have the key (goal just created), report "no data yet"
+
+Carry forward for Step 3:
+
+```python
+goals = [{
+    "slug": "vo2-max",
+    "title": "Hold and improve VO2 max",
+    "category": "personal",
+    "type": "metric",
+    "current": 36.2, "baseline": 36.2, "target": 37.0, "unit": "ml/(kg·min)",
+    "progress_pct": 0,  # baseline = current → no gain yet
+    "weekly_action": "2x zone-2 + 1x intervals",
+    "anchor": "After walking Red, Mon/Wed/Fri 7:45am",
+    "hit_rate_7d": "2/3",  # or "no data yet"
+    "hit_rate_28d": "8/12",
+    "end": "2026-06-30",
+    "weeks_remaining": 5,
+}, ...]
+```
+
+**Coaching signals** to surface in Step 3 per goal:
+- If `hit_rate_7d` < 50% AND not "no data yet": include the coaching question pattern.
+- If metric goal is trending wrong direction (current < baseline OR weekly trend negative for 3+ weeks): flag "trajectory needs review".
+- If `weeks_remaining` ≤ 2 AND `progress_pct` < 50%: flag "behind on this — accelerate or rescope".
+
+Skip 1h entirely if no goal files exist or none are active.
+
 ### Step 1.5: Strategy layer check
 
 Check if `$OBSIDIAN_VAULT_PATH/10-strategy/operating-memo.md` exists.
@@ -371,6 +454,34 @@ Present to the builder:
 [1-2 pattern observations from Step 2 — be direct, not preachy]
 [If cross-week insight signal detected: "For the [N]th consecutive week, [signal]. [What this suggests structurally, not as a one-off]."]
 
+### Body & Recovery (last 7 days)
+- **VO2 max:** [latest reading] ml/(kg·min) (as of [date]) — 4-week delta: [+/-N.N]
+- **Sleep:** [N.N]h avg (consistency: ±[N.N]h) — [N]% restorative
+- **Exercise:** [N] min total (CDC target: 150)
+- **HRV:** [N] ms avg — Δ vs prior week: [+/-N]
+- **RHR:** [N] bpm avg *(or: "not captured — HAE gap")*
+
+*[1-line interpretation: trajectory + most actionable signal. E.g., "Aerobic base trending slightly down; HRV stable; exercise under target — schedule 2 walks this week."]*
+
+*Skip this whole section if Step 1g returned no data.*
+
+### Active Quarterly Goals
+
+*Populated from Step 1h. Skip section if no active goals.*
+
+For each active personal goal:
+
+- **[Goal title]** ([type], ends [date], [weeks remaining]w left)
+  - Progress: [baseline] → [current] / [target] [unit] ([progress_pct]%)
+  - Last 7 days: [hit rate description, e.g., "2/3 anchor days hit"]
+  - This week: **[weekly action commitment]** at [anchor]
+  - [Coaching question if hit_rate_7d < 50% OR trajectory_warning]
+
+*If coaching signals fire, surface them as questions, not blame. Examples:*
+> "Last week, [goal] fired 1/3 anchor days. What was different about the days it didn't fire?"
+> "[Goal] metric has trended down 3 weeks straight. Time to revisit the protocol, the anchor, or the target?"
+> "[Goal] has 2 weeks left and you're at 30% of target. Accelerate, rescope, or graduate to next quarter?"
+
 ### Calendar Reality
 - [N] meetings this week ([X] hours)
 - Key meetings: [list external/board/candidate meetings]
@@ -478,6 +589,44 @@ This gives Kevin a birds-eye view of which relationship moves to make this week,
 Write to: `$OBSIDIAN_VAULT_PATH/02-weekly/YYYY-[W]WW.md`
 
 If a close-week already wrote this file, **merge** — keep the close-week sections (achievements, learnings, etc.) and add the plan sections below.
+
+**Health frontmatter (from Step 1g):**
+
+If Step 1g returned data, prepend or merge into the weekly note's frontmatter. These keys are read by `03-meta/weekly-health-trends.md` for graphing trajectory and hit-rate over time.
+
+```yaml
+---
+# Weekly health aggregates (last 7 days ending Sunday of this week)
+date: 2026-05-22  # week's end date — Tracker X axis (KEEP THIS — required for weekly-health-trends.md graphs)
+exercise_min_total: 132
+exercise_min_avg_per_day: 18.9
+sleep_total_avg: 6.4
+sleep_consistency_stddev: 0.6
+sleep_restorative_avg_pct: 36
+hrv_avg: 56
+hrv_delta_vs_prior_week: 3
+rhr_avg: null
+vo2_max_latest: 36.2
+vo2_max_delta_4w: -0.9
+# Target hits (booleans for graphing hit-rate)
+hit_exercise_target: false   # exercise_min_total >= 150
+hit_exercise_stretch: false  # exercise_min_total >= 300
+hit_sleep_target: false      # sleep_total_avg >= 7.0
+hit_sleep_stretch: false     # sleep_total_avg >= 7.5
+hit_restorative_target: true # sleep_restorative_avg_pct >= 25
+hit_consistency_target: true # sleep_consistency_stddev <= 1.0
+---
+```
+
+**Target definitions (do not change without updating `weekly-health-trends.md` to match):**
+- `hit_exercise_target`: `exercise_min_total >= 150` (CDC moderate-intensity floor)
+- `hit_exercise_stretch`: `exercise_min_total >= 300` (CDC upper benefit curve)
+- `hit_sleep_target`: `sleep_total_avg >= 7.0` (NSF/AASM consensus floor)
+- `hit_sleep_stretch`: `sleep_total_avg >= 7.5` (sweet spot)
+- `hit_restorative_target`: `sleep_restorative_avg_pct >= 25` (Whoop/Garmin baseline)
+- `hit_consistency_target`: `sleep_consistency_stddev <= 1.0` hour (variance regulates metabolic health more than total)
+
+If a value is null (e.g., `rhr_avg` because HAE doesn't surface daily RHR), use YAML `null`. Don't compute `hit_*_target` for null-valued metrics.
 
 The weekly note must include a Learning Plan section after the Top 3:
 

@@ -92,6 +92,33 @@ mcp__claude_ai_asana__asana_search_tasks(
 )
 ```
 
+**1e. Active quarterly goals + per-goal weekly progress**
+
+Read goal files from `$OBSIDIAN_VAULT_PATH/10-strategy/goals/*.md` with `status: active` (skip dashboards and archive). For each:
+
+1. Parse frontmatter.
+2. Compute weekly hit rate: from the 7 daily notes already loaded in 1a, count notes with `goal_{slug}_moved: true` / count of notes that have the key (true/false).
+3. If `type: metric` and `metric_source` is `apple_health.*`, query the apple-health MCP for the week's metric value (same logic as `/open-week` Step 1h).
+4. If `type: behavior`, weekly progress = hit_rate.
+
+Carry forward as `goals_for_reflection`:
+```python
+goals_for_reflection = [{
+    "slug": "vo2-max",
+    "title": "Hold and improve VO2 max",
+    "baseline": 36.2, "target": 37.0, "current": 36.4, "unit": "ml/(kg·min)",
+    "weekly_action": "2x zone-2 + 1x intervals",
+    "anchor": "After walking Red, Mon/Wed/Fri 7:45am",
+    "hit_rate": "2/3",  # days with goal_<slug>_moved: true / days with key set
+    "weeks_remaining": 4,
+    "trend": "stable",  # up | down | stable | no data
+}, ...]
+```
+
+This feeds Step 2 (synthesis) and Step 3 (weekly goal reflection writeback).
+
+Skip if no goals are active.
+
 ### Step 2: Synthesize
 
 **Achievements:** Scan all Work Log bullets across the week. Pick the 5-8 most impactful — things that shipped, decisions that moved the needle, external commitments met. Prefer concrete outcomes with numbers over activity descriptions.
@@ -334,6 +361,34 @@ Priorities vs. Reality:
 Insight of the Week:
 [One sentence — the sharpest non-obvious thing the week's data revealed. Specific, declarative, anchored.]
 ```
+
+**Output B.5: Per-goal weekly reflection** (interactive — appended to each goal file's Weekly Log)
+
+For each goal in `goals_for_reflection` (from Step 1e), conduct a 3-prompt reflective conversation. Don't batch — ask one goal at a time, one prompt at a time. Keep prompts open-ended, not leading.
+
+Prompts per goal:
+
+> **For [Goal title]:**
+> Hit rate this week: [N/M anchor days fired]. Metric: [current] [unit] ([trend vs last week]).
+>
+> 1. **What worked toward this goal this week?**
+> 2. **What got in the way?** (Skip if hit rate is 100% — nothing to diagnose.)
+> 3. **Refinement for next week?** — keep the same action/anchor, adjust (specify how), or pause/abandon?
+
+After all goals, write back to each goal file's Weekly Log section:
+
+```markdown
+### 2026-W## (week ending YYYY-MM-DD)
+- **Metric:** [current] [unit] ([Δ vs last week])
+- **Hit rate:** [N/M]
+- **What worked:** [from response 1]
+- **What got in the way:** [from response 2 — or "—" if 100% hit]
+- **Refinement:** [from response 3]
+```
+
+If a goal's `weeks_remaining ≤ 1` and progress ≥ 80%, prompt: "Looks like you're closing in on the target. Graduate this goal next week and pick a new one?"
+
+If a goal's `weeks_remaining ≤ 0` (cycle ended), prompt: "Cycle ended. Status: [done | abandoned | extend]?" Then update the goal file's frontmatter `status` accordingly.
 
 **Output C: AI-Suggested Next Week Priorities** (seeded into the weekly note for `/open-week` to pick up)
 

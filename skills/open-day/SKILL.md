@@ -313,12 +313,75 @@ my_actions = [r for r in all_records if os.environ.get('BUILDER_NAME', '') in (r
 
 **Sanity check:** Total open actions across all assignees should return 50-100+. If 0 or errors, formula reverted to field IDs — switch back to the pattern above.
 
+**2k. Apple Health — yesterday's body metrics**
+
+If the `apple-health` MCP is configured (`~/.claude.json` contains `mcpServers.apple-health`), pull yesterday's summary:
+
+```
+mcp__apple-health__apple_health_daily(date="YYYY-MM-DD")  # yesterday's date
+```
+
+If the response contains `{error: ...}` (no data for that day yet), skip this step silently and omit the "Yesterday's body" line from Step 3 + the health frontmatter from Step 6. Don't surface the error to the builder.
+
+Extract these fields for use in Steps 3 and 6:
+
+| Source path in response | Variable |
+|---|---|
+| `activity.steps` | `steps` |
+| `activity.exercise_min` | `exercise_min` |
+| `activity.active_energy_kcal` | `active_energy_kcal` |
+| `sleep.total` (e.g. `"6h 32m"`) | parse to `sleep_total_hrs` (decimal) |
+| `sleep.deep` (e.g. `"1h 9m"`) | parse to `sleep_deep_hrs` (decimal) |
+| `sleep.rem` (e.g. `"1h 33m"`) | parse to `sleep_rem_hrs` (decimal) |
+| `heart.hrv_ms` | `hrv_ms` |
+
+Compute `sleep_restorative_pct`:
+```
+restorative_pct = round((sleep_deep_hrs + sleep_rem_hrs) / sleep_total_hrs * 100) if sleep_total_hrs else None
+```
+
+Restorative % (deep + REM as share of total sleep) is the closest proxy to "sleep quality score" derivable from Apple Health stage data. Typical healthy range: 25-50%.
+
+**2l. Quarterly goal anchor cues**
+
+Read active personal goal files from `$OBSIDIAN_VAULT_PATH/10-strategy/goals/*.md` (skip `personal-goals.md`, `work-goals.md`, anything in `archive/`). Filter to `status: active` AND `category: personal`.
+
+For each, parse the `anchor:` frontmatter field. Match against today's day-of-week to decide if today is an anchor day:
+
+- Anchor phrases like `"Mon/Wed/Fri 7:45am"` → today (DOW) matches Mon, Wed, or Fri → fire cue
+- Anchor phrases like `"After morning coffee, weekdays"` → today is a weekday → fire cue
+- Anchor phrases like `"Sunday evening, before kids' bedtime"` → today is Sunday → fire cue
+- Anchor phrases that mention specific events ("After SLT meeting") → check today's calendar for that event
+
+If an anchor fires today, carry forward to Step 3 as a `goal_cues` list:
+
+```python
+goal_cues = [{
+    "slug": "vo2-max",
+    "title": "Hold and improve VO2 max",
+    "anchor": "After walking Red, Mon/Wed/Fri 7:45am",
+    "weekly_action": "2x zone-2 + 1x intervals",
+    "fires_today_because": "today is Wednesday",
+}, ...]
+```
+
+Skip this step silently if no goal files exist or none fire today.
+
 ### Step 3: Draft Morning Check-in
 
 Present to the builder. If AI suggestions were seeded by close-day, show them first:
 
 ```markdown
 ## Morning Check-in
+
+### Yesterday's body
+Sleep: [Xh Ym] ([Z]% restorative) · Exercise: [N] min · Steps: [N,NNN]
+
+### Goal cues today
+*Populated from Step 2l. Skip entirely if no anchors fire today.*
+
+For each `goal_cues` entry:
+- **[Goal title]** — anchor fires today ([fires_today_because]). Action: **[weekly_action]** at [anchor time/event].
 
 ### Last Night's AI Suggestions (from /close-day)
 **Top 3:**
@@ -616,10 +679,22 @@ $OBSIDIAN_VAULT_PATH/01-daily/YYYY-MM-DD.md
 The daily note should include:
 
 ```markdown
+---
+sleep_total_hrs: 6.5
+sleep_restorative_pct: 38
+sleep_deep_hrs: 1.15
+sleep_rem_hrs: 1.55
+exercise_min: 29
+steps: 5811
+active_energy_kcal: 429
+hrv_ms: 61
+---
 # YYYY-MM-DD — [Day of Week]
 
 ## Morning Check-in
-- Energy: [builder's input]
+- Yesterday: [6h 32m] sleep ([38]% restorative) · [29] min exercise · [5,811] steps
+- Mood: [builder's input]
+- Goal cues today: [one-line summary per firing goal, OR "—" if none fire]
 
 ### AI Suggested: Top 3 (from [previous day]'s close)
 [preserved from close-day seed if it existed]
@@ -662,6 +737,12 @@ SORT priority ASC
 ```
 
 The `## Work Log`, `## Projects Touched`, `## Carrying Over`, and `## End of Day` sections are left empty — `/close-day` fills those in.
+
+**Health frontmatter rules:**
+- The eight `sleep_*`, `exercise_min`, `steps`, `active_energy_kcal`, `hrv_ms` keys come from Step 2k. Use YAML `null` for any value Apple Health didn't provide for yesterday (e.g., `hrv_ms: null`).
+- If Step 2k was skipped entirely (no MCP, no data), omit the whole frontmatter block AND drop the "Yesterday:" line from Morning Check-in.
+- **If the daily note already exists** (close-day seeded it last night) and has existing frontmatter, merge: update the health keys, preserve everything else. If it has no frontmatter, prepend the block.
+- These keys are graphable via the Obsidian Tracker plugin or Dataview — they're stored in structured frontmatter specifically so trends across daily notes can be charted without re-parsing the body.
 
 ### Step 7: Track priority alignment (if AI suggestions existed)
 
