@@ -280,3 +280,61 @@ Annotate each candidate. DROP_UNSAFE candidates are removed from the proposal li
 Step 6: rubric → N PASS, M RESHAPE, K DROP_UNSAFE
   Dropped categories: <comma-separated list, e.g., "individual comp (2), profit number (1)">
 ```
+
+## Step 7: Present numbered approval list
+
+Render the surviving candidates as a numbered list grouped by topic file, with clear diff markers. Then parse the user's response.
+
+**Render format:**
+
+```
+Harvest candidates from YYYY-MM-DD ({M} meeting(s), {N} candidates after rubric):
+
+[1] <topic-slug>.md → Key Decisions
+    + YYYY-MM-DD: <candidate text> ([▶](<fathom_url>?timestamp=<sec>))
+
+[2] <topic-slug>.md → Current State (REPLACE)
+    - <existing text>
+    + <new text>
+
+[3] <topic-slug>.md → Open Questions
+    + <candidate text>
+
+[4] 🆕 NEW: <suggested_slug>.md (parent: <parent_slug>, type: <type>)
+    + Key Decision: YYYY-MM-DD: <candidate text> ([▶](<fathom_url>?timestamp=<sec>))
+
+[5] <topic-slug>.md → Key Decisions (RESHAPED)
+    original: <original candidate text>
+    reshaped: <rubric-reshape>
+    category: <which never-write category drove reshape>
+
+[?6] <topic-slug>.md → Key Decisions  (LOW CONFIDENCE — please confirm topic)
+    + YYYY-MM-DD: <candidate text>
+    alternatives: <secondary_topics>
+
+⚠ N candidates dropped by rubric:
+  - "<candidate text>" (<never-write category>)
+  - "<candidate text>" (<never-write category>)
+
+Approve? all / drop 1,3 / edit 2: <new text> / topic ?6: <slug> / cancel
+> _
+```
+
+**Parser:** Accept input. Parse against this grammar:
+- `all` → approve every numbered item (including `?` items as-is)
+- `cancel` → abort, no writes
+- `drop <comma-separated-numbers>` → exclude those numbers, approve the rest
+- `edit <N>: <text>` → replace candidate N's text with `<text>`, then approve the rest (assumed `all` unless another action follows)
+- `topic <?N>: <slug>` → resolve a low-confidence flag by picking the topic, then approve
+- Compound: `drop 1,3 edit 2: foo topic ?6: bar` → apply each action
+
+Re-render after any `edit` or `topic` so the user sees the result before final approval. Loop until user types `all`, `cancel`, or unambiguous full-list approval.
+
+**Heartbeat:**
+```
+Step 7: presenting N candidates for approval...
+[after user response]
+Step 7: user approved K candidates (M edited, J dropped)
+```
+
+If the user types `cancel`, heartbeat `Step 7: harvest cancelled, no changes.` and exit cleanly.
