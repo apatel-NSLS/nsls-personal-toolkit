@@ -176,3 +176,33 @@ Heartbeat: `Step 2: loaded 1 meeting from URL: <title>`
 ### Mode: `--week-audit`
 
 Defer; this mode's data load is handled in Task 11.
+
+## Step 3: Extract candidates
+
+For each meeting loaded in Step 2, ask Claude to extract candidate KB entries.
+
+**Prompt construction:** Read `references/candidate-extraction.md` for the full prompt template and examples. Substitute:
+- The `[paste the never-write categories table]` placeholder with the actual rubric table from `/tmp/harvest-meeting-ctx/rubric.md`
+- The `INPUT` block with the meeting's title, date, attendees, summary, and transcript
+
+**Invocation:** Call Claude with the constructed prompt. Parse the JSON response. Expect 0–10 candidates per meeting; flag if > 15 (probably mis-parsing). Stash all candidates in `/tmp/harvest-meeting-ctx/candidates.json`:
+
+```json
+[{
+  "meeting_id": "<recording_id>",
+  "meeting_title": "...",
+  "meeting_url": "...",
+  "meeting_date": "YYYY-MM-DD",
+  "kind": "...", "text": "...", "fathom_timestamp_sec": ..., "speaker": "...", "confidence": ...
+}, ...]
+```
+
+**Heartbeat per meeting:**
+```
+Step 3: meeting "<title>" → N candidates (D decisions, P projects, S state-changes)
+```
+
+**Edge cases:**
+- 0 candidates from a meeting: heartbeat "Step 3: meeting '<title>' → 0 candidates (likely not strategic)". Continue.
+- JSON parse fail: heartbeat error, dump the raw response to `/tmp/harvest-meeting-ctx/extract-error-<meeting_id>.txt`, skip that meeting, continue with the rest.
+- All meetings yield 0 candidates: heartbeat "Step 3: no candidates from any meeting today. Nothing to harvest." Exit cleanly.
