@@ -288,30 +288,33 @@ Rules:
 
 The Insight Reflection is the **first section** in the weekly note (Output A), before Achievements. It is also summarized as a single "Insight of the Week" sentence in Output B.
 
-### Step 2b: Knowledge Graph Consolidation
+### Step 2b. NSLS Knowledge Base week audit
 
-If `$OBSIDIAN_VAULT_PATH/60-nsls-knowledge/` exists, do a weekly pass on the knowledge graph:
+Always runs (audit visible to all users; write actions gated to KB_AUTHORS).
 
-1. **Review this week's entries**: Read all `60-nsls-knowledge/*.md` files that were modified this week (check `last-updated` frontmatter or git log). Look at what close-day added.
+```bash
+echo "Step 2b: auditing 60-nsls-knowledge for week $WEEK..."
+```
 
-2. **Consolidate**: If multiple daily entries on the same topic say essentially the same thing, merge them into one clearer entry. Remove redundancy.
+Invoke the harvest skill in audit mode:
 
-3. **Update Current State**: For any topic where the week's decisions or insights meaningfully changed the overall picture, rewrite the `## Current State` section to reflect the new reality. Keep it to 2-3 sentences.
+```
+/harvest-meeting --week-audit --week $WEEK
+```
 
-4. **Surface neglected topics** (optional, light touch): If there are topics owned by Kevin with no activity in 4+ weeks, mention them: "Revenue Strategy hasn't been updated since March 15 — still accurate?" Don't do this every week; once a month is enough.
+The skill displays:
+- Activity summary (commits, edits, files touched)
+- Unharvested meetings
+- Stale topics (last-updated > 60 days)
+- Open Questions older than 30 days
 
-5. **Report — always surface a heartbeat line**, even if nothing was touched this week:
-   ```
-   📚 Knowledge graph: [N] topics updated this week, [M] entries consolidated
-   ```
-   ```
-   📚 Knowledge graph: no topics touched this week — check that /close-day Step 4c is firing
-   ```
-   ```
-   📚 Knowledge graph: skipped — `$OBSIDIAN_VAULT_PATH/60-nsls-knowledge/` not found
-   ```
+If the user is in `kb_authors.txt`, the skill additionally:
+- Offers promotions for resolved Open Questions → Key Decisions
+- Offers stale-flag updates on old topic frontmatter
 
-Keep this lightweight. The goal is quality control on what close-day added, not a major writing exercise. The knowledge base is meant to reflect **how NSLS works and where it's going** so any employee can read it and understand company strategy and direction — consolidation should sharpen toward that audience.
+The user approves changes via the same numbered-list UX as `/harvest-meeting --date`.
+
+**After the skill returns:** Append a `## Knowledge Base` section to the weekly close note with the audit summary (and any commits made).
 
 ### Step 3: Generate two outputs
 
