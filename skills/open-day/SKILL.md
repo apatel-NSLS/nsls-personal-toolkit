@@ -263,7 +263,7 @@ Pull Kevin's open Meeting Actions from the SLT Meeting Intelligence base. Symmet
 
 Skip this step if `$AIRTABLE_API_KEY` is not set or the builder profile does not enable SLT integration.
 
-- **Base:** `appHDEHQA4bvlWwQq`
+- **Base:** `${SLT_BASE_ID}`
 - **Table:** `tblasgjUjadHCqzrg` (Meeting Actions)
 - **Auth:** `AIRTABLE_API_KEY` env var
 
@@ -276,7 +276,7 @@ PYTHONPATH=/tmp/pptx_deps python3.12 -c "
 import httpx, os, urllib.parse
 
 key = os.environ['AIRTABLE_API_KEY']
-BASE = 'appHDEHQA4bvlWwQq'
+BASE = '${SLT_BASE_ID}'
 TABLE = 'tblasgjUjadHCqzrg'
 
 formula = \"AND(NOT({status}='Completed'),NOT({status}='Not doing'))\"
@@ -460,7 +460,7 @@ The script returns JSON with `surfaced_actions` (up to 3 actions, distributed ac
 **Today / retreat-critical:**
 - [ ] [Action] — `recXXX`
 
-*+[N] in strategic backlog. Full list in Airtable `appHDEHQA4bvlWwQq/tblasgjUjadHCqzrg`.*
+*+[N] in strategic backlog. Full list in Airtable `${SLT_BASE_ID}/tblasgjUjadHCqzrg`.*
 
 ### Open PRs ([waiting] waiting, [yours] yours)
 
@@ -553,7 +553,7 @@ Context: [meeting_title from linked meeting] — [why this matters today]"
 )
 ```
 
-Then confirm with `create_task_confirm` (workspace `657431271309846`).
+Then confirm with `create_task_confirm` (workspace `${ASANA_WORKSPACE_GID}`).
 
 **CRITICAL — the `SLT record: recXXX` line format is load-bearing.** `/close-day` Step 7d parses Asana task notes for exactly this pattern (case-sensitive, followed by a record ID starting with `rec`) to close the loop back to Airtable when the task is marked complete. Don't reformat it as "SLT: rec..." or "Airtable: rec..." — close-day won't match.
 

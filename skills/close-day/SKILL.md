@@ -10,7 +10,7 @@ description: >-
 
 # Daily Close
 
-Synthesize Kevin's full day from seven data sources into a daily note and project session updates. Write carry-over tasks to Asana.
+Synthesize the builder's full day from seven data sources into a daily note and project session updates. Write carry-over tasks to Asana.
 
 ## Data Sources
 
@@ -20,15 +20,23 @@ Synthesize Kevin's full day from seven data sources into a daily note and projec
 | **Familiar** | Screen activity — apps used, window titles, URLs, time distribution | Bash: scan `$HOME/familiar/stills-markdown/session-YYYY-MM-DDT*/*.md` frontmatter |
 | **Fathom** | Meeting summaries, topics, action items, decisions | Bash: Python script calling Fathom API (see below) |
 | **Sent Email** | Approvals, decisions, outbound communications | `gmail_search_messages` MCP tool (`from:me after:YYYY/M/DD before:YYYY/M/DD+1`) |
-| **Sent Slack** | Conversations, decisions, coordination, context | `slack_search_public_and_private` MCP tool (`from:<@U07TS8X7T7X> on:YYYY-MM-DD`) |
+| **Sent Slack** | Conversations, decisions, coordination, context | `slack_search_public_and_private` MCP tool (`from:<@${SLACK_USER_ID}> on:YYYY-MM-DD`) |
 | **Asana** | Pending tasks, overdue items, what was due today | `mcp__claude_ai_Asana__get_my_tasks` and `mcp__claude_ai_asana__asana_search_tasks` MCP tools |
 | **Apple Health** | Personal-goal execution: workouts, exercise minutes, distance, HR, sleep, VO2 max | `mcp__apple-health__apple_health_workouts` and `mcp__apple-health__apple_health_daily` MCP tools |
 | **Claude session context** | What was built, decided, and discussed in this conversation | Conversation history in current session |
 
-## Asana Reference
+## Builder Context
 
-- **Workspace GID:** `657431271309846`
-- **Kevin's user GID:** `1212312899409797`
+Read these from `~/.claude/local-plugins/nsls-personal-toolkit/.env` before running any subsequent step, then substitute `${VAR_NAME}` references throughout this skill with the actual values:
+
+- `${OBSIDIAN_VAULT_PATH}` — vault location (used by daily note writes + session log scans)
+- `${SLACK_USER_ID}` — Slack user ID (used in `from:` / `to:` search queries)
+- `${ASANA_WORKSPACE_GID}` — Asana workspace
+- `${ASANA_USER_GID}` — Asana user
+- `${PEOPLE_OPS_BASE_ID}` — People Ops Airtable base
+- `${SLT_BASE_ID}` — SLT Meeting Intelligence Airtable base (Step 1h SLT Meeting Actions sync)
+
+Also read `${OBSIDIAN_VAULT_PATH}/50-reference/builder-profile.md` for role/categories/timezone — the categorization logic in Step 1b depends on it.
 
 ---
 
@@ -36,7 +44,7 @@ Synthesize Kevin's full day from seven data sources into a daily note and projec
 
 ### Step 0: Determine the date
 
-Default to today (`date +%Y-%m-%d`). Kevin can override: `/close-day 2026-03-21`.
+Default to today (`date +%Y-%m-%d`). Override by passing the date as an argument: `/close-day 2026-03-21`.
 
 ### Step 1: Collect data (run in parallel where possible)
 
@@ -329,13 +337,13 @@ Extract: who Kevin emailed, subject, and the snippet (which captures his reply).
 Use the `slack_search_public_and_private` MCP tool:
 ```
 slack_search_public_and_private(
-  query="from:<@U07TS8X7T7X> on:YYYY-MM-DD",
+  query="from:<@${SLACK_USER_ID}> on:YYYY-MM-DD",
   sort="timestamp",
   limit=20,
   include_context=false
 )
 ```
-Kevin's Slack user ID is `U07TS8X7T7X`. Extract: who he messaged, what channels, key topics discussed. Group by conversation thread — don't list every individual message, summarize the thread topic. Distinguish work conversations from personal. Skip trivial messages ("ok", "thanks", reactions).
+Your Slack user ID is in `${SLACK_USER_ID}` from `.env`. Extract: who he messaged, what channels, key topics discussed. Group by conversation thread — don't list every individual message, summarize the thread topic. Distinguish work conversations from personal. Skip trivial messages ("ok", "thanks", reactions).
 
 **1e-pre. Slack follow-up scan (today only)**
 
@@ -346,7 +354,7 @@ Kevin's Slack user ID is `U07TS8X7T7X`. Extract: who he messaged, what channels,
 1. **Today's sent messages** — find commitment language
    ```
    slack_search_public_and_private(
-     query="from:<@U07TS8X7T7X> on:YYYY-MM-DD",
+     query="from:<@${SLACK_USER_ID}> on:YYYY-MM-DD",
      sort="timestamp",
      limit=20,
      include_context=false
@@ -357,7 +365,7 @@ Kevin's Slack user ID is `U07TS8X7T7X`. Extract: who he messaged, what channels,
 2. **Today's incoming asks** — find threads where someone asked Kevin something and he didn't reply, OR where his reply was a commitment that wasn't acted on by EOD.
    ```
    slack_search_public_and_private(
-     query="to:<@U07TS8X7T7X> on:YYYY-MM-DD",
+     query="to:<@${SLACK_USER_ID}> on:YYYY-MM-DD",
      sort="timestamp",
      limit=20,
      include_context=true
@@ -473,7 +481,7 @@ Include the overdue and due-today lists in the daily note's `## Asana` section. 
 
 Pull Kevin's open Meeting Actions from the SLT Meeting Intelligence base. These are action items committed to in SLT meetings, tracked separately from Asana. Many have no due date but are time-sensitive (retreat prep, offsite logistics, quarterly deliverables).
 
-- **Base:** `appHDEHQA4bvlWwQq`
+- **Base:** `${SLT_BASE_ID}`
 - **Table:** `tblasgjUjadHCqzrg` (Meeting Actions)
 - **Auth:** `AIRTABLE_API_KEY` env var (already exported in Kevin's shell)
 
@@ -487,7 +495,7 @@ PYTHONPATH=/tmp/pptx_deps python3.12 -c "
 import httpx, os, urllib.parse
 
 key = os.environ['AIRTABLE_API_KEY']
-BASE = 'appHDEHQA4bvlWwQq'
+BASE = '${SLT_BASE_ID}'
 TABLE = 'tblasgjUjadHCqzrg'
 
 formula = \"AND(NOT({status}='Completed'),NOT({status}='Not doing'))\"
@@ -574,7 +582,7 @@ At least one ✅ signal → **Completed candidate**. Moderate signals only → *
 
 **Obsidian session log scan:**
 ```bash
-VAULT="$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/KP"
+VAULT="${OBSIDIAN_VAULT_PATH}"
 find "$VAULT/20-projects" -path "*/sessions/$DATE.md" 2>/dev/null | while read f; do
   echo "=== $f ==="; cat "$f"
 done
@@ -610,8 +618,8 @@ Match activity to projects using these signals (in priority order):
    - "GitHub" + repo name → match to project
    - "Slack" + channel name → match to project domain
 4. **Familiar URLs** — match known URLs:
-   - `airtable.com/appnXPTu01esWWbrK` → `people-ops`
-   - `airtable.com/appHDEHQA4bvlWwQq` → `meeting-automation`
+   - `airtable.com/${PEOPLE_OPS_BASE_ID}` → `people-ops`
+   - `airtable.com/${SLT_BASE_ID}` → `meeting-automation`
    - GitHub repo URLs → match to project
 
 Use the project mappings from `~/.claude/skills/log/SKILL.md` as the source of truth.
@@ -679,7 +687,7 @@ Doing vs. Orchestrating: [X%] hands-on building, [X%] managing/meeting, [X%] adm
 - [ ] [Task name] — [project if any]
 
 ## SLT Meeting Actions ([N] open, Kevin-owned)
-Source: `appHDEHQA4bvlWwQq/tblasgjUjadHCqzrg` — pulled fresh this evening.
+Source: `${SLT_BASE_ID}/tblasgjUjadHCqzrg` — pulled fresh this evening.
 
 **Overdue:**
 - [ ] [Action description] (due [date], [N weeks overdue])
@@ -767,7 +775,7 @@ Show the full daily note draft. Ask:
 
 ### Step 5: Write daily note
 
-Write to: `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/KP/01-daily/YYYY-MM-DD.md`
+Write to: `${OBSIDIAN_VAULT_PATH}/01-daily/YYYY-MM-DD.md`
 
 **If the file already exists** (Kevin started it in the morning with priorities), **merge** — keep the existing Morning Check-in section and append/update the generated sections below it.
 
@@ -824,7 +832,7 @@ mcp__claude_ai_Asana__create_task_preview(
 )
 ```
 
-Then confirm with `mcp__claude_ai_Asana__create_task_confirm` using workspace `657431271309846`.
+Then confirm with `mcp__claude_ai_Asana__create_task_confirm` using workspace `${ASANA_WORKSPACE_GID}`.
 
 **Priority framework (CEO lens):**
 
@@ -873,7 +881,7 @@ The SLT knowledge base has its own action tracking. Meeting Actions are first-cl
 For each ✅ completion candidate from Step 1i that maps to an SLT Meeting Action (carried forward with its record ID from Step 1h):
 
 ```
-PATCH https://api.airtable.com/v0/appHDEHQA4bvlWwQq/tblasgjUjadHCqzrg/{record_id}
+PATCH https://api.airtable.com/v0/${SLT_BASE_ID}/tblasgjUjadHCqzrg/{record_id}
 Body: { "fields": {
   "fldJleDMJFfcj5gPN": "Completed",
   "fldkqhlQRTug3A1ui": true
@@ -953,7 +961,7 @@ After Kevin confirms, execute: create Asana tasks for Task items (using `create_
 
 ### Step 8: Seed tomorrow's daily note
 
-Check if tomorrow's note exists at `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/KP/01-daily/YYYY-MM-DD+1.md`. If it does NOT exist, create it with this template:
+Check if tomorrow's note exists at `${OBSIDIAN_VAULT_PATH}/01-daily/YYYY-MM-DD+1.md`. If it does NOT exist, create it with this template:
 
 ```markdown
 # YYYY-MM-DD+1 — [Day of Week]

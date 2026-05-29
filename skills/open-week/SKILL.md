@@ -74,7 +74,7 @@ Query open tasks (status = Not Started or In Progress) assigned to the builder. 
 
 ```
 mcp__b9e0ba62-fba1-48c0-8814-6f701844c723__list_records_for_table(
-  baseId="appHDEHQA4bvlWwQq",
+  baseId="${SLT_BASE_ID}",
   tableId="tblasgjUjadHCqzrg",
   filters={
     "operator": "and",
