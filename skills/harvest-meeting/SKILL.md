@@ -338,3 +338,134 @@ Step 7: user approved K candidates (M edited, J dropped)
 ```
 
 If the user types `cancel`, heartbeat `Step 7: harvest cancelled, no changes.` and exit cleanly.
+
+## Step 8: Apply edits, commit, push
+
+For each approved candidate, perform the edit, then commit and push as one batch.
+
+```bash
+PYTHONPATH=/tmp/pptx_deps python3.12 << 'PYEOF'
+import os, pathlib, json, re, datetime, subprocess
+
+kb_dir = pathlib.Path(os.environ['OBSIDIAN_VAULT_PATH']) / '60-nsls-knowledge'
+ctx_dir = pathlib.Path('/tmp/harvest-meeting-ctx')
+approved = json.loads((ctx_dir / 'approved.json').read_text())
+today = datetime.date.today().isoformat()
+
+# Ensure clean tree before write
+subprocess.run(['git', '-C', str(kb_dir), 'pull', '--ff-only', '--quiet'], check=True)
+
+edited_files = set()
+
+for cand in approved:
+    target = cand.get('topic_slug')
+    section = cand.get('section')
+    is_new_topic = cand.get('is_new_topic', False)
+
+    target_path = kb_dir / f"{target}.md"
+
+    if is_new_topic:
+        # Scaffold new topic file
+        suggested = cand.get('suggested_new', {})
+        scaffold = f"""---
+type: {suggested.get('type', 'l3')}
+parent: "[[{suggested.get('parent', '')}]]"
+status: stub
+last-updated: {today}
+---
+
+# {target.replace('-', ' ').title()}
+
+## Current State
+
+
+## Key Decisions
+
+- {today}: {cand['text']} ([▶]({cand['meeting_url']}?timestamp={cand['fathom_timestamp_sec']}))
+
+## Open Questions
+
+"""
+        target_path.write_text(scaffold)
+        edited_files.add(target_path)
+        continue
+
+    # Existing topic: edit in place
+    text = target_path.read_text()
+
+    if section == 'key_decisions' or section == 'open_questions':
+        # Append a new line under the section header
+        section_header = '## Key Decisions' if section == 'key_decisions' else '## Open Questions'
+        prefix = f'- {today}: ' if section == 'key_decisions' else '- '
+        new_line = f"{prefix}{cand['text']}"
+        if section == 'key_decisions':
+            new_line += f" ([▶]({cand['meeting_url']}?timestamp={cand['fathom_timestamp_sec']}))"
+
+        # Handle REFINEMENT: replace the matched existing entry
+        if cand.get('dedup_verdict') == 'REFINEMENT' and cand.get('replace_entry'):
+            text = text.replace(cand['replace_entry'], new_line, 1)
+        else:
+            # Insert under the section header
+            new_text = text.replace(
+                section_header + '\n',
+                f"{section_header}\n\n{new_line}\n",
+                1
+            )
+            # Avoid double blank line if existing content followed immediately
+            text = re.sub(r'\n{3,}', '\n\n', new_text)
+
+    elif section == 'current_state':
+        # REPLACE the Current State block
+        new_text = cand.get('reshape_to') or cand['text']
+        text = re.sub(
+            r'(## Current State\n)(.*?)(?=\n## )',
+            rf'\1\n{new_text}\n',
+            text,
+            count=1,
+            flags=re.DOTALL,
+        )
+
+    # Update last-updated frontmatter
+    text = re.sub(r'^(last-updated:\s*)\S+', rf'\g<1>{today}', text, count=1, flags=re.MULTILINE)
+
+    target_path.write_text(text)
+    edited_files.add(target_path)
+
+# Commit
+if edited_files:
+    rel_files = [str(p.relative_to(kb_dir)) for p in edited_files]
+    subprocess.run(['git', '-C', str(kb_dir), 'add'] + rel_files, check=True)
+
+    meeting_titles = list({c['meeting_title'] for c in approved})
+    title_str = '; '.join(meeting_titles[:3])
+    if len(meeting_titles) > 3:
+        title_str += f' (+{len(meeting_titles) - 3} more)'
+
+    msg = f"harvest: {today} {title_str} ({len(approved)} edits)"
+    subprocess.run(['git', '-C', str(kb_dir), 'commit', '-m', msg], check=True)
+
+    # Push with rebase-retry
+    try:
+        subprocess.run(['git', '-C', str(kb_dir), 'push', 'origin', 'main'], check=True)
+        print(f"Step 8: pushed {len(edited_files)} file change(s), {len(approved)} edit(s)")
+    except subprocess.CalledProcessError:
+        # Rebase + retry once
+        rebase = subprocess.run(['git', '-C', str(kb_dir), 'pull', '--rebase'], capture_output=True, text=True)
+        if 'CONFLICT' in (rebase.stdout + rebase.stderr):
+            print("Step 8: FATAL — rebase conflict on topic file. Aborting. Resolve manually.")
+            subprocess.run(['git', '-C', str(kb_dir), 'rebase', '--abort'])
+            raise SystemExit(1)
+        subprocess.run(['git', '-C', str(kb_dir), 'push', 'origin', 'main'], check=True)
+        print(f"Step 8: pushed after rebase ({len(edited_files)} file change(s), {len(approved)} edit(s))")
+else:
+    print("Step 8: no approved candidates, nothing to commit.")
+PYEOF
+```
+
+**Heartbeat at end:**
+```
+Step 8: committed <sha> — <N> edits to <M> file(s) in 60-nsls-knowledge
+       pushed to origin/main
+```
+
+This is the last step in `--date` and `--fathom-url` modes.
