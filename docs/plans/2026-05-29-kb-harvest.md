@@ -61,6 +61,27 @@ cd ~/nsls-skills/nsls-personal-toolkit && git pull --ff-only
 - Create: `skills/harvest-meeting/kb_authors.txt`
 - Create: `skills/harvest-meeting/references/.gitkeep`
 
+> **2026-05-29 mid-implementation finding:** A prior attempt at this task overwrote uncommitted local content at `skills/harvest-meeting/SKILL.md`. The overwritten content was never tracked in git and is irrecoverable from the repo. The lesson: **before writing any file, check whether it exists with non-trivial content**. If it does, halt and surface to the user. This task adds a Step 0 to enforce that check.
+
+- [ ] **Step 0: Pre-flight — check for prior uncommitted work and HALT if found**
+
+```bash
+TARGET="$HOME/nsls-skills/nsls-personal-toolkit/skills/harvest-meeting"
+if [ -d "$TARGET" ]; then
+    echo "HALT: $TARGET already exists. Inspect contents before proceeding:"
+    ls -la "$TARGET"
+    echo
+    echo "If the existing content is your prior work and you want to preserve it:"
+    echo "  - Move it: mv $TARGET ${TARGET}.preserved-\$(date +%Y%m%d-%H%M%S)"
+    echo "  - OR commit it on a branch first: git checkout -b prior-work && git add $TARGET && git commit"
+    echo "If the existing content can be discarded: rm -rf $TARGET"
+    echo "Re-run this task once $TARGET is absent."
+    exit 1
+fi
+```
+
+If `$TARGET` exists, this command halts. The implementer must surface the situation to the user and not proceed automatically.
+
 - [ ] **Step 1: Create the directory structure**
 
 ```bash

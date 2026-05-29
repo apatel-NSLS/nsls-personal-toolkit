@@ -14,9 +14,31 @@
 
 The NSLS Knowledge Base (`thensls/nsls-knowledge`) was seeded on 2026-05-19 with 60+ topic files derived from 7,800+ SLT meeting topic mentions. Since seed: **zero content commits**. Every recent commit is an hourly `rippling-sync` org-chart refresh.
 
-The intended write-back wiring — `close-day` Step 4c (per-meeting harvest) and `close-week` Step 2b (weekly reconciliation) — was planned but never built. The local `close-day` SKILL.md has no `60-nsls-knowledge` references; the upstream plugin `close-week` SKILL.md has no Step 2b.
-
 Consequence: meeting decisions and project definitions from the last 10 days (including a 2026-05-26 SLT meeting Kevin described as "especially useful") sit only in Fathom transcripts and the SLT Meeting Intelligence Airtable. The employee-facing KB is a frozen snapshot, not a living map.
+
+## Prior Work (discovered 2026-05-29 mid-implementation)
+
+The initial framing of this spec said "the wiring was never built." That was wrong. **A `Step 4c: Knowledge Graph Insight Proposals` lived inside `close-day` SKILL.md from 2026-05-12 (commit `5ee6b94`) through 2026-05-25 (commit `9c8daf7`).** It was accidentally removed in commit `6a1dd15` on 2026-05-28 — the "Apple Health 1f-bis + Personal Goals" commit — without the removal being called out in the commit message.
+
+The prior Step 4c is preserved at `docs/specs/2026-05-29-prior-step-4c-from-9c8daf7.md` (extracted from the last commit where it existed). Its core flow:
+
+1. Match topics in 60-nsls-knowledge against today's meetings
+2. Filter for insights against "would a new NSLS employee want to know this?" bar
+3. Apply the sensitive-content rubric as a HARD STOP
+4. Surface up to 3 candidates as prose proposals
+5. Append approved candidates to Key Decisions / Current State
+6. Heartbeat unconditionally (per Kevin's heartbeat memory)
+
+Why this spec is still the right direction (v2, not redundant): the prior Step 4c had no `project_definition` / `state_change` kinds, no topic-mapping for NEW topics, no dedup against existing entries, no SLT allowlist for the other 6 SLT members, no auto-commit/push, no week-audit pipeline, and used a one-at-a-time prose UX rather than a numbered bulk-approve list. The new design carries the prior's rubric work forward and adds the missing dimensions.
+
+Implications for implementation:
+- The accidental removal in `6a1dd15` is left alone; the new design ships in a standalone `/harvest-meeting` skill rather than re-inlined into close-day, so there's nothing to restore in the close-day inline-Step-4c form.
+- The new `Step 4c` in close-day (Task 13 of the plan) is a thin caller that invokes `/harvest-meeting`. Functionally replaces the prior inline Step 4c.
+- The KB's `CLAUDE.md` sensitive-content rubric (which was hoisted out of the prior Step 4c on 2026-05-19) remains the source of truth. The new pipeline reads it at runtime.
+
+### What was lost
+
+The `Task 1` subagent (now reverted) reported overwriting pre-existing uncommitted local content in `skills/harvest-meeting/`. That content was never tracked in git and is irrecoverable from the repo. It may exist in Time Machine; pursuit deferred to Kevin's discretion. If recovered later and found to materially differ from this spec, treat it as a design input and revise.
 
 ## Goal
 
