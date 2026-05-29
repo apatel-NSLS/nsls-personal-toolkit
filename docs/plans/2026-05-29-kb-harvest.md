@@ -1,7 +1,7 @@
 ---
 title: NSLS Knowledge Base Harvest Pipeline
 type: feat
-status: planned
+status: in-progress
 date: 2026-05-29
 plan_depth: deep
 spec: docs/specs/2026-05-29-kb-harvest-design.md
