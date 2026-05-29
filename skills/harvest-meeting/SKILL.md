@@ -60,3 +60,83 @@ print(f'authors_file: {authors_file}')
 - If `slt_writer: False` AND mode is `--week-audit` → "Step 0: not in KB_AUTHORS, running audit-only (no write actions)." Continue with `WRITE_AUTHORIZED=false`.
 
 Pass `WRITE_AUTHORIZED` (True/False) through to subsequent steps; they consult it to decide whether to execute write actions.
+
+## Step 1: Load context
+
+For `--date` and `--fathom-url` modes, load:
+1. KB local clone (refresh first), topic file index, rubric
+2. Current Fathom meeting data (Step 2 builds on this)
+
+For `--week-audit` mode, load KB local clone + git log for the week (Task 11 fills this in).
+
+### 1a. Ensure KB local clone is fresh
+
+```bash
+KB_DIR="$OBSIDIAN_VAULT_PATH/60-nsls-knowledge"
+if [ ! -d "$KB_DIR/.git" ]; then
+    echo "Step 1a: FATAL — KB not cloned to $KB_DIR. Run: git clone https://github.com/thensls/nsls-knowledge.git \"$KB_DIR\""
+    exit 1
+fi
+git -C "$KB_DIR" pull --ff-only --quiet
+echo "Step 1a: KB synced to $(git -C "$KB_DIR" rev-parse --short HEAD)"
+```
+
+### 1b. Load topic index and rubric
+
+```bash
+PYTHONPATH=/tmp/pptx_deps python3.12 << 'PYEOF'
+import os, pathlib, re, json
+
+kb_dir = pathlib.Path(os.environ['OBSIDIAN_VAULT_PATH']) / '60-nsls-knowledge'
+
+# Parse frontmatter + body for every topic file
+topics = {}
+for md_file in kb_dir.glob('*.md'):
+    if md_file.name.startswith('_'): continue  # _index.md, etc.
+    text = md_file.read_text()
+    fm_match = re.match(r'^---\n(.*?)\n---\n(.*)$', text, re.DOTALL)
+    if not fm_match: continue
+    fm_raw, body = fm_match.groups()
+    fm = {}
+    for line in fm_raw.split('\n'):
+        if ':' in line:
+            k, _, v = line.partition(':')
+            fm[k.strip()] = v.strip()
+
+    # Extract Current State, Key Decisions, Open Questions sections
+    sections = {'current_state': '', 'key_decisions': [], 'open_questions': []}
+    cur = None
+    for line in body.split('\n'):
+        if line.startswith('## Current State'): cur = 'current_state'; continue
+        if line.startswith('## Key Decisions'): cur = 'key_decisions'; continue
+        if line.startswith('## Open Questions'): cur = 'open_questions'; continue
+        if line.startswith('## '): cur = None; continue
+        if cur == 'current_state':
+            sections['current_state'] += line + '\n'
+        elif cur in ('key_decisions', 'open_questions') and line.strip().startswith('-'):
+            sections[cur].append(line.strip())
+
+    topics[md_file.stem] = {
+        'frontmatter': fm,
+        'current_state': sections['current_state'].strip(),
+        'key_decisions': sections['key_decisions'],
+        'open_questions': sections['open_questions'],
+    }
+
+# Parse rubric from CLAUDE.md
+claude_md = (kb_dir / 'CLAUDE.md').read_text()
+rubric_match = re.search(r'## Sensitive-Content Rubric.*?(?=\n## |\Z)', claude_md, re.DOTALL)
+rubric_text = rubric_match.group(0) if rubric_match else ''
+
+print(f"Step 1b: loaded {len(topics)} topic files, rubric is {len(rubric_text)} chars")
+
+# Stash for downstream steps
+ctx_dir = pathlib.Path('/tmp/harvest-meeting-ctx')
+ctx_dir.mkdir(exist_ok=True)
+(ctx_dir / 'topics.json').write_text(json.dumps(topics, indent=2))
+(ctx_dir / 'rubric.md').write_text(rubric_text)
+print(f"Step 1b: cached context at {ctx_dir}")
+PYEOF
+```
+
+**Heartbeat expected:** `Step 1b: loaded 60 topic files, rubric is ~5000 chars`. If fewer than 40 topic files, something is wrong with the KB clone.
