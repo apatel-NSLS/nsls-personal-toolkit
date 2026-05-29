@@ -140,3 +140,39 @@ PYEOF
 ```
 
 **Heartbeat expected:** `Step 1b: loaded 60 topic files, rubric is ~5000 chars`. If fewer than 40 topic files, something is wrong with the KB clone.
+
+## Step 2: Load Fathom meetings
+
+This step is mode-specific.
+
+### Mode: `--date YYYY-MM-DD`
+
+Use the Fathom MCP to list meetings for the date where the current user was a participant or owner:
+
+```
+Call: mcp__claude_ai_Fathom__list_meetings
+Parameters:
+  - start_date: YYYY-MM-DD
+  - end_date: YYYY-MM-DD
+  - owner_email: <current user.email>
+```
+
+For each returned recording_id, call `get_meeting_summary` and `get_meeting_transcript` to get the full content. Stash in `/tmp/harvest-meeting-ctx/meetings.json` as a list of:
+
+```json
+{"recording_id": "...", "title": "...", "url": "...", "summary": "...", "transcript_url": "...", "attendees": [...]}
+```
+
+Heartbeat: `Step 2: loaded N meeting(s) for YYYY-MM-DD: <comma-separated titles>`
+
+If N == 0, heartbeat `Step 2: no meetings for YYYY-MM-DD, nothing to harvest` and exit step (the rest of the pipeline can't run with no input).
+
+### Mode: `--fathom-url <url>`
+
+Call `mcp__claude_ai_Fathom__get_recording_by_url` with the URL. Then `get_meeting_summary` and `get_meeting_transcript`. Stash same as above (single-item list).
+
+Heartbeat: `Step 2: loaded 1 meeting from URL: <title>`
+
+### Mode: `--week-audit`
+
+Defer; this mode's data load is handled in Task 11.
