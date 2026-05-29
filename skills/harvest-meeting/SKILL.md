@@ -469,3 +469,168 @@ Step 8: committed <sha> — <N> edits to <M> file(s) in 60-nsls-knowledge
 ```
 
 This is the last step in `--date` and `--fathom-url` modes.
+
+## Step 9: Week-audit mode (--week-audit)
+
+Invoked by `close-week` Step 2b. Reads git log for the week + topic file frontmatter to produce an audit report. SLT users additionally get promotion + stale-flag write actions.
+
+### 9a. Load week context
+
+```bash
+PYTHONPATH=/tmp/pptx_deps python3.12 << 'PYEOF'
+import os, pathlib, subprocess, datetime, json, re
+
+kb_dir = pathlib.Path(os.environ['OBSIDIAN_VAULT_PATH']) / '60-nsls-knowledge'
+week = os.environ['HARVEST_WEEK']  # YYYY-Www format
+year, w = week.split('-W')
+year = int(year); w = int(w)
+
+# Compute week boundaries (Mon-Sun)
+jan4 = datetime.date(year, 1, 4)
+week_start = jan4 + datetime.timedelta(weeks=w - 1, days=-jan4.isoweekday() + 1)
+week_end = week_start + datetime.timedelta(days=7)
+
+# Pull git log for the week
+log = subprocess.check_output([
+    'git', '-C', str(kb_dir), 'log',
+    f'--since={week_start.isoformat()}',
+    f'--until={week_end.isoformat()}',
+    '--pretty=format:%H|%ad|%s', '--date=short'
+], text=True)
+
+harvest_commits = [
+    line.split('|') for line in log.split('\n')
+    if line and line.split('|')[2].startswith('harvest:')
+]
+
+# Scan topic files for stale + old open questions
+today = datetime.date.today()
+stale_threshold = today - datetime.timedelta(days=60)
+old_q_threshold = today - datetime.timedelta(days=30)
+
+stale_topics = []
+old_open_qs = []
+
+for md_file in kb_dir.glob('*.md'):
+    if md_file.name.startswith('_'): continue
+    text = md_file.read_text()
+    fm_match = re.search(r'last-updated:\s*(\S+)', text)
+    if fm_match:
+        try:
+            last = datetime.date.fromisoformat(fm_match.group(1))
+            if last < stale_threshold:
+                stale_topics.append({'topic': md_file.stem, 'last_updated': last.isoformat()})
+        except ValueError:
+            pass
+
+    # Open Questions section
+    oq_match = re.search(r'## Open Questions\n(.*?)(?=\n## |\Z)', text, re.DOTALL)
+    if oq_match:
+        for line in oq_match.group(1).split('\n'):
+            if line.strip().startswith('-'):
+                # Heuristic: extract date from question line if present
+                date_match = re.search(r'(\d{4}-\d{2}-\d{2})', line)
+                if date_match:
+                    q_date = datetime.date.fromisoformat(date_match.group(1))
+                    if q_date < old_q_threshold:
+                        old_open_qs.append({'topic': md_file.stem, 'question': line.strip(), 'opened': q_date.isoformat()})
+
+print(json.dumps({
+    'week': week,
+    'window': [week_start.isoformat(), week_end.isoformat()],
+    'harvest_commits': harvest_commits,
+    'stale_topics': stale_topics,
+    'old_open_questions': old_open_qs,
+}, indent=2))
+PYEOF
+```
+
+### 9b. Cross-reference unharvested meetings
+
+Pull Fathom meetings in the week window via MCP, compare against meeting titles in `harvest_commits[*].subject`. List meetings not found in any commit subject.
+
+### 9c. Audit report — always displayed
+
+```
+Week YYYY-Www KB audit:
+
+Activity:
+  - {N} harvest commits, {M} edits across {K} topic files
+  - {J} SLT-recorded meetings; {I} harvested ({J-I} unharvested — listed below)
+
+Unharvested meetings:
+  - YYYY-MM-DD "<title>": no harvest commits reference this meeting
+  (or "All meetings harvested ✓")
+
+Stale topics (last-updated > 60 days):
+  - <slug>.md (last touched YYYY-MM-DD)
+  ...
+  (or "No stale topics ✓")
+
+Open Questions older than 30 days:
+  - <slug>.md: "<question text>" (opened YYYY-MM-DD)
+  ...
+  (or "No old open questions ✓")
+```
+
+### 9d. Promotion offers (SLT-only)
+
+Skip if `WRITE_AUTHORIZED=false`.
+
+For each old open question, ask Claude:
+
+```
+Question: "<question text>" (from <slug>.md, opened <date>)
+
+Week's harvest commits (with their meeting context):
+<list of harvest commit subjects + brief notes>
+
+Fathom meetings this week (titles + summaries):
+<list>
+
+Was this question answered? If yes, return JSON:
+{"resolved": true, "resolution_text": "<new Key Decision summary>",
+ "source_url": "<fathom url if applicable>", "source_date": "YYYY-MM-DD"}
+Else: {"resolved": false}
+```
+
+For each resolved question, render in the same approval list pattern as harvest mode:
+
+```
+Promotion candidates:
+
+[1] chapter-health.md — Open Question resolved
+    - Remove from Open Questions: "How do we measure tier-4 chapters?"
+    + Add to Key Decisions: "YYYY-MM-DD: <resolution_text> ([▶](<source_url>))"
+
+Approve? all / drop 1 / edit 1: <text> / cancel
+```
+
+On approval, edit the topic file (remove from Open Questions section, append to Key Decisions), commit, push (Step 8 reused).
+
+### 9e. Stale-flag offers (SLT-only)
+
+For each stale topic, prompt user:
+
+```
+Topic <slug>.md last updated YYYY-MM-DD ({N} days ago).
+
+  [a] Mark `status: stale` in frontmatter
+  [b] Leave alone (it's just not active and that's fine)
+  [s] Skip all remaining stale prompts
+
+>
+```
+
+Per-topic Y/N. Commit the frontmatter changes as a single batch at end.
+
+### 9f. Non-SLT path
+
+If `WRITE_AUTHORIZED=false`, after 9c:
+
+```
+Step 9: audit-only (not in KB_AUTHORS). To propose changes, edit a topic file
+in your local clone and open a PR against thensls/nsls-knowledge.
+```
+
+Exit cleanly.
