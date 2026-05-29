@@ -206,3 +206,77 @@ Step 3: meeting "<title>" → N candidates (D decisions, P projects, S state-cha
 - 0 candidates from a meeting: heartbeat "Step 3: meeting '<title>' → 0 candidates (likely not strategic)". Continue.
 - JSON parse fail: heartbeat error, dump the raw response to `/tmp/harvest-meeting-ctx/extract-error-<meeting_id>.txt`, skip that meeting, continue with the rest.
 - All meetings yield 0 candidates: heartbeat "Step 3: no candidates from any meeting today. Nothing to harvest." Exit cleanly.
+
+## Step 4: Map candidates to topic files
+
+For each candidate in `/tmp/harvest-meeting-ctx/candidates.json`, ask Claude to map it to topic file(s).
+
+**Prompt construction:** Read `references/topic-mapping.md` for the full prompt and examples. Substitute the topic index summary using a compact form of `/tmp/harvest-meeting-ctx/topics.json` (slug, title from frontmatter, parent, first 200 chars of current_state).
+
+**Invocation:** Call Claude once per candidate. Parse JSON. Annotate the candidate with the mapping result. Stash updated candidates back to `/tmp/harvest-meeting-ctx/candidates.json`.
+
+**Heartbeat:**
+```
+Step 4: mapped N candidates → M topic files (K NEW topics, J low-confidence flagged for review)
+```
+
+**Edge cases:**
+- Mapping returns invalid topic slug (typo, hallucination): re-prompt with explicit warning. If still invalid, mark candidate `mapping: ERROR` and surface in approval.
+- All candidates map to the same topic: surface "Step 4: ⚠ all N candidates mapped to <topic>. Sanity-check this is real." Continue.
+
+## Step 5: Dedup against existing topic content
+
+For each candidate + its primary_topic, ask Claude:
+
+```
+Candidate: <candidate text>
+Topic file: <topic slug>
+Existing Key Decisions:
+  - <list from topics.json>
+Existing Current State: <text from topics.json>
+
+Is this candidate already covered? Return JSON:
+{"verdict": "NEW" | "REFINEMENT" | "DUPLICATE",
+ "replace_entry": "<text>",  // only for REFINEMENT
+ "reason": "<one-sentence>"}
+
+- NEW: not covered. Add fresh.
+- REFINEMENT: a similar entry exists but this candidate updates it (e.g.,
+  new date, refined wording, expanded scope). The existing entry should be
+  replaced by the new one.
+- DUPLICATE: substantively the same as an existing entry. Drop.
+```
+
+Annotate each candidate with the dedup verdict. Drop DUPLICATEs. Mark REFINEMENTs with the existing entry to replace.
+
+**Heartbeat:**
+```
+Step 5: dedup → N NEW, M REFINEMENT (replacing existing), K DUPLICATE (dropped)
+```
+
+## Step 6: Apply sensitive-content rubric
+
+For each surviving candidate (NEW or REFINEMENT), apply the full rubric from `/tmp/harvest-meeting-ctx/rubric.md`:
+
+```
+Apply this rubric to the candidate text:
+
+<paste full rubric from /tmp/harvest-meeting-ctx/rubric.md, including never-write
+table AND reshape rules>
+
+Candidate text: "<candidate.text>"
+
+Return JSON:
+{"verdict": "PASS" | "RESHAPE" | "DROP_UNSAFE",
+ "reshape_to": "<reshaped text>",  // only for RESHAPE
+ "category": "<which never-write category triggered>",  // for DROP_UNSAFE or RESHAPE
+ "reason": "<one-sentence>"}
+```
+
+Annotate each candidate. DROP_UNSAFE candidates are removed from the proposal list but logged for the summary at end of approval display.
+
+**Heartbeat:**
+```
+Step 6: rubric → N PASS, M RESHAPE, K DROP_UNSAFE
+  Dropped categories: <comma-separated list, e.g., "individual comp (2), profit number (1)">
+```
