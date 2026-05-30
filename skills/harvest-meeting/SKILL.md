@@ -23,41 +23,72 @@ Writes require the current git user.email to be present in `kb_authors.txt` (sam
 
 Parse arguments to determine mode (`--date`, `--fathom-url`, or `--week-audit`).
 
-Then check whether the current user is an SLT writer:
+Then check whether the current user is an SLT writer.
+
+**Identity resolution must be cwd-independent.** `git config user.email` with no scope reads
+the config for the *current working directory*. close-day invokes this skill from the user's
+home directory, which is usually not a git repo, so a bare `git config user.email` silently
+falls back to the global config — which may be a personal email that isn't in the allowlist.
+That produced a silent skip of the entire harvest. To avoid it, gather candidate identities
+from every stable scope (global, the KB repo, the toolkit repo, and `$GIT_AUTHOR_EMAIL`) and
+treat the user as an SLT writer if **any** candidate is in the allowlist.
 
 ```bash
 PYTHONPATH=/tmp/pptx_deps python3.12 -c "
 import os, subprocess, sys, pathlib
 
-skill_dir = pathlib.Path(__file__).resolve().parent if '__file__' in dir() else pathlib.Path('$HOME/nsls-skills/nsls-personal-toolkit/skills/harvest-meeting')
-authors_file = skill_dir / 'kb_authors.txt'
-
-# Try multiple resolution paths in case the symlink/install path differs
-candidates = [
+# Locate the allowlist (handle both repo-clone and plugin-install paths)
+candidates_paths = [
     pathlib.Path.home() / 'nsls-skills/nsls-personal-toolkit/skills/harvest-meeting/kb_authors.txt',
     pathlib.Path.home() / '.claude/plugins/nsls-personal-toolkit/skills/harvest-meeting/kb_authors.txt',
 ]
-authors_file = next((p for p in candidates if p.exists()), None)
+authors_file = next((p for p in candidates_paths if p.exists()), None)
 if not authors_file:
     print('FATAL: kb_authors.txt not found in any known path')
     sys.exit(2)
-
-user_email = subprocess.check_output(['git', 'config', 'user.email'], text=True).strip()
 authors = {line.strip() for line in authors_file.read_text().splitlines()
            if line.strip() and not line.startswith('#')}
 
-is_slt = user_email in authors
-print(f'user: {user_email}')
+def git_email(*scope):
+    try:
+        return subprocess.check_output(['git', *scope, 'config', 'user.email'],
+                                       text=True, stderr=subprocess.DEVNULL).strip()
+    except Exception:
+        return ''
+
+kb_dir = pathlib.Path(os.environ.get('OBSIDIAN_VAULT_PATH', '')) / '60-nsls-knowledge'
+toolkit_dir = pathlib.Path.home() / 'nsls-skills/nsls-personal-toolkit'
+
+# cwd-independent identity scopes, in order of authority
+scopes = [
+    ('kb-repo',      git_email('-C', str(kb_dir))),        # identity that authors KB commits
+    ('global',       git_email('--global')),
+    ('toolkit-repo', git_email('-C', str(toolkit_dir))),
+    ('env',          os.environ.get('GIT_AUTHOR_EMAIL', '')),
+]
+matched = [(s, e) for s, e in scopes if e and e in authors]
+is_slt = bool(matched)
+
+print('emails_checked: ' + ', '.join(f'{s}={e or \"-\"}' for s, e in scopes))
 print(f'slt_writer: {is_slt}')
+if is_slt:
+    print(f'matched_via: {matched[0][0]} ({matched[0][1]})')
 print(f'authors_file: {authors_file}')
 "
 ```
 
-**Heartbeat the result** (per the skill-heartbeats rule):
+**Heartbeat the result** (per the skill-heartbeats rule — always print the scopes checked so a
+future silent skip is debuggable):
 
-- If `slt_writer: True` → "Step 0: SLT writer confirmed ({user_email}), proceeding."
-- If `slt_writer: False` AND mode is `--date` or `--fathom-url` → "Step 0: not in KB_AUTHORS, skipping harvest." Exit cleanly with `WRITE_AUTHORIZED=false`.
-- If `slt_writer: False` AND mode is `--week-audit` → "Step 0: not in KB_AUTHORS, running audit-only (no write actions)." Continue with `WRITE_AUTHORIZED=false`.
+- If `slt_writer: True` → "Step 0: SLT writer confirmed ({matched_email} via {scope}), proceeding."
+- If `slt_writer: False` AND mode is `--date` or `--fathom-url` → "Step 0: not in KB_AUTHORS (checked: {emails_checked}), skipping harvest." Exit cleanly with `WRITE_AUTHORIZED=false`.
+- If `slt_writer: False` AND mode is `--week-audit` → "Step 0: not in KB_AUTHORS (checked: {emails_checked}), running audit-only (no write actions)." Continue with `WRITE_AUTHORIZED=false`.
+
+> **KB commit attribution:** harvest commits are authored by whatever `git -C "$KB_DIR" config
+> user.email` resolves to. For the org KB (`thensls/nsls-knowledge`), set the KB clone's local
+> identity to your NSLS email so commits are correctly attributed:
+> `git -C "$OBSIDIAN_VAULT_PATH/60-nsls-knowledge" config user.email <you>@nsls.org`. This also
+> makes the gate match via the `kb-repo` scope regardless of cwd.
 
 Pass `WRITE_AUTHORIZED` (True/False) through to subsequent steps; they consult it to decide whether to execute write actions.
 
@@ -362,6 +393,12 @@ for cand in approved:
     section = cand.get('section')
     is_new_topic = cand.get('is_new_topic', False)
 
+    # Entries are stamped with the MEETING date (the date the decision was made),
+    # not the harvest date — so backfilling an old meeting keeps the historical
+    # record honest. Existing KB entries follow this convention. Fall back to
+    # today only if the candidate is missing a meeting_date.
+    entry_date = cand.get('meeting_date') or today
+
     target_path = kb_dir / f"{target}.md"
 
     if is_new_topic:
@@ -381,7 +418,7 @@ last-updated: {today}
 
 ## Key Decisions
 
-- {today}: {cand['text']} ([▶]({cand['meeting_url']}?timestamp={cand['fathom_timestamp_sec']}))
+- {entry_date}: {cand['text']} ([▶]({cand['meeting_url']}?timestamp={cand['fathom_timestamp_sec']}))
 
 ## Open Questions
 
@@ -396,7 +433,7 @@ last-updated: {today}
     if section == 'key_decisions' or section == 'open_questions':
         # Append a new line under the section header
         section_header = '## Key Decisions' if section == 'key_decisions' else '## Open Questions'
-        prefix = f'- {today}: ' if section == 'key_decisions' else '- '
+        prefix = f'- {entry_date}: ' if section == 'key_decisions' else '- '
         new_line = f"{prefix}{cand['text']}"
         if section == 'key_decisions':
             new_line += f" ([▶]({cand['meeting_url']}?timestamp={cand['fathom_timestamp_sec']}))"
