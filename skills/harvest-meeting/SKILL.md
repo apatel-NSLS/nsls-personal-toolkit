@@ -439,9 +439,19 @@ for cand in approved:
     target_path = kb_dir / f"{target}.md"
 
     if is_new_topic:
-        # Scaffold new topic file
-        suggested = cand.get('suggested_new', {})
-        scaffold = f"""---
+        # New topic. Multiple approved candidates can target the SAME new topic — scaffold
+        # once, then APPEND subsequent decisions. Never write_text twice (that would drop
+        # all but the last decision). If the file somehow already exists, append rather than
+        # clobber.
+        kd_line = f"- {entry_date}: {cand['text']} ([▶]({cand['meeting_url']}?timestamp={cand['fathom_timestamp_sec']}))"
+        if target_path.exists():
+            text = target_path.read_text()
+            text = text.replace('## Key Decisions\n', f"## Key Decisions\n\n{kd_line}\n", 1)
+            text = re.sub(r'\n{3,}', '\n\n', text)
+            target_path.write_text(text)
+        else:
+            suggested = cand.get('suggested_new', {})
+            scaffold = f"""---
 type: {suggested.get('type', 'l3')}
 parent: "[[{suggested.get('parent', '')}]]"
 status: stub
@@ -455,12 +465,12 @@ last-updated: {today}
 
 ## Key Decisions
 
-- {entry_date}: {cand['text']} ([▶]({cand['meeting_url']}?timestamp={cand['fathom_timestamp_sec']}))
+{kd_line}
 
 ## Open Questions
 
 """
-        target_path.write_text(scaffold)
+            target_path.write_text(scaffold)
         edited_files.add(target_path)
         continue
 
