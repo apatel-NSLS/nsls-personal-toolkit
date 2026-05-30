@@ -1,8 +1,9 @@
 ---
 title: NSLS Knowledge Base Harvest Pipeline
 type: feat
-status: in-progress
+status: completed
 date: 2026-05-29
+completed: 2026-05-30
 plan_depth: deep
 spec: docs/specs/2026-05-29-kb-harvest-design.md
 ---
@@ -1682,7 +1683,30 @@ Local fork is not under git management. Memory edit is a separate concern from p
 
 ---
 
-## Task 17: Backfill the 2026-05-19 → 2026-05-29 gap
+## Task 17: Backfill the 2026-05-19 → 2026-05-29 gap ✅ DONE (2026-05-30)
+
+> **2026-05-30 result:** Backfilled a curated set of 6 meetings (Kevin chose "SLT + curated
+> strategic set"). 2 harvest commits to `thensls/nsls-knowledge`, **24 edits**, 1 new topic
+> (`ai-builder-governance`). Rubric dropped ~16 sensitive items across the set (CEO transition,
+> profit/EBITDA, owner-distribution/bonus, named comp/promotions, Gary's legal/divorce, reporting
+> structure, security/PII research, duty-of-care incident). Heavy transcripts were processed by
+> per-meeting subagents (extract→map→dedup→rubric→merge) to keep them out of main context, then a
+> cross-meeting dedup pass collapsed overlapping fall-rollout content before one batch commit.
+> Commits: `86481cb` (SLT 05-26, 15 edits), `0f4ef68` (mtgs 05-27/29, 9 edits), `3c05240` (title fix).
+>
+> **Two more bugs surfaced + fixed during backfill:**
+> 3. **New-topic clobber** (`979e4fc`) — Step 8 `write_text`'d per candidate, so N decisions to one
+>    NEW topic overwrote each other. Now scaffolds once + appends (Claude Builder Sprint → 4 decisions
+>    in one `ai-builder-governance.md`).
+> 4. **Title casing (KNOWN, not yet fixed in skill)** — `slug.replace('-',' ').title()` produces
+>    "Ai Builder Governance"; acronyms (AI, B2B, B2C, SNT, FOL) mistitle. Fixed the one live file by
+>    hand. **Follow-up:** add an acronym-aware title map to Step 8's scaffold, or prompt for the H1.
+>
+> Meetings NOT harvested (excluded as low-KB-signal / mostly never-write): CEO-transition 1:1s (Adam,
+> Cory), coaching/relationship 1:1s (Red ×3, Jack), Gary/Kevin board-budget (financial-figure heavy).
+> One harvested meeting (WGU/Ashleigh impromptu) yielded 0 candidates — pure exploratory swirl.
+>
+> Original step-by-step (kept for reference):
 
 **Files:**
 - No file changes. Real harvest writes to `thensls/nsls-knowledge`.
