@@ -312,9 +312,46 @@ Step 6: rubric → N PASS, M RESHAPE, K DROP_UNSAFE
   Dropped categories: <comma-separated list, e.g., "individual comp (2), profit number (1)">
 ```
 
+## Step 6b: Merge current_state replacements (never clobber)
+
+A `state_change` candidate maps to `section: current_state`, which is a **whole-block replace**.
+Topic files hold multi-fact narratives in Current State, so replacing the block with the
+candidate's one-line summary would destroy existing context. Before approval, generate a full
+merged replacement for each such candidate.
+
+For each surviving candidate with `section == current_state`, ask Claude:
+
+```
+You are updating the Current State of an NSLS Knowledge Base topic. Produce a complete,
+rewritten Current State that PRESERVES all still-true existing context and folds in the new
+change. Do not drop facts that are still accurate. Do not invent detail. Apply the
+sensitive-content rubric (no profit/comp/personnel/etc.).
+
+Topic: <slug>.md
+Existing Current State:
+<full current_state from /tmp/harvest-meeting-ctx/topics.json>
+
+New change (from meeting <date>): <candidate.text>
+(If the rubric reshaped this candidate, use the reshaped text: <candidate.reshape_to>)
+
+Return JSON: {"new_current_state": "<full rewritten block>",
+              "dropped_context": "<anything you removed and why, or 'none'>"}
+```
+
+Store `new_current_state` on the candidate. If the model reports it dropped non-trivial context,
+surface that in the approval list so the human can check.
+
+**Heartbeat:** `Step 6b: merged N current_state replacement(s) (M flagged for dropped context)`
+
+If Current State is empty, skip the merge — write the candidate text directly.
+
 ## Step 7: Present numbered approval list
 
 Render the surviving candidates as a numbered list grouped by topic file, with clear diff markers. Then parse the user's response.
+
+> **Current State diffs must show the FULL existing block** (not a truncated snippet) as the
+> `-` lines, and the full `new_current_state` as the `+` lines, so clobbering or dropped context
+> is visible before the user types `all`.
 
 **Render format:**
 
@@ -452,8 +489,19 @@ last-updated: {today}
             text = re.sub(r'\n{3,}', '\n\n', new_text)
 
     elif section == 'current_state':
-        # REPLACE the Current State block
-        new_text = cand.get('reshape_to') or cand['text']
+        # REPLACE the Current State block — use the FULL merged block from Step 6b,
+        # never the one-line candidate summary (that would clobber existing context).
+        new_text = cand.get('new_current_state')
+        if not new_text:
+            existing = (cand.get('existing_current_state') or '').strip()
+            if existing:
+                # Fail safe, not fail clobber: a non-empty Current State with no merged
+                # replacement means Step 6b did not run. Skip rather than destroy content.
+                print(f"Step 8: SKIP {target}.md current_state — no merged block from Step 6b; "
+                      f"refusing to clobber existing content. Re-run with Step 6b.")
+                continue
+            # Empty Current State: safe to write the candidate directly.
+            new_text = cand.get('reshape_to') or cand['text']
         text = re.sub(
             r'(## Current State\n)(.*?)(?=\n## )',
             rf'\1\n{new_text}\n',

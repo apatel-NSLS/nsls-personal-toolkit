@@ -1141,12 +1141,27 @@ git commit -m "feat(harvest-meeting): apply+commit+push with rebase-retry (Step 
 
 ---
 
-## Task 11: End-to-end verification on the synthetic fixture
+## Task 11: End-to-end verification on the synthetic fixture ✅ DONE (2026-05-30)
 
 This task validates the full pipeline (Steps 0–8) using the synthetic meeting from Task 10. No real Fathom call — feed the fixture directly.
 
 **Files:**
 - No code changes; this is an integration test.
+
+> **2026-05-30 result:** PASS — 3 candidates + 1 rubric-dropped, matches expectation.
+> Results recorded at `references/test-fixtures/2026-05-26-slt-sample-actual-output.md`.
+> The test surfaced and fixed two correctness bugs (commit `0e92274`):
+> 1. **SLT gate silent-skip** — Step 0 read a cwd-dependent `git config user.email`;
+>    from `$HOME` it fell back to the global gmail (not in the allowlist) and skipped
+>    every harvest. Now resolves identity across all stable git scopes.
+> 2. **Wrong entry date** — Step 8 stamped `today` not the meeting date; would corrupt
+>    backfilled history. Now uses `cand['meeting_date']`.
+>
+> **Open design issue (gates Task 17): `state_change → current_state` REPLACE clobbers.**
+> Step 8 regex-replaces the entire Current State block with the candidate's one-line
+> summary. Real topic files hold multi-fact narratives (e.g., `chapter-health.md`), so a
+> blind REPLACE destroys context. Resolve before backfilling real meetings — see decision
+> log appended at end of plan.
 
 - [ ] **Step 1: Stage the synthetic meeting as if it came from Fathom**
 
