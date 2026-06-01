@@ -30,12 +30,13 @@ the config for the *current working directory*. close-day invokes this skill fro
 home directory, which is usually not a git repo, so a bare `git config user.email` silently
 falls back to the global config — which may be a personal email that isn't in the allowlist.
 That produced a silent skip of the entire harvest. To avoid it, gather candidate identities
-from every stable scope (global, the KB repo, the toolkit repo, and `$GIT_AUTHOR_EMAIL`) and
-treat the user as an SLT writer if **any** candidate is in the allowlist.
+from every stable scope (the KB repo, global, the toolkit repo, `$GIT_AUTHOR_EMAIL`, and the
+personal-toolkit `.env` `BUILDER_EMAIL`/`OPERATING_USER_EMAIL`) and treat the user as an SLT
+writer if **any** candidate is in the allowlist.
 
 ```bash
 PYTHONPATH=/tmp/pptx_deps python3.12 -c "
-import os, subprocess, sys, pathlib
+import os, subprocess, sys, pathlib, re
 
 # Locate the allowlist (handle both repo-clone and plugin-install paths)
 candidates_paths = [
@@ -56,33 +57,97 @@ def git_email(*scope):
     except Exception:
         return ''
 
+def env_file_email(path, *keys):
+    try:
+        text = pathlib.Path(path).read_text()
+    except Exception:
+        return ''
+    for key in keys:
+        m = re.search(rf'^{re.escape(key)}=(.+)$', text, re.MULTILINE)
+        if m: return m.group(1).strip()
+    return ''
+
 kb_dir = pathlib.Path(os.environ.get('OBSIDIAN_VAULT_PATH', '')) / '60-nsls-knowledge'
 toolkit_dir = pathlib.Path.home() / 'nsls-skills/nsls-personal-toolkit'
+
+# .env candidates — local-plugins symlink path first (canonical), then repo path
+env_candidates = [
+    pathlib.Path.home() / '.claude/local-plugins/nsls-personal-toolkit/.env',
+    pathlib.Path.home() / 'nsls-skills/nsls-personal-toolkit/.env',
+]
+env_file = next((p for p in env_candidates if p.exists()), None)
+env_email = env_file_email(env_file, 'BUILDER_EMAIL', 'OPERATING_USER_EMAIL') if env_file else ''
 
 # cwd-independent identity scopes, in order of authority
 scopes = [
     ('kb-repo',      git_email('-C', str(kb_dir))),        # identity that authors KB commits
     ('global',       git_email('--global')),
     ('toolkit-repo', git_email('-C', str(toolkit_dir))),
-    ('env',          os.environ.get('GIT_AUTHOR_EMAIL', '')),
+    ('env-var',      os.environ.get('GIT_AUTHOR_EMAIL', '')),
+    ('toolkit-.env', env_email),
 ]
 matched = [(s, e) for s, e in scopes if e and e in authors]
 is_slt = bool(matched)
 
-print('emails_checked: ' + ', '.join(f'{s}={e or \"-\"}' for s, e in scopes))
+print('emails_checked: ' + ' | '.join(f'{s}={e or \"-\"}' for s, e in scopes))
 print(f'slt_writer: {is_slt}')
 if is_slt:
     print(f'matched_via: {matched[0][0]} ({matched[0][1]})')
 print(f'authors_file: {authors_file}')
+
+# Detect 'looks-like-SLT-misconfigured': any detected email is @nsls.org but none
+# matched the allowlist. Usually means the allowlist is stale OR there's a typo.
+# Distinct from 'genuinely non-SLT user' (no @nsls.org email anywhere) — where the
+# skip is the expected behavior and no action is needed.
+nsls_emails = sorted({e for _, e in scopes if e and e.endswith('@nsls.org')})
+looks_misconfigured = (not is_slt) and bool(nsls_emails)
+print(f'looks_misconfigured: {looks_misconfigured}')
+if nsls_emails:
+    print(f'nsls_emails_detected: {\", \".join(nsls_emails)}')
 "
 ```
 
 **Heartbeat the result** (per the skill-heartbeats rule — always print the scopes checked so a
 future silent skip is debuggable):
 
-- If `slt_writer: True` → "Step 0: SLT writer confirmed ({matched_email} via {scope}), proceeding."
-- If `slt_writer: False` AND mode is `--date` or `--fathom-url` → "Step 0: not in KB_AUTHORS (checked: {emails_checked}), skipping harvest." Exit cleanly with `WRITE_AUTHORIZED=false`.
-- If `slt_writer: False` AND mode is `--week-audit` → "Step 0: not in KB_AUTHORS (checked: {emails_checked}), running audit-only (no write actions)." Continue with `WRITE_AUTHORIZED=false`.
+- **If `slt_writer: True`** → "Step 0: SLT writer confirmed ({matched_email} via {scope}), proceeding."
+
+- **If `slt_writer: False` AND `looks_misconfigured: True`** (some `@nsls.org` email detected but
+  none matched the allowlist) → print the **loud allowlist-gap** message and skip:
+
+  ```
+  Step 0: ⚠ NSLS email detected but NOT in KB_AUTHORS allowlist
+    checked: <emails_checked>
+    NSLS emails detected: <nsls_emails_detected>
+
+    If your @nsls.org email is correct but missing from the allowlist, ping Kevin to
+    add you to skills/harvest-meeting/kb_authors.txt and tick Members.is_slt = true.
+    If you have an @nsls.org typo (e.g., name@nsl.org), fix it in the appropriate
+    git scope or in your toolkit .env and re-run.
+  ```
+
+- **If `slt_writer: False` AND `looks_misconfigured: False`** AND mode is `--date` / `--fathom-url`
+  → print the **actionable setup-fix** message and skip cleanly:
+
+  ```
+  Step 0: not in KB_AUTHORS, skipping harvest
+    checked: <emails_checked>
+
+    If you ARE on SLT, your git identity isn't your @nsls.org email yet. Quick fix:
+
+      KB_DIR="$OBSIDIAN_VAULT_PATH/60-nsls-knowledge"
+      git -C "$KB_DIR" config user.email <you>@nsls.org
+
+    Or set BUILDER_EMAIL in your toolkit .env so the gate matches via toolkit-.env:
+      ~/.claude/local-plugins/nsls-personal-toolkit/.env  →  BUILDER_EMAIL=<you>@nsls.org
+
+    Then re-run /close-day or /harvest-meeting.
+
+    If you're NOT on SLT, this skip is expected — /close-day continues normally.
+  ```
+  Exit cleanly with `WRITE_AUTHORIZED=false`.
+
+- **If `slt_writer: False` AND mode is `--week-audit`** → "Step 0: not in KB_AUTHORS (checked: {emails_checked}), running audit-only (no write actions)." Continue with `WRITE_AUTHORIZED=false`. (The audit is read-only; the same setup-fix hint applies only if the user wants write actions.)
 
 > **KB commit attribution:** harvest commits are authored by whatever `git -C "$KB_DIR" config
 > user.email` resolves to. For the org KB (`thensls/nsls-knowledge`), set the KB clone's local
