@@ -84,6 +84,7 @@ def list_fathom_meetings_since(email, since_date):
         "--email",
         email,
         "--list",
+        "--json",  # emit JSON lines to stdout (we parse result.stdout below)
     ]
     if since_date:
         cmd.extend(["--after", since_date])
@@ -93,7 +94,10 @@ def list_fathom_meetings_since(email, since_date):
             cmd,
             capture_output=True,
             text=True,
-            timeout=120,
+            # Only the first call populates the shared light cache (one windowed
+            # fetch); every later person filters that cache in <1s. Generous ceiling
+            # so the cache-populating call can finish even on a slow API day.
+            timeout=240,
         )
     except subprocess.TimeoutExpired:
         return {"count": 0, "meetings": [], "error": "fathom fetch timed out"}

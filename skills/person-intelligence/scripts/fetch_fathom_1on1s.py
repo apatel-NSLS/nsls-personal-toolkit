@@ -33,22 +33,39 @@ FATHOM_BASE = "https://api.fathom.ai/external/v1"
 MEETINGS_URL_BASE = (
     f"{FATHOM_BASE}/meetings"
     "?calendar_invitees_domains_type=all"
-    "&include_action_items=true"
-    "&include_summary=true"
 )
 
+# When no --after is given, how far back to look by default. The old behavior
+# crawled from 2023-01-01, which paginates hundreds of heavy pages (10 meetings/
+# page) and reliably blew the biweekly sweep's subprocess timeout before the
+# shared cache could be saved — so every person re-ran the full crawl. A bounded
+# recent window keeps the sweep fast and still covers all tracked last-synced
+# dates. Override with FATHOM_DEFAULT_LOOKBACK_DAYS for a deeper first synthesis.
+DEFAULT_LOOKBACK_DAYS = int(os.environ.get("FATHOM_DEFAULT_LOOKBACK_DAYS", "120"))
 
-def build_meetings_url(after_date: str | None = None, before_date: str | None = None) -> str:
+
+def build_meetings_url(
+    after_date: str | None = None,
+    before_date: str | None = None,
+    include_details: bool = False,
+) -> str:
     """Build Fathom meetings URL with date-scoped params.
 
-    When dates are provided, uses created_after/created_before API params
-    to avoid paginating through all meetings since 2023.
+    include_details controls the heavy include_summary/include_action_items flags,
+    which inflate each page from ~11KB/1.2s to ~110KB/~10s. The list/count path
+    (manifest, biweekly sweep) doesn't need them — matching uses calendar_invitees
+    and title only. Only the record-building paths (--fetch-all / --date) request
+    them. When no after_date is given, scope to DEFAULT_LOOKBACK_DAYS rather than
+    crawling since 2023.
     """
     url = MEETINGS_URL_BASE
-    if after_date:
-        url += f"&created_after={after_date}T00:00:00Z"
-    else:
-        url += "&created_after=2023-01-01"
+    if include_details:
+        url += "&include_action_items=true&include_summary=true"
+    if not after_date:
+        from datetime import date as _date, timedelta as _td
+
+        after_date = (_date.today() - _td(days=DEFAULT_LOOKBACK_DAYS)).isoformat()
+    url += f"&created_after={after_date}T00:00:00Z"
     if before_date:
         url += f"&created_before={before_date}T23:59:59Z"
     return url
@@ -105,15 +122,22 @@ def save_cached_meetings(meetings: list[dict]) -> None:
     )
 
 
-def fetch_all_meetings(api_key: str, after_date: str | None = None, before_date: str | None = None) -> list[dict]:
-    """Fetch meetings from Fathom (paginated, with retry on 429).
+def fetch_all_meetings(
+    api_key: str,
+    after_date: str | None = None,
+    before_date: str | None = None,
+    include_details: bool = False,
+) -> list[dict]:
+    """Fetch meetings from Fathom (paginated, with retry on 429 + transient errors).
 
-    When after_date/before_date are provided, the API call is date-scoped
-    to avoid paginating through all meetings since 2023.
+    When after_date/before_date are provided, the API call is date-scoped to avoid
+    paginating through all meetings since 2023. A page that exhausts its retries
+    ends pagination with whatever was collected so far rather than crashing the run
+    (and the partial set is still cached, so callers degrade instead of failing).
     """
     headers = {"X-Api-Key": api_key}
     meetings = []
-    url = build_meetings_url(after_date, before_date)
+    url = build_meetings_url(after_date, before_date, include_details)
     cursor = None
     page = 0
 
@@ -121,9 +145,21 @@ def fetch_all_meetings(api_key: str, after_date: str | None = None, before_date:
         page += 1
         page_url = url + (f"&cursor={cursor}" if cursor else "")
 
-        # Retry up to 3 times on rate limit
+        resp = None
+        # Retry on rate limit AND transient network/timeout errors
         for attempt in range(3):
-            resp = httpx.get(page_url, headers=headers, timeout=30)
+            try:
+                resp = httpx.get(page_url, headers=headers, timeout=60)
+            except (httpx.TimeoutException, httpx.TransportError) as e:
+                wait = 2**attempt * 2  # 2s, 4s, 8s
+                print(
+                    f"  Network error (page {page}, attempt {attempt + 1}): "
+                    f"{type(e).__name__}; retrying in {wait}s...",
+                    file=sys.stderr,
+                )
+                resp = None
+                time.sleep(wait)
+                continue
             if resp.status_code == 429:
                 wait = 2**attempt * 3  # 3s, 6s, 12s
                 print(
@@ -133,6 +169,14 @@ def fetch_all_meetings(api_key: str, after_date: str | None = None, before_date:
                 time.sleep(wait)
                 continue
             resp.raise_for_status()
+            break
+
+        if resp is None or resp.status_code != 200:
+            print(
+                f"  Giving up on page {page} after retries; "
+                f"returning {len(meetings)} meetings collected so far.",
+                file=sys.stderr,
+            )
             break
 
         data = resp.json()
@@ -147,33 +191,45 @@ def fetch_all_meetings(api_key: str, after_date: str | None = None, before_date:
         if not cursor:
             break
 
-        time.sleep(1)  # polite pause between pages
+        time.sleep(0.4)  # polite pause between pages (light pages are ~1.2s each)
 
     save_cached_meetings(meetings)
     return meetings
 
 
-def fetch_all_meetings_cached(api_key: str, after_date: str | None = None, before_date: str | None = None) -> list[dict]:
-    # Try cache first regardless of date params — filter the cached set in-process
-    # to avoid hammering the Fathom API with redundant scoped fetches.
+def fetch_all_meetings_cached(
+    api_key: str,
+    after_date: str | None = None,
+    before_date: str | None = None,
+    include_details: bool = False,
+) -> list[dict]:
+    # Populate the cache ONCE with the full default window, then filter in-process.
+    # This makes the biweekly sweep hit the API exactly once (the first person)
+    # instead of re-fetching per person — and guarantees the cache always holds the
+    # widest window, so a person with a narrow --after never shrinks it for others.
     cached = load_cached_meetings()
-    if cached is not None:
-        if not after_date and not before_date:
-            return cached
-        # Filter by date window
-        filtered = []
-        for m in cached:
-            m_date = m.get("scheduled_start_time", "") or m.get("created_at", "") or ""
-            # Extract just the YYYY-MM-DD portion for comparison
-            m_iso = m_date[:10] if m_date else ""
-            if after_date and m_iso and m_iso < after_date:
-                continue
-            if before_date and m_iso and m_iso > before_date:
-                continue
-            filtered.append(m)
-        print(f"Using cached meetings, filtered to {len(filtered)} in date window", file=sys.stderr)
-        return filtered
-    return fetch_all_meetings(api_key, after_date, before_date)
+    if cached is None:
+        cached = fetch_all_meetings(
+            api_key, after_date=None, before_date=None, include_details=include_details
+        )
+
+    if not after_date and not before_date:
+        return cached
+
+    filtered = []
+    for m in cached:
+        m_date = m.get("scheduled_start_time", "") or m.get("created_at", "") or ""
+        m_iso = m_date[:10] if m_date else ""
+        if after_date and m_iso and m_iso < after_date:
+            continue
+        if before_date and m_iso and m_iso > before_date:
+            continue
+        filtered.append(m)
+    print(
+        f"Using cached meetings, filtered to {len(filtered)} in date window",
+        file=sys.stderr,
+    )
+    return filtered
 
 
 def fetch_transcript(api_key: str, recording_id) -> list[dict]:
@@ -323,6 +379,13 @@ def main():
         "--before",
         help="Only return meetings on or before YYYY-MM-DD",
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="In --list mode, emit one compact JSON object per matched meeting to "
+        "stdout (id/date/title/recording_id) for machine consumers like the "
+        "biweekly sweep. Without it, --list prints only a human summary to stderr.",
+    )
     args = parser.parse_args()
 
     emails = {e.lower().strip() for e in args.email}
@@ -343,8 +406,21 @@ def main():
         from datetime import date as date_type, timedelta
         api_before = (date_type.fromisoformat(args.date) + timedelta(days=1)).isoformat()
 
+    # Only the record-building paths (--fetch-all / --date) need the heavy
+    # summary/action-item payloads. The list/count path stays light and uses the
+    # shared cache; the detail path fetches fresh (and direct) so its records carry
+    # summaries without contaminating the light cache.
+    want_details = bool(args.fetch_all or args.date)
+
     print("Fetching meetings from Fathom...", file=sys.stderr)
-    all_meetings = fetch_all_meetings_cached(api_key, after_date=api_after, before_date=api_before)
+    if want_details:
+        all_meetings = fetch_all_meetings(
+            api_key, after_date=api_after, before_date=api_before, include_details=True
+        )
+    else:
+        all_meetings = fetch_all_meetings_cached(
+            api_key, after_date=api_after, before_date=api_before, include_details=False
+        )
     print(f"Total meetings returned: {len(all_meetings)}", file=sys.stderr)
 
     # Filter to 1:1s with this person
@@ -364,7 +440,9 @@ def main():
     meetings.sort(key=lambda x: x.get("scheduled_start_time", ""))
 
     if args.list and not args.fetch_all and not args.date:
-        # List-only mode: human-readable to stderr, nothing to stdout
+        # List-only mode: human-readable to stderr. With --json, also emit one
+        # compact JSON object per meeting to stdout for machine consumers (the
+        # biweekly sweep parses stdout — without --json it would always see 0).
         if not meetings:
             print("No matching meetings found.", file=sys.stderr)
             return
@@ -379,6 +457,13 @@ def main():
                 f"  {start}  |  {title}  |  recording_id={rid}",
                 file=sys.stderr,
             )
+            if args.json:
+                print(json.dumps({
+                    "id": m.get("id") or m.get("meeting_id"),
+                    "scheduled_start_time": m.get("scheduled_start_time"),
+                    "title": title,
+                    "recording_id": rid,
+                }))
         return
 
     if args.date:
