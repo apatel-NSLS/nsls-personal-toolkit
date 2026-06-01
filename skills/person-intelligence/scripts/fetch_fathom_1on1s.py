@@ -71,8 +71,16 @@ def build_meetings_url(
     return url
 
 CACHE_DIR = Path.home() / ".cache" / "person-intelligence"
-CACHE_FILE = CACHE_DIR / ".meeting-cache.json"
 CACHE_MAX_AGE_HOURS = 6
+
+
+def _cache_file(include_details: bool = False) -> Path:
+    # Light (list/count) and detailed (summary+actions) payloads are cached
+    # separately so a light list fetch can't strip summaries from the detail path,
+    # and so a multi-person synthesis run fetches the heavy list only once.
+    return CACHE_DIR / (
+        ".meeting-cache-detailed.json" if include_details else ".meeting-cache.json"
+    )
 
 
 def get_api_key() -> str:
@@ -91,12 +99,13 @@ def get_api_key() -> str:
     return key
 
 
-def load_cached_meetings() -> list[dict] | None:
+def load_cached_meetings(include_details: bool = False) -> list[dict] | None:
     """Return cached meetings if cache is fresh, else None."""
-    if not CACHE_FILE.exists():
+    cache_file = _cache_file(include_details)
+    if not cache_file.exists():
         return None
     try:
-        data = json.loads(CACHE_FILE.read_text())
+        data = json.loads(cache_file.read_text())
         cached_at = datetime.fromisoformat(data["cached_at"])
         age_hours = (datetime.now(timezone.utc) - cached_at).total_seconds() / 3600
         if age_hours < CACHE_MAX_AGE_HOURS:
@@ -110,9 +119,9 @@ def load_cached_meetings() -> list[dict] | None:
     return None
 
 
-def save_cached_meetings(meetings: list[dict]) -> None:
+def save_cached_meetings(meetings: list[dict], include_details: bool = False) -> None:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    CACHE_FILE.write_text(
+    _cache_file(include_details).write_text(
         json.dumps(
             {
                 "cached_at": datetime.now(timezone.utc).isoformat(),
@@ -193,7 +202,7 @@ def fetch_all_meetings(
 
         time.sleep(0.4)  # polite pause between pages (light pages are ~1.2s each)
 
-    save_cached_meetings(meetings)
+    save_cached_meetings(meetings, include_details)
     return meetings
 
 
@@ -207,7 +216,7 @@ def fetch_all_meetings_cached(
     # This makes the biweekly sweep hit the API exactly once (the first person)
     # instead of re-fetching per person — and guarantees the cache always holds the
     # widest window, so a person with a narrow --after never shrinks it for others.
-    cached = load_cached_meetings()
+    cached = load_cached_meetings(include_details)
     if cached is None:
         cached = fetch_all_meetings(
             api_key, after_date=None, before_date=None, include_details=include_details
@@ -414,7 +423,9 @@ def main():
 
     print("Fetching meetings from Fathom...", file=sys.stderr)
     if want_details:
-        all_meetings = fetch_all_meetings(
+        # Detail path also uses the (separate, detailed) cache so a multi-person
+        # synthesis run fetches the heavy meeting list once, not per person.
+        all_meetings = fetch_all_meetings_cached(
             api_key, after_date=api_after, before_date=api_before, include_details=True
         )
     else:
