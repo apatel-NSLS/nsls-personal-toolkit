@@ -26,6 +26,8 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+import load_dotenv_local  # noqa: E402,F401  — load .env into os.environ for cron/non-interactive runs
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "person-intelligence"
 
 SYSTEM_PROMPT = """You are producing a biweekly team-pulse digest for a manager.

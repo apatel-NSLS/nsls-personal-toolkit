@@ -16,6 +16,9 @@ import sys
 from datetime import date
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import load_dotenv_local  # noqa: E402,F401  — load .env into os.environ for cron/non-interactive runs
+
 REFERENCES_DIR = Path(__file__).resolve().parent.parent / "references"
 
 SYSTEM_PROMPT_BASE = (
@@ -367,6 +370,20 @@ def determine_role(data):
     return "NSLS team member"
 
 
+def _existing_fm_value(data, key):
+    """Return a frontmatter scalar from the existing profile, or None.
+
+    Health scores (`health`, `health_score`, `health_last_assessed`) and the
+    `health-*` graph tag are set by the relationship-health-check flow, NOT by
+    synthesis. Synthesis rebuilds frontmatter from scratch, so it must carry these
+    forward verbatim — otherwise every re-synthesis silently wipes the health
+    dashboard while leaving the body health table intact.
+    """
+    text = data.get("existing_profile") or ""
+    m = re.search(rf"^{re.escape(key)}:[ \t]*(\S[^\n]*)$", text, re.MULTILINE)
+    return m.group(1).strip() if m else None
+
+
 def determine_tags(data):
     """Build tag list based on available data."""
     tags = ["leadership"]
@@ -376,6 +393,10 @@ def determine_tags(data):
     board = data.get("existing_board_profile")
     if board:
         tags.append("board")
+    # Preserve the health-* graph-coloring tag set by the health-check flow.
+    for t in re.findall(r"health-[a-z]+", _existing_fm_value(data, "tags") or ""):
+        if t not in tags:
+            tags.append(t)
     return tags
 
 
@@ -429,6 +450,11 @@ def build_frontmatter(data):
         f"last-synthesized: {date.today().isoformat()}",
         f"sources: [{', '.join(sources)}]",
     ]
+    # Carry forward health-dashboard fields owned by the health-check flow.
+    for hk in ("health", "health_score", "health_last_assessed"):
+        hv = _existing_fm_value(data, hk)
+        if hv is not None:
+            lines.append(f"{hk}: {hv}")
     if meeting_count > 0:
         lines.append(f"meetings_attended: {meeting_count}")
     lines.append("---")
