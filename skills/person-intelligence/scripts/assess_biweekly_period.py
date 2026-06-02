@@ -37,6 +37,8 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+import load_dotenv_local  # noqa: E402,F401  — load .env into os.environ for cron/non-interactive runs
 CACHE_FILE = Path.home() / ".cache" / "person-intelligence" / ".meeting-cache.json"
 
 # 1-4 scale with emoji mapping

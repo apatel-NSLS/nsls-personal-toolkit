@@ -38,6 +38,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
+import load_dotenv_local  # noqa: E402,F401  — load .env into os.environ for cron/non-interactive runs
 import resolve_user  # noqa: E402
 import list_relationships  # noqa: E402
 
@@ -48,11 +49,38 @@ def utc_now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
+def resolve_canonical_name(vault_path, person_name):
+    """If a person's profile is a redirect stub, return the canonical name it points to.
+
+    Rippling stores a formal name (e.g. "Jana Amsellem") for someone who goes by a
+    preferred name (e.g. "Red Akasha"). The formal-name file is a
+    `type: person-redirect` stub pointing at the canonical profile. Following it
+    keeps the manifest from double-listing the person and from false-flagging the
+    stub as "never synthesized." Returns the original name when there's no redirect.
+    """
+    candidate = vault_path / "30-people" / f"{person_name}.md"
+    try:
+        text = candidate.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return person_name
+    if not re.search(r"^type:\s*person-redirect\s*$", text, re.MULTILINE):
+        return person_name
+    m = re.search(r"^preferred_name:[ \t]*(\S[^\n]*)$", text, re.MULTILINE)
+    if m:
+        return m.group(1).strip().strip('"').strip("'")
+    m = re.search(r'^canonical_profile:[ \t]*"?\[\[([^\]]+)\]\]"?', text, re.MULTILINE)
+    if m:
+        return m.group(1).strip()
+    return person_name
+
+
 def read_last_synthesized(vault_path, person_name):
     """Read the last-synthesized date from a person's Obsidian profile frontmatter.
 
     Returns ISO date string (YYYY-MM-DD) or None if not found / no profile.
+    Follows redirect stubs to the canonical profile first.
     """
+    person_name = resolve_canonical_name(vault_path, person_name)
     candidate = vault_path / "30-people" / f"{person_name}.md"
     if not candidate.exists():
         return None
@@ -148,7 +176,7 @@ def build_manifest(vault_path, cache_dir):
     seen_names = set()
 
     def add(emp, reason):
-        name = emp.get("name", "")
+        name = resolve_canonical_name(vault_path, emp.get("name", ""))
         emp_email = emp.get("email", "")
         key_email = emp_email.lower() if emp_email else None
         key_name = name.lower()
@@ -211,8 +239,12 @@ def build_manifest(vault_path, cache_dir):
         if emp:
             add(emp, "key_relationship")
         else:
+            canonical = resolve_canonical_name(vault_path, name)
+            if canonical.lower() in seen_names:
+                continue
+            seen_names.add(canonical.lower())
             rel_set.append({
-                "name": name,
+                "name": canonical,
                 "email": "",
                 "slack": "",
                 "title": "",
