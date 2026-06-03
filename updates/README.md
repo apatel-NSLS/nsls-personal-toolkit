@@ -8,6 +8,7 @@ Each release has a per-file detail page describing the change, its cost to adopt
 
 ---
 
+- **2026-06-03** — [Harvest meetings into the NSLS Knowledge Base](2026-06-03-kb-harvest-pipeline.md) — 15 min. New `/harvest-meeting` skill turns strategic meetings into gated KB entries; `/close-day` and `/close-week` harvest and audit automatically; `/personal-setup` auto-configures the KB clone for SLT.
 - **2026-05-25** — [Apple Health integration + quarterly goal system](2026-05-25-apple-health-and-quarterly-goals.md) — 30+ min. Daily and weekly skills now surface body metrics (sleep/exercise/HRV/VO2) and actively push toward quarterly personal goals via anchor cues, hit-rate tracking, and weekly reflection.
 - **2026-05-16** — [Person Intelligence v2](2026-05-16-person-intelligence-v2.md) — 30+ min. `/person-intelligence` becomes a manager-coaching system with biweekly sweeps across direct reports, Fathom + Slack + Gmail ingest, and coaching moves surfaced in `/open-day` and `/open-week`.
 - **2026-04-18** — [Release log + guided update flow](2026-04-18-announce-update-and-release-log.md) — 15 min. Every release now has a detail doc, and `/update-personal-productivity` walks you through unadopted releases interactively with customization-aware safe merge.
