@@ -346,21 +346,27 @@ Restorative % (deep + REM as share of total sleep) is the closest proxy to "slee
 
 Read active personal goal files from `$OBSIDIAN_VAULT_PATH/10-strategy/goals/*.md` (skip `personal-goals.md`, `work-goals.md`, anything in `archive/`). Filter to `status: active` AND `category: personal`.
 
-For each, parse the `anchor:` frontmatter field. Match against today's day-of-week to decide if today is an anchor day:
+**Preferred — structured `weekly_schedule` (use when present):** If a goal file has a `weekly_schedule:` map (keys `mon`/`tue`/.../`sun`), look up today's day-of-week and use that entry as the cue. This takes precedence over parsing the flat `anchor`/`weekly_action` fields, because it tells the builder the *specific* session for today (e.g. easy vs. hard) rather than a generic weekly summary.
+
+- **Effective-date guard:** If the goal also has `weekly_schedule_effective:` (a date) and today is *before* that date, do **not** apply the structured schedule. Instead fire a soft bridge cue: `weekly_action` = `"Easy / optional movement only (Z2). Structured pattern starts {weekly_schedule_effective}."` and `fires_today_because` = `"bridge week before schedule starts"`. This prevents prescribing a hard session during a planned ramp-in or recovery window. On/after the effective date, apply the schedule normally.
+- If today's entry is a rest day (text starts with `Rest`, or is empty) → **do not fire** the cue.
+- Otherwise → fire the cue with `weekly_action` = today's entry verbatim, and `fires_today_because` = `"today is <Day>"`.
+
+**Fallback — parse the `anchor:` field** (for goals with no `weekly_schedule`). Match against today's day-of-week to decide if today is an anchor day:
 
 - Anchor phrases like `"Mon/Wed/Fri 7:45am"` → today (DOW) matches Mon, Wed, or Fri → fire cue
 - Anchor phrases like `"After morning coffee, weekdays"` → today is a weekday → fire cue
 - Anchor phrases like `"Sunday evening, before kids' bedtime"` → today is Sunday → fire cue
 - Anchor phrases that mention specific events ("After SLT meeting") → check today's calendar for that event
 
-If an anchor fires today, carry forward to Step 3 as a `goal_cues` list:
+If a cue fires today (by either path), carry forward to Step 3 as a `goal_cues` list:
 
 ```python
 goal_cues = [{
     "slug": "vo2-max",
     "title": "Hold and improve VO2 max",
-    "anchor": "After walking Red, Mon/Wed/Fri 7:45am",
-    "weekly_action": "2x zone-2 + 1x intervals",
+    "anchor": "Laptop on, before opening Slack",
+    "weekly_action": "HARD — Norwegian 4×4 Outdoor Run. 4 × (4 min @ 88-92% HRmax / 3 min jog).",  # today's weekly_schedule entry
     "fires_today_because": "today is Wednesday",
 }, ...]
 ```
