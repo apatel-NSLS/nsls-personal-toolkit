@@ -7,6 +7,29 @@ description: Harvest decisions, project definitions, and state changes from SLT 
 
 Pulls decisions, project definitions, and state changes from SLT-recorded meetings, gates them through the employee-facing sensitive-content rubric, and proposes precise edits to topic files in `60-nsls-knowledge`. Approved edits are committed to `main` and pushed.
 
+## First-Time Setup (read before you clone)
+
+> ⚠️ **The GitHub repo is `thensls/nsls-knowledge` — NOT `60-nsls-knowledge`.**
+> The `60-` prefix is only the *local Obsidian vault folder name* this skill clones into.
+> Cloning `60-nsls-knowledge` fails with "Repository not found" — and on a private repo,
+> "not found" also means *you don't have access yet*. If the clone command below 404s,
+> ping Kevin to be added as a collaborator on `thensls/nsls-knowledge`.
+
+One-time setup for a new SLT writer:
+
+```bash
+# 1. Clone the repo (nsls-knowledge) INTO the folder the skill expects (60-nsls-knowledge)
+git clone https://github.com/thensls/nsls-knowledge.git "$OBSIDIAN_VAULT_PATH/60-nsls-knowledge"
+
+# 2. Set this clone's commit identity to your @nsls.org email so harvest commits are
+#    attributed to you AND the SLT writer gate matches via the kb-repo scope (Step 0).
+git -C "$OBSIDIAN_VAULT_PATH/60-nsls-knowledge" config user.email <you>@nsls.org
+```
+
+Prerequisites (both are quick adds — ask Kevin):
+- Your `@nsls.org` email is in `kb_authors.txt` (same directory as this skill).
+- Your GitHub account is a collaborator on `thensls/nsls-knowledge`.
+
 ## Modes
 
 | Mode | When | Source |
@@ -170,7 +193,10 @@ For `--week-audit` mode, load KB local clone + git log for the week (Task 11 fil
 ```bash
 KB_DIR="$OBSIDIAN_VAULT_PATH/60-nsls-knowledge"
 if [ ! -d "$KB_DIR/.git" ]; then
-    echo "Step 1a: FATAL — KB not cloned to $KB_DIR. Run: git clone https://github.com/thensls/nsls-knowledge.git \"$KB_DIR\""
+    echo "Step 1a: FATAL — KB not cloned to $KB_DIR."
+    echo "  The repo is 'nsls-knowledge' (NOT '60-nsls-knowledge' — that's just the local folder)."
+    echo "  Run: git clone https://github.com/thensls/nsls-knowledge.git \"$KB_DIR\""
+    echo "  If that 404s, you need collaborator access — ask Kevin. See First-Time Setup in this skill."
     exit 1
 fi
 git -C "$KB_DIR" pull --ff-only --quiet
