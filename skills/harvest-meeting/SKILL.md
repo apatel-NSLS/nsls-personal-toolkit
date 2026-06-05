@@ -1,11 +1,11 @@
 ---
 name: harvest-meeting
-description: Harvest decisions, project definitions, and state changes from SLT meetings into the NSLS Knowledge Base (60-nsls-knowledge). Gated to SLT writers. Use when you've just finished a strategic meeting, want to backfill a specific Fathom URL, or as part of close-day Step 4c / close-week Step 2b.
+description: Harvest decisions, project definitions, and state changes from meetings into a knowledge base. SLT members write to the shared company KB (thensls/nsls-knowledge); everyone else builds a local, private KB (never pushed). Use when you've just finished a strategic meeting, want to backfill a specific Fathom URL, or as part of close-day Step 4c / close-week Step 2b.
 ---
 
 # Harvest Meeting — NSLS Knowledge Base Pipeline
 
-Pulls decisions, project definitions, and state changes from SLT-recorded meetings, gates them through the employee-facing sensitive-content rubric, and proposes precise edits to topic files in `60-nsls-knowledge`. Approved edits are committed to `main` and pushed.
+Pulls decisions, project definitions, and state changes from recorded meetings, gates them through the employee-facing sensitive-content rubric, and proposes precise edits to topic files. Routing is automatic: SLT members (on `kb_authors.txt`) write to the shared company KB (`60-nsls-knowledge`) and push to `main`; everyone else writes to a local, private KB (`60-nsls-knowledge-local`) that is committed locally and never pushed.
 
 ## First-Time Setup (read before you clone)
 
@@ -14,6 +14,9 @@ Pulls decisions, project definitions, and state changes from SLT-recorded meetin
 > Cloning `60-nsls-knowledge` fails with "Repository not found" — and on a private repo,
 > "not found" also means *you don't have access yet*. If the clone command below 404s,
 > ping Kevin to be added as a collaborator on `thensls/nsls-knowledge`.
+
+> **This setup applies only to SLT members writing to the company KB.** Non-SLT users need
+> no setup — the local KB is scaffolded automatically on first run.
 
 One-time setup for a new SLT writer:
 
@@ -38,11 +41,19 @@ Prerequisites (both are quick adds — ask Kevin):
 | `--fathom-url <url>` | Manual after important meeting | Single meeting |
 | `--week-audit --week YYYY-Www` | close-week Step 2b | Git log + topic files for the week |
 
-## SLT Allowlist
+## Allowlist → routing (not a write gate)
 
-Writes require the current git user.email to be present in `kb_authors.txt` (same directory as this SKILL.md). Non-SLT users running `--week-audit` get the audit report; write actions are silently skipped.
+`kb_authors.txt` (same directory as this SKILL.md) lists SLT members. It no longer gates
+whether you can write — it decides **where** writes go:
 
-## Step 0: Mode dispatch + SLT allowlist gate
+- **On the allowlist** → company KB (`thensls/nsls-knowledge`), committed and pushed to `main`.
+- **Not on the allowlist** → a self-contained **local KB** (`60-nsls-knowledge-local` in your
+  vault), committed locally and never pushed. First run scaffolds it from an org-level seed.
+
+Identity is resolved cwd-independently in Step 0 (same logic as before). Everyone gets a
+working harvest; SLT membership only changes the destination.
+
+## Step 0: Mode dispatch + allowlist routing
 
 Parse arguments to determine mode (`--date`, `--fathom-url`, or `--week-audit`).
 
@@ -66,7 +77,9 @@ candidates_paths = [
     pathlib.Path.home() / 'nsls-skills/nsls-personal-toolkit/skills/harvest-meeting/kb_authors.txt',
     pathlib.Path.home() / '.claude/plugins/nsls-personal-toolkit/skills/harvest-meeting/kb_authors.txt',
 ]
-authors_file = next((p for p in candidates_paths if p.exists()), None)
+# HARVEST_AUTHORS_FILE lets verification runs point at a temp allowlist.
+override = os.environ.get('HARVEST_AUTHORS_FILE')
+authors_file = pathlib.Path(override) if override and pathlib.Path(override).exists() else next((p for p in candidates_paths if p.exists()), None)
 if not authors_file:
     print('FATAL: kb_authors.txt not found in any known path')
     sys.exit(2)
@@ -127,58 +140,76 @@ looks_misconfigured = (not is_slt) and bool(nsls_emails)
 print(f'looks_misconfigured: {looks_misconfigured}')
 if nsls_emails:
     print(f'nsls_emails_detected: {\", \".join(nsls_emails)}')
+
+# --- Routing: allowlist match -> company; otherwise -> local (never skip) ---
+vault = pathlib.Path(os.environ.get('OBSIDIAN_VAULT_PATH', ''))
+if is_slt:
+    kb_target, kb_push = 'company', True
+    kb_dir = vault / '60-nsls-knowledge'
+else:
+    kb_target, kb_push = 'local', False
+    kb_dir = vault / '60-nsls-knowledge-local'
+
+# write_authorized is now TRUE for everyone: writes always go SOMEWHERE.
+ctx_dir = pathlib.Path('/tmp/harvest-meeting-ctx')
+ctx_dir.mkdir(exist_ok=True)
+import json as _json
+(ctx_dir / 'target.json').write_text(_json.dumps({
+    'kb_target': kb_target, 'kb_dir': str(kb_dir),
+    'kb_push': kb_push, 'write_authorized': True,
+}, indent=2))
+(ctx_dir / 'env.sh').write_text(
+    f'export KB_TARGET={kb_target}\n'
+    f'export KB_DIR={_json.dumps(str(kb_dir))}\n'
+    f'export KB_PUSH={\"true\" if kb_push else \"false\"}\n'
+)
+print(f'kb_target: {kb_target}')
+print(f'kb_dir: {kb_dir}')
+print(f'kb_push: {kb_push}')
 "
 ```
 
-**Heartbeat the result** (per the skill-heartbeats rule — always print the scopes checked so a
-future silent skip is debuggable):
+**Heartbeat the result** (per the skill-heartbeats rule — always print the scopes checked and
+the resolved target so a future silent misroute is debuggable):
 
-- **If `slt_writer: True`** → "Step 0: SLT writer confirmed ({matched_email} via {scope}), proceeding."
+- **If `kb_target: company`** (SLT writer confirmed) →
+  "Step 0: SLT writer ({matched_email} via {scope}) → company KB, pushing to thensls/nsls-knowledge."
 
-- **If `slt_writer: False` AND `looks_misconfigured: True`** (some `@nsls.org` email detected but
-  none matched the allowlist) → print the **loud allowlist-gap** message and skip:
+- **If `kb_target: local` AND `looks_misconfigured: True`** (an `@nsls.org` email was detected
+  but none matched the allowlist) → route to local, AND print the allowlist-gap note so a
+  genuinely-SLT-but-unlisted person is never silently demoted:
 
   ```
-  Step 0: ⚠ NSLS email detected but NOT in KB_AUTHORS allowlist
+  Step 0: ⚠ NSLS email detected but NOT in KB_AUTHORS — writing to your LOCAL KB
     checked: <emails_checked>
     NSLS emails detected: <nsls_emails_detected>
+    local KB: <kb_dir>
 
-    If your @nsls.org email is correct but missing from the allowlist, ping Kevin to
-    add you to skills/harvest-meeting/kb_authors.txt and tick Members.is_slt = true.
-    If you have an @nsls.org typo (e.g., name@nsl.org), fix it in the appropriate
-    git scope or in your toolkit .env and re-run.
+    If you ARE on SLT and should be writing to the company KB, ping Kevin to add you to
+    skills/harvest-meeting/kb_authors.txt and tick Members.is_slt = true, then re-run.
+    If you have an @nsls.org typo, fix it in the appropriate git scope or your toolkit .env.
+    Otherwise this is expected — your harvest goes to your local KB.
   ```
 
-- **If `slt_writer: False` AND `looks_misconfigured: False`** AND mode is `--date` / `--fathom-url`
-  → print the **actionable setup-fix** message and skip cleanly:
+- **If `kb_target: local` AND `looks_misconfigured: False`** (genuinely non-SLT) →
+  "Step 0: not on the SLT allowlist → writing to your local KB at <kb_dir> (not pushed)."
+  This is the normal, expected path for most of the org — no setup fix needed.
 
-  ```
-  Step 0: not in KB_AUTHORS, skipping harvest
-    checked: <emails_checked>
+In every case the pipeline continues. There is no longer a skip/abort path based on membership.
 
-    If you ARE on SLT, your git identity isn't your @nsls.org email yet. Quick fix:
+> **KB commit attribution:**
+> - *Company KB:* harvest commits are authored by whatever `git -C "$KB_DIR" config user.email`
+>   resolves to. Set the company clone's local identity to your NSLS email so commits are
+>   attributed to you AND the allowlist matches via the `kb-repo` scope regardless of cwd:
+>   `git -C "$OBSIDIAN_VAULT_PATH/60-nsls-knowledge" config user.email <you>@nsls.org`.
+> - *Local KB:* the local repo's identity is set automatically on first run (Step 1a). No
+>   remote is ever configured, so a push is impossible — your local KB cannot reach the
+>   company repo.
 
-      KB_DIR="$OBSIDIAN_VAULT_PATH/60-nsls-knowledge"
-      git -C "$KB_DIR" config user.email <you>@nsls.org
-
-    Or set BUILDER_EMAIL in your toolkit .env so the gate matches via toolkit-.env:
-      ~/.claude/local-plugins/nsls-personal-toolkit/.env  →  BUILDER_EMAIL=<you>@nsls.org
-
-    Then re-run /close-day or /harvest-meeting.
-
-    If you're NOT on SLT, this skip is expected — /close-day continues normally.
-  ```
-  Exit cleanly with `WRITE_AUTHORIZED=false`.
-
-- **If `slt_writer: False` AND mode is `--week-audit`** → "Step 0: not in KB_AUTHORS (checked: {emails_checked}), running audit-only (no write actions)." Continue with `WRITE_AUTHORIZED=false`. (The audit is read-only; the same setup-fix hint applies only if the user wants write actions.)
-
-> **KB commit attribution:** harvest commits are authored by whatever `git -C "$KB_DIR" config
-> user.email` resolves to. For the org KB (`thensls/nsls-knowledge`), set the KB clone's local
-> identity to your NSLS email so commits are correctly attributed:
-> `git -C "$OBSIDIAN_VAULT_PATH/60-nsls-knowledge" config user.email <you>@nsls.org`. This also
-> makes the gate match via the `kb-repo` scope regardless of cwd.
-
-Pass `WRITE_AUTHORIZED` (True/False) through to subsequent steps; they consult it to decide whether to execute write actions.
+`Step 0` has stashed `/tmp/harvest-meeting-ctx/target.json` (`kb_target`, `kb_dir`, `kb_push`,
+`write_authorized`) and `/tmp/harvest-meeting-ctx/env.sh`. Every later step reads these: python
+blocks `json.load` the file; bash blocks `source` the `env.sh`. Do NOT re-derive the company
+path anywhere downstream.
 
 ## Step 1: Load context
 
@@ -191,16 +222,49 @@ For `--week-audit` mode, load KB local clone + git log for the week (Task 11 fil
 ### 1a. Ensure KB local clone is fresh
 
 ```bash
-KB_DIR="$OBSIDIAN_VAULT_PATH/60-nsls-knowledge"
-if [ ! -d "$KB_DIR/.git" ]; then
-    echo "Step 1a: FATAL — KB not cloned to $KB_DIR."
-    echo "  The repo is 'nsls-knowledge' (NOT '60-nsls-knowledge' — that's just the local folder)."
-    echo "  Run: git clone https://github.com/thensls/nsls-knowledge.git \"$KB_DIR\""
-    echo "  If that 404s, you need collaborator access — ask Kevin. See First-Time Setup in this skill."
-    exit 1
+source /tmp/harvest-meeting-ctx/env.sh   # sets KB_TARGET, KB_DIR, KB_PUSH (from Step 0)
+
+if [ "$KB_TARGET" = "company" ]; then
+    if [ ! -d "$KB_DIR/.git" ]; then
+        echo "Step 1a: FATAL — company KB not cloned to $KB_DIR."
+        echo "  The repo is 'nsls-knowledge' (NOT '60-nsls-knowledge' — that's just the local folder)."
+        echo "  Run: git clone https://github.com/thensls/nsls-knowledge.git \"$KB_DIR\""
+        echo "  If that 404s, you need collaborator access — ask Kevin. See First-Time Setup."
+        exit 1
+    fi
+    git -C "$KB_DIR" pull --ff-only --quiet
+    echo "Step 1a: company KB synced to $(git -C "$KB_DIR" rev-parse --short HEAD)"
+else
+    # Local KB: scaffold on first run, never add a remote (push is impossible by design).
+    SEED_CANDIDATES=(
+        "$HOME/nsls-skills/nsls-personal-toolkit/skills/harvest-meeting/references/local-kb-seed"
+        "$HOME/.claude/plugins/nsls-personal-toolkit/skills/harvest-meeting/references/local-kb-seed"
+    )
+    SEED_DIR=""
+    for c in "${SEED_CANDIDATES[@]}"; do [ -d "$c" ] && SEED_DIR="$c" && break; done
+    if [ -z "$SEED_DIR" ]; then
+        echo "Step 1a: FATAL — local-kb-seed not found in any known path."; exit 1
+    fi
+    if [ ! -d "$KB_DIR/.git" ]; then
+        mkdir -p "$KB_DIR"
+        git -C "$KB_DIR" init --quiet
+        # Local-only identity; prefer a detected nsls email if present, else a generic fallback.
+        WHO="$(git config --global user.email 2>/dev/null)"
+        case "$WHO" in *@nsls.org) : ;; *) WHO="harvest-local@nsls.org" ;; esac
+        git -C "$KB_DIR" config user.email "$WHO"
+        git -C "$KB_DIR" config user.name "NSLS KB (local)"
+        cp -R "$SEED_DIR"/. "$KB_DIR"/
+        git -C "$KB_DIR" add -A
+        git -C "$KB_DIR" commit -q -m "local KB: initial scaffold"
+        echo "Step 1a: local KB created at $KB_DIR (seeded $(ls "$SEED_DIR"/*.md | wc -l | tr -d ' ') files)"
+    else
+        echo "Step 1a: local KB ready at $KB_DIR ($(git -C "$KB_DIR" rev-parse --short HEAD))"
+    fi
+    # Guard: a local KB must never have a remote.
+    if git -C "$KB_DIR" remote | grep -q .; then
+        echo "Step 1a: ⚠ local KB unexpectedly has a remote — refusing to proceed."; exit 1
+    fi
 fi
-git -C "$KB_DIR" pull --ff-only --quiet
-echo "Step 1a: KB synced to $(git -C "$KB_DIR" rev-parse --short HEAD)"
 ```
 
 ### 1b. Load topic index and rubric
@@ -209,7 +273,8 @@ echo "Step 1a: KB synced to $(git -C "$KB_DIR" rev-parse --short HEAD)"
 PYTHONPATH=/tmp/pptx_deps python3.12 << 'PYEOF'
 import os, pathlib, re, json
 
-kb_dir = pathlib.Path(os.environ['OBSIDIAN_VAULT_PATH']) / '60-nsls-knowledge'
+_t = json.loads(pathlib.Path('/tmp/harvest-meeting-ctx/target.json').read_text())
+kb_dir = pathlib.Path(_t['kb_dir'])
 
 # Parse frontmatter + body for every topic file
 topics = {}
@@ -261,7 +326,9 @@ print(f"Step 1b: cached context at {ctx_dir}")
 PYEOF
 ```
 
-**Heartbeat expected:** `Step 1b: loaded 60 topic files, rubric is ~5000 chars`. If fewer than 40 topic files, something is wrong with the KB clone.
+**Heartbeat expected:** `Step 1b: loaded N topic files, rubric is ~5000 chars`.
+- *Company KB:* expect ~60. Fewer than 40 means something is wrong with the clone — stop and check.
+- *Local KB:* a freshly seeded KB legitimately has ~5 files. The count grows as you harvest, so there is no low-count alarm for local.
 
 ## Step 2: Load Fathom meetings
 
@@ -506,13 +573,16 @@ For each approved candidate, perform the edit, then commit and push as one batch
 PYTHONPATH=/tmp/pptx_deps python3.12 << 'PYEOF'
 import os, pathlib, json, re, datetime, subprocess
 
-kb_dir = pathlib.Path(os.environ['OBSIDIAN_VAULT_PATH']) / '60-nsls-knowledge'
 ctx_dir = pathlib.Path('/tmp/harvest-meeting-ctx')
+_t = json.loads((ctx_dir / 'target.json').read_text())
+kb_dir = pathlib.Path(_t['kb_dir'])
+kb_push = bool(_t.get('kb_push'))
 approved = json.loads((ctx_dir / 'approved.json').read_text())
 today = datetime.date.today().isoformat()
 
-# Ensure clean tree before write
-subprocess.run(['git', '-C', str(kb_dir), 'pull', '--ff-only', '--quiet'], check=True)
+# Company KB: ensure clean tree before write (rebase on remote). Local KB: no remote, skip.
+if kb_push:
+    subprocess.run(['git', '-C', str(kb_dir), 'pull', '--ff-only', '--quiet'], check=True)
 
 edited_files = set()
 
@@ -629,36 +699,43 @@ if edited_files:
 
     msg = f"harvest: {today} {title_str} ({len(approved)} edits)"
     subprocess.run(['git', '-C', str(kb_dir), 'commit', '-m', msg], check=True)
+    head = subprocess.check_output(['git', '-C', str(kb_dir), 'rev-parse', '--short', 'HEAD'], text=True).strip()
 
-    # Push with rebase-retry
-    try:
-        subprocess.run(['git', '-C', str(kb_dir), 'push', 'origin', 'main'], check=True)
-        print(f"Step 8: pushed {len(edited_files)} file change(s), {len(approved)} edit(s)")
-    except subprocess.CalledProcessError:
-        # Rebase + retry once
-        rebase = subprocess.run(['git', '-C', str(kb_dir), 'pull', '--rebase'], capture_output=True, text=True)
-        if 'CONFLICT' in (rebase.stdout + rebase.stderr):
-            print("Step 8: FATAL — rebase conflict on topic file. Aborting. Resolve manually.")
-            subprocess.run(['git', '-C', str(kb_dir), 'rebase', '--abort'])
-            raise SystemExit(1)
-        subprocess.run(['git', '-C', str(kb_dir), 'push', 'origin', 'main'], check=True)
-        print(f"Step 8: pushed after rebase ({len(edited_files)} file change(s), {len(approved)} edit(s))")
+    if not kb_push:
+        # Local KB: commit only, never push (no remote exists by design).
+        print(f"Step 8: committed {head} locally — {len(edited_files)} file change(s), "
+              f"{len(approved)} edit(s) in {kb_dir.name} (not pushed — local KB)")
+    else:
+        # Company KB: push with rebase-retry.
+        try:
+            subprocess.run(['git', '-C', str(kb_dir), 'push', 'origin', 'main'], check=True)
+            print(f"Step 8: committed {head} — {len(approved)} edit(s) to {len(edited_files)} file(s) "
+                  f"in {kb_dir.name}, pushed to origin/main")
+        except subprocess.CalledProcessError:
+            rebase = subprocess.run(['git', '-C', str(kb_dir), 'pull', '--rebase'], capture_output=True, text=True)
+            if 'CONFLICT' in (rebase.stdout + rebase.stderr):
+                print("Step 8: FATAL — rebase conflict on topic file. Aborting. Resolve manually.")
+                subprocess.run(['git', '-C', str(kb_dir), 'rebase', '--abort'])
+                raise SystemExit(1)
+            # After rebase, HEAD sha may have changed; recompute for an accurate heartbeat.
+            head = subprocess.check_output(['git', '-C', str(kb_dir), 'rev-parse', '--short', 'HEAD'], text=True).strip()
+            subprocess.run(['git', '-C', str(kb_dir), 'push', 'origin', 'main'], check=True)
+            print(f"Step 8: committed {head} — {len(approved)} edit(s) to {len(edited_files)} file(s) "
+                  f"in {kb_dir.name}, pushed to origin/main after rebase")
 else:
     print("Step 8: no approved candidates, nothing to commit.")
 PYEOF
 ```
 
 **Heartbeat at end:**
-```
-Step 8: committed <sha> — <N> edits to <M> file(s) in 60-nsls-knowledge
-       pushed to origin/main
-```
+- *Company KB:* `Step 8: committed <sha> — <N> edit(s) to <M> file(s) in 60-nsls-knowledge, pushed to origin/main`.
+- *Local KB:* `Step 8: committed <sha> locally — <N> edits to <M> file(s) in 60-nsls-knowledge-local (not pushed — local KB)`.
 
 This is the last step in `--date` and `--fathom-url` modes.
 
 ## Step 9: Week-audit mode (--week-audit)
 
-Invoked by `close-week` Step 2b. Reads git log for the week + topic file frontmatter to produce an audit report. SLT users additionally get promotion + stale-flag write actions.
+Invoked by `close-week` Step 2b. Reads git log for the week + topic file frontmatter to produce an audit report. Everyone additionally gets promotion + stale-flag write actions against their own KB — company-KB edits push, local-KB edits commit only.
 
 ### 9a. Load week context
 
@@ -666,7 +743,8 @@ Invoked by `close-week` Step 2b. Reads git log for the week + topic file frontma
 PYTHONPATH=/tmp/pptx_deps python3.12 << 'PYEOF'
 import os, pathlib, subprocess, datetime, json, re
 
-kb_dir = pathlib.Path(os.environ['OBSIDIAN_VAULT_PATH']) / '60-nsls-knowledge'
+_t = json.loads(pathlib.Path('/tmp/harvest-meeting-ctx/target.json').read_text())
+kb_dir = pathlib.Path(_t['kb_dir'])
 week = os.environ['HARVEST_WEEK']  # YYYY-Www format
 year, w = week.split('-W')
 year = int(year); w = int(w)
@@ -759,9 +837,10 @@ Open Questions older than 30 days:
   (or "No old open questions ✓")
 ```
 
-### 9d. Promotion offers (SLT-only)
+### 9d. Promotion offers
 
-Skip if `WRITE_AUTHORIZED=false`.
+Available whenever a KB target is set (always, post-routing). Commits respect `kb_push`:
+the company KB pushes; a local KB commits only. (Step 8's logic is reused, so this is automatic.)
 
 For each old open question, ask Claude:
 
@@ -794,7 +873,7 @@ Approve? all / drop 1 / edit 1: <text> / cancel
 
 On approval, edit the topic file (remove from Open Questions section, append to Key Decisions), commit, push (Step 8 reused).
 
-### 9e. Stale-flag offers (SLT-only)
+### 9e. Stale-flag offers
 
 For each stale topic, prompt user:
 
@@ -810,13 +889,13 @@ Topic <slug>.md last updated YYYY-MM-DD ({N} days ago).
 
 Per-topic Y/N. Commit the frontmatter changes as a single batch at end.
 
-### 9f. Non-SLT path
+### 9f. Target note
 
-If `WRITE_AUTHORIZED=false`, after 9c:
+After 9c, print which KB the audit ran against so the report is unambiguous:
 
 ```
-Step 9: audit-only (not in KB_AUTHORS). To propose changes, edit a topic file
-in your local clone and open a PR against thensls/nsls-knowledge.
+Step 9: audit ran against your <company|local> KB (<kb_dir>).
 ```
 
-Exit cleanly.
+There is no audit-only dead-end anymore. Whether company or local, 9d/9e write actions are
+available; a local KB commits without pushing.
