@@ -484,6 +484,13 @@ Notes never touch the vault — both return only distilled, sensitivity-screened
 
 **Rules:**
 - One line per bucket; drop any bucket that's null for that person.
+- **🌱 Develop — deliver it with GAIN (Jack Cohen's feedback framework).** Frame toward the gain,
+  not the pain. Walk the four steps in order:
+  - **G — Goal:** name what you *both* gain from the change ("I want us to ship faster"). Same-team signal, not a complaint.
+  - **A — Actions:** observable behavior, no judgment ("the last handoff skipped the customer research").
+  - **I — Impacts:** the consequence — and own your contribution too ("engineers had to re-ask instead of deciding").
+  - **N — Next Actions:** a concrete commitment, co-designed with them ("can you include that context next time?").
+  Make it a dialogue, frame the new behavior as a time-boxed experiment, and schedule the follow-up.
 - **🔁 Close loop** fires when `loop_ledger --for` lists this person in `close_the_loop` — a
   friction of theirs resolved and you haven't told them. You're seeing them today: perfect moment.
   When the builder confirms they closed it, run `loop_ledger.py --close "<name>" --note "..."`.
