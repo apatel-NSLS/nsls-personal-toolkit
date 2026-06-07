@@ -492,6 +492,13 @@ This drives a **Management Cadence** block in the Week Plan (Step 3) and the
 **Rules:**
 - The three intentions are the point — exactly one per bucket, each on a *different* report
   (recognition + development + unblocking spread across the team, never stacked on one person).
+- **🌱 Develop — plan it with GAIN (Jack Cohen's feedback framework).** When you set the develop
+  intention, frame the conversation toward the gain, not the pain, in four steps:
+  - **G — Goal:** what you *both* gain from the change (same-team signal, not a complaint).
+  - **A — Actions:** observable behavior, no judgment.
+  - **I — Impacts:** the consequence — and own your contribution too.
+  - **N — Next Actions:** a concrete, co-designed commitment.
+  Make it a dialogue, frame the new behavior as a time-boxed experiment, and schedule the follow-up.
 - **Streak ≥3 / any `p1_candidates` loop is a trust emergency** — it should usually become the
   unblock intention and may warrant a Top-3 slot this week.
 - **Closing loops is the highest-leverage habit:** for each `close_the_loop` person, the move is
