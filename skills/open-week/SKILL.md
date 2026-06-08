@@ -300,6 +300,35 @@ mode-rationale: "[evidence string — name the signals that drove the call, both
 
 Then proceed to existing Step 2 (coaching insights) and Step 3 (draft week plan). The Top 3 for the week should be informed by the stack rank — typically the top 3 ranked projects become the Top 3, but user may choose differently based on calendar and deadlines.
 
+### Step 1.95: Month-aware reminders
+
+Some recurring CFO/role-level actions only fire during specific weeks of the month (e.g., monthly close + P&L review in the first week of each month). Surface these automatically when the week's Monday falls in the relevant date range.
+
+**Detection:** Compute `monday_dom` = the day-of-month of this week's Monday. For example, if this week's Monday is May 4, `monday_dom = 4`.
+
+**Trigger conditions:**
+- `first_week`: `monday_dom <= 7` — the week containing the first Monday of the month
+- (extend later if other windows are needed: mid-month, last-week, quarter-end)
+
+**Read reminders from builder profile:**
+
+Open `$OBSIDIAN_VAULT_PATH/50-reference/builder-profile.md` and look for a `## Month Reminders` section. Format:
+
+```markdown
+## Month Reminders
+
+- **[Reminder name]** — [one-line description of the action]
+- **[Reminder name]** — [description]
+```
+
+If the section is missing, skip silently — no monthly cadence configured.
+
+**What to do with the reminders:**
+
+- If `first_week` is true and the profile has Month Reminders, render them as a `### Monthly Cadence (first week of [Month])` block in the week plan (see Step 3 template).
+- Treat them as Top-3-eligible: if a reminder is genuinely urgent (e.g., the close hasn't fired yet), it's a candidate for Top 3, not just a checkbox at the bottom.
+- Do not ask the builder whether to include them. They configured them in the profile; surface them every applicable week.
+
 ### Step 2: Generate coaching insights
 
 Before suggesting priorities, surface patterns:
@@ -352,6 +381,12 @@ Present to the builder:
 **Stale goals:** [any goals with no progress in 3+ weeks — suggest park or schedule]
 
 **Inbox:** [N] unprocessed links. [If >10: "Your learning inbox is backing up. Run `/learn inbox` to process, or I'll triage during `/open-day`."]
+
+### Monthly Cadence (first week of [Month])
+*Only render this section when Step 1.95 detected `first_week == true` AND the builder profile has Month Reminders. Otherwise omit entirely.*
+
+- [ ] **[Reminder name]** — [description from profile]
+- [ ] **[Reminder name]** — [description from profile]
 
 ### Also Important (but not Top 3)
 - [Item] — due [date], can be done in [time estimate]

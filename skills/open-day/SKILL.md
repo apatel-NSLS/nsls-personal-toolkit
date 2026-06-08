@@ -91,18 +91,42 @@ The auto-run is the point: morning routine self-heals when the evening ritual wa
 
 ### Step 2: Collect data (run in parallel)
 
-**2a. Google Calendar — today's meetings**
+**2a. Today's meetings — try sources in this order**
 
-```
-gcal_list_events(
-  timeMin="YYYY-MM-DDT00:00:00",
-  timeMax="YYYY-MM-DDT23:59:59",
-  timeZone="<builder timezone>",
-  condenseEventDetails=false
-)
-```
+1. **Google Calendar MCP (preferred):**
+   ```
+   gcal_list_events(
+     timeMin="YYYY-MM-DDT00:00:00",
+     timeMax="YYYY-MM-DDT23:59:59",
+     timeZone="<builder timezone>",
+     condenseEventDetails=false
+   )
+   ```
 
-Extract: meeting title, start/end time, attendees. Flag meetings that need prep (external attendees, board members, candidates).
+2. **Gmail MCP fallback** — if `gcal_*` tools aren't loaded but `mcp__*__search_threads` (the `claude.ai Gmail` connector) is, search invites: `query="has:attachment filename:ics newer_than:14d"` then read threads to extract today's events.
+
+3. **IMAP fallback for headless / scheduled runs** — if neither MCP is available (the 7 a.m. scheduled run hits this path because `--dangerously-skip-permissions` headless mode doesn't load the first-party connectors), shell out to the bundled fetcher:
+   ```bash
+   python ~/.claude/local-plugins/nsls-personal-toolkit/skills/open-day/scripts/fetch_today_meetings.py
+   ```
+   The script auto-loads `~/.claude/credentials/open-day.env` if env vars aren't pre-sourced.
+
+   Output is a JSON envelope:
+   ```json
+   {
+     "events":   [{"summary": "...", "start_local": "...", "end_local": "...",
+                   "organizer": "...", "attendees": [...], "location": "...", "status": "..."}, ...],
+     "warnings": ["..."]
+   }
+   ```
+   Events are sorted by start_local, deduped (Google `_R` UID variants collapse, latest SEQUENCE wins), cancelled events stripped, recurring meetings expanded via RRULE.
+
+   The script exits 0 even on Gmail/parse failures — failures surface in `warnings`. **If `warnings` is non-empty, prepend a visible callout to the meetings section of the daily note** (e.g. `> ⚠️ Gmail fetch issue: <warning text>`) so the user sees that meetings may be incomplete.
+
+   If `events` is empty AND `warnings` is empty: legitimately a quiet day — render an empty calendar.
+   If `events` is empty AND `warnings` is non-empty: Gmail fetch failed — fall back to yesterday's "Tomorrow's calendar" forward-look AND surface the warning at the top of the meetings section.
+
+Extract from whichever source succeeded: meeting title, start/end time, attendees. Flag meetings that need prep (external attendees, board members, candidates). External attendees are easy to spot in the IMAP output — any attendee email whose domain isn't `nsls.org` is external.
 
 **2b. Airtable — what's due and overdue**
 
@@ -192,7 +216,67 @@ Also read:
 - `$OBSIDIAN_VAULT_PATH/40-learning/_weekly-plan.md` — today's micro-learning assignment
 - `$OBSIDIAN_VAULT_PATH/40-learning/_inbox.md` — count of unprocessed links for active goals
 
-**2i. Open PRs on watched repos**
+**2i. Cross-channel priority scan (Slack DMs + Gmail) — surface untracked asks**
+
+> **Why this step exists.** On 2026-05-04 a request from Gary about 2025 financials sat in Slack DMs and Gmail for 3+ months without ever surfacing as a priority because it was never logged in Airtable. The carry-over chain only catches what was already in Airtable or yesterday's daily note. This step catches the gap: things asked of the builder by senior leaders that never made it into a structured tracker.
+
+**Always run this step. Do not skip even if MCPs feel slow.** If a tool isn't available in the current run mode (e.g., headless without Slack MCP), surface that explicitly in the daily note as `> ⚠️ Cross-channel priority scan skipped — Slack/Gmail MCP not loaded; run /open-day interactively today to catch untracked asks` and continue.
+
+**Key contacts** (DMs and replies from these people get prioritized):
+
+Read from `$OBSIDIAN_VAULT_PATH/50-reference/builder-profile.md` under `key_contacts:` if present. If absent, fall back to:
+`Gary Tuerack, Kevin Prentiss, Cory Capoccia, Heather Darnell, Jenna Fontanez, Ashleigh Smith, Michael O'Brien, Adam Stone, Valerie English, Sandra Suarez`.
+
+**Slack scan** (last 7 days):
+
+```
+slack_search_public_and_private(
+  query="to:me from:<@U040YTX56DP> OR from:<@KEVIN_USER_ID> OR ... newer_than:7d",
+  sort="timestamp", limit=20
+)
+```
+
+For each match, classify:
+- **Direct ask**: contains `can you`, `could you`, `please`, `need`, `where are we`, `any update`, `did you`, `will you`, `do you have`, `still waiting`, `is this done`, `?`
+- **Builder reply check**: read the thread tail. If the builder's most recent reply contains delivery language (`done`, `sent`, `shipped`, `here you go`, `attached`, `link is`), the ask is closed — skip. Otherwise it's an open ask.
+
+**Gmail scan** (last 14 days):
+
+```
+search_threads(query="(to:me OR cc:me) -from:me newer_than:14d")
+```
+
+For each thread:
+- If from non-`@nsls.org` AND contains action language AND the builder's last reply (if any) does not contain delivery language → it's an external chase
+- If the builder previously replied with commitment language (`I'll get back to you`, `I'll send`, `we're working on`, `following up`) more than 7 days ago and there's no subsequent delivery from the builder → it's a stale commitment
+
+**De-dupe against structured trackers:**
+
+For every candidate, check that the topic doesn't already appear in:
+- This morning's Airtable open-tasks list (Step 2b)
+- Yesterday's daily note Carrying Over section
+- Today's daily note Tasks section if already partially drafted
+
+Match heuristically by keyword overlap (the candidate's first 5–8 distinctive words vs. each tracked task's description + Notes). If matched → already tracked, skip.
+
+**Output format (insert into Morning Check-in, BEFORE Top 3):**
+
+```markdown
+### 🔴 Untracked asks — found in Slack/Gmail, not in Airtable
+
+| Source | Person | When | Ask | Last builder action |
+|---|---|---|---|---|
+| Slack DM | Gary | 5/1 12:04 PM | "Are you back, do you have [2025 financials]?" | Replied 12:25 with promise of follow-up; no further movement |
+| Email | Meredith Sawyer (external counsel) | 3/10 | "When will 2025 reviewed financials and tax return be completed?" | Replied 3/10 with "tax returns under partner review"; no delivery since |
+
+*Surface 0–5 most urgent. If 0, write: "✅ Cross-channel scan clean — no untracked asks from key contacts."*
+```
+
+**Treat anything from Gary as P1-eligible** unless it's a low-stakes ask. Anything from Cory or Kevin is P1-eligible if it has a deadline. Other key contacts default to P2.
+
+**Pass through to Step 3:** these untracked asks are eligible for the Top 3 / full task list. Do not bury them in a "for later" section — if they survive de-dup, they're as actionable as any Airtable task.
+
+**2j. Open PRs on watched repos**
 
 Surface open pull requests on repos the builder maintains so they don't sit forgotten. Skip silently if `PR_WATCH_REPOS` is not set in `~/.claude/local-plugins/nsls-personal-toolkit/.env`, or if the `gh` CLI is unavailable.
 
@@ -216,7 +300,7 @@ Categorize results into two buckets:
 
 Skip the entire section in Step 3 if both buckets are empty.
 
-**2j. SLT Meeting Actions — open items from the SLT knowledge base**
+**2k. SLT Meeting Actions — open items from the SLT knowledge base**
 
 Pull Kevin's open Meeting Actions from the SLT Meeting Intelligence base. Symmetric with `/close-day` Step 1h. These are action items from SLT meetings tracked separately from Asana — many have no due date but are time-sensitive (retreat prep, offsite logistics, quarterly deliverables).
 
@@ -388,7 +472,7 @@ Also check the teach/delegate/do ladder: if a priority is maintenance work on a 
 
 You set your actual Top 3, energy level, and vitality intentions. The AI and morning suggestions are starting points — you may adopt, modify, or completely replace them.
 
-### Step 4a: SLT → Asana shadow creation (if SLT actions were pulled in Step 2i)
+### Step 4a: SLT → Asana shadow creation (if SLT actions were pulled in Step 2k)
 
 After the builder confirms their Top 3 and before scheduling, check whether any Top 3 item corresponds to an open SLT Meeting Action, and whether the builder wants any overdue/retreat-critical SLT items mirrored to Asana for today's flow.
 
@@ -632,6 +716,14 @@ Example format (customize per builder):
 - **Monday:** "Review topic submissions. Prepare weekly update."
 - **Tuesday:** "Check standing meeting agenda. Finalize prep."
 - **Friday:** "Run /close-week. Review weekly metrics."
+
+### Month-Aware Additions
+
+Some recurring actions only fire during specific weeks of the month (e.g., monthly close + P&L review in the first week). When today's date-of-month falls in days 1–7, read the `## Month Reminders` section from `$OBSIDIAN_VAULT_PATH/50-reference/builder-profile.md` and surface each reminder as a checkbox under a `### Monthly Cadence (first week of [Month])` section in the daily note's Tasks section. Do not ask whether to include them; the builder configured them in the profile.
+
+If the section is missing or today is not in the first week of a month, skip silently.
+
+This mirrors Step 1.95 of the open-week skill — open-week sets the weekly framing; open-day re-surfaces the reminders daily during the relevant week so they don't fall off the radar after Monday.
 
 ## Edge Cases
 

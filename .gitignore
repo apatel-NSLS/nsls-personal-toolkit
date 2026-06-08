@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 .toolkit-state.json
+.pytest_cache/
+imap_stderr.log
+scripts/scheduled/logs/

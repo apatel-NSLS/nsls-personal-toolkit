@@ -401,6 +401,20 @@ I'll show you the exact changes before writing anything.
 
 **Pass-through to Step 7:** The confirmed list feeds Step 7a (mark complete) and 7d (SLT sync). Step 7 still presents the full plan before any writes.
 
+**1i. Cross-channel commitment scan — catch new asks before they age**
+
+> **Why this step exists.** Mirror of `/open-day` Step 2i. Close-day is the second chokepoint where untracked asks should be caught: anything received via Slack DM or Gmail today (or in last 7 days) from a senior leader that wasn't logged as a task. If close-day misses it, it'll sit in Live Threads (or nowhere) and silently age — exactly how Gary's 2025 financials request sat for 3+ months.
+
+**Always run this step.** If the Slack or Gmail MCP isn't available, skip with a `> ⚠️ commitment scan skipped` note and rely on the next interactive open-day to catch it.
+
+**Same logic as `/open-day` Step 2i:**
+- Search Slack DMs from key contacts in last 7 days (key contacts list lives in `50-reference/builder-profile.md`)
+- Search Gmail for inbound asks where the builder hasn't replied with delivery language
+- For each candidate, check it isn't already in today's daily note Tasks section, today's Carrying Over section (drafted in Step 3), or open Airtable tasks
+- Surface remaining items in the close-day output as a `## 🔴 Untracked asks (caught at close-day)` block
+
+**Auto-route candidates to Step 7c (Airtable carry-over creation).** Don't let close-day write the daily note without first having the builder triage these candidates: each becomes either (a) a new Airtable task created in Step 7c, (b) appended to today's Carrying Over for tomorrow, or (c) explicitly dismissed. **Do not silently leave any candidate untracked** — that's the failure mode this step exists to prevent.
+
 ### Step 2: Identify projects touched
 
 Match activity to projects using these signals (in priority order):
