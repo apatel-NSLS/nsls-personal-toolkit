@@ -509,7 +509,10 @@ while True:
     offset = data.get('offset')
     if not offset: break
 
-kevin = [r for r in all_records if 'Kevin' in (r.get('fields', {}).get('fldmpu3lN0lrgrdSa') or '')]
+# Filter to the builder's own actions. assignee_name is a free-text display name,
+# so match on BUILDER_NAME from .env (e.g. 'Anish' / 'Anish Patel') — never hardcode.
+builder_name = os.environ.get('BUILDER_NAME', '')
+mine = [r for r in all_records if builder_name and builder_name in (r.get('fields', {}).get('fldmpu3lN0lrgrdSa') or '')]
 # Classify by due_date: overdue / due today / upcoming / no date
 # Emit record ID alongside each for Step 7d matching.
 "
@@ -551,17 +554,17 @@ After Steps 1a–1g are collected, cross-reference your open Airtable tasks and 
 |---|---|
 | **Obsidian session logs** | Scan `## What Was Done` sections of all `*/sessions/$DATE.md` files found under `20-projects/` |
 | **Familiar window titles** | High capture count (≥30) on a window title related to the task — indicates substantial work time |
-| **Slack sent messages (1e)** | Kevin's outbound messages mentioning the task or deliverable with completion language ("done", "sent", "finished", "shared", "pushed", "complete") |
+| **Slack sent messages (1e)** | The user's outbound messages mentioning the task or deliverable with completion language ("done", "sent", "finished", "shared", "pushed", "complete") |
 | **Fathom meeting notes (1c)** | Action items from meetings confirmed complete, or attendee acknowledged receiving a deliverable |
 | **Claude/Warp session context (1f)** | Session title or working directory matching the task's project |
-| **Sent email (1d)** | Kevin sent the artifact the task was asking for (attachment, link, approval) |
+| **Sent email (1d)** | The user sent the artifact the task was asking for (attachment, link, approval) |
 
 **Evidence scoring:**
 
 | Signal | Classification |
 |---|---|
 | Obsidian session log lists it in `## What Was Done` | ✅ Completed |
-| Slack: Kevin said "done", "sent", "finished", etc. about this specific task | ✅ Completed |
+| Slack: the user said "done", "sent", "finished", etc. about this specific task | ✅ Completed |
 | Sent email delivers the artifact the task described | ✅ Completed |
 | Fathom: deliverable confirmed received or action marked done | ✅ Completed |
 | Familiar: 30–49 captures on task-related window title | 🔶 Significant progress |
@@ -578,7 +581,7 @@ find "$VAULT/20-projects" -path "*/sessions/$DATE.md" 2>/dev/null | while read f
 done
 ```
 
-**Output format (show Kevin before Step 2):**
+**Output format (show the user before Step 2):**
 
 ```
 ## Task Evidence Check
@@ -594,7 +597,7 @@ Do you want me to mark the ✅ items complete in Airtable (and SLT if applicable
 I'll show you the exact changes before writing anything.
 ```
 
-**Pass-through to Step 7:** The confirmed list feeds Step 7a (mark complete) and 7d (SLT sync). Step 7 still presents the full plan to Kevin before any writes.
+**Pass-through to Step 7:** The confirmed list feeds Step 7a (mark complete) and 7d (SLT sync). Step 7 still presents the full plan to the user before any writes.
 
 **1j. Cross-channel commitment scan — catch new asks before they age**
 
