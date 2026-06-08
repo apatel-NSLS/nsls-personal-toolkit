@@ -22,7 +22,7 @@ To reconfigure later (change Slack ID, Airtable key, etc.), say `/personal-setup
 | `/self-insight` | Personal insight — analyzes your calendar, meetings, and behavior to build a personal profile + operating memo |
 | `/log` | Log session progress to project notes |
 | `/familiar` | Recall past screen activity and work context |
-| `/person-intelligence` | Build relationship profiles, track 1:1 context |
+| `/person-intelligence` | Build relationship profiles, track 1:1 context, biweekly sweep, team-pulse digest, manager-coaching frame (Thrive + How I Work With), managing-up frame for your manager, coaching-action surfacing in /open-day and /open-week |
 | `obsidian-setup` | Set up an Obsidian knowledge base |
 
 ## Strategy Layer (Optional)
